@@ -1,0 +1,33 @@
+.PHONY: all clean
+default: all
+
+CODE = $(shell find src -type f -name '*.js' | sort)
+
+MARKDOWN = $(shell find docs -type f -name '*.md' | sort)
+JSON = $(MARKDOWN:docs/%.md=dist/%.json)
+HTML = $(MARKDOWN:docs/%.md=dist/%.html)
+
+node_modules: package.json
+	npm install
+
+dist:
+	@mkdir -p dist/
+
+
+dist/%.json: docs/%.md dist node_modules
+	node src/build/article-to-json.js $< $@
+dist/%.html: dist/%.json
+	node src/build/json-to-html.js src/index.html docs/toc.json $< $@
+
+
+dist/client.js: src/client.js dist node_modules $(CODE)
+	node node_modules/browserify/bin/cmd.js -e $< -o $@
+dist/styles.css: src/styles.sass dist node_modules
+	node node_modules/node-sass/bin/node-sass --output-style compressed $< > $@
+
+
+all: $(JSON) $(HTML) dist/client.js dist/styles.css
+
+clean:
+	rm -rf dist/*
+

@@ -1,0 +1,244 @@
+
+////////////////////////////////////////////////////////////////////////////////
+// K
+
+$color-background: #f7f7f7
+$color-header-background-left: #0b9a9a
+$color-header-background-right: #057d7d
+$color-sidebar-background: #33333b
+$color-splash: #085b5b
+$color-heading: #000
+
+$header-height: 12em
+$sidebar-padding: 2.5em
+$sidebar-width: 28em
+$main-padding: 4em
+$main-max-width: 65rem
+
+$font-title: 'malaga-narrow', "Helvetica Neue", Helvetica, Arial, sans-serif
+$font-heading: malaga, "Helvetica Neue", Helvetica, Arial, sans-serif
+$font-body: ratio, "Helvetica Neue", Helvetica, Arial, sans-serif
+$font-monospace: consolas, monaco, monospace
+
+$z-header-base: 100
+$z-header: 101
+
+
+////////////////////////////////////////////////////////////////////////////////
+// UTIL
+
+@mixin fill($buffer: 0)
+  bottom: 0
+  left: 0
+  position: absolute
+  right: 0
+  top: 0
+
+@mixin reify
+  content: ''
+  display: block
+
+
+////////////////////////////////////////////////////////////////////////////////
+// RESET
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em,
+font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var,
+b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td
+  background: transparent
+  border: 0
+  margin: 0
+  outline: 0
+  padding: 0
+  vertical-align: baseline
+
+html
+  color: #333
+  font-family: "ratio"
+  font-size: 62.5%
+
+body
+  background-color: $color-background
+
+ul, ol
+  list-style-type: none
+
+
+////////////////////////////////////////////////////////////////////////////////
+// LAYOUT
+
+header
+  color: #fff
+  left: 0
+  position: fixed
+  top: 0
+  right: 0
+  z-index: $z-header-base
+
+  &:before, &:after
+    @include reify
+    position: absolute
+    transform: skewY(-3deg)
+
+  &:before
+    background: $color-header-background-left
+    box-shadow: 0 0 1.2em rgba(0, 0, 0, 0.8)
+    left: 0
+    height: $header-height + 2em
+    top: -2em
+    width: $sidebar-width
+    z-index: $z-header
+
+  &:after
+    background: $color-header-background-right
+    height: $header-height
+    left: $sidebar-width
+    right: 0
+    top: 0
+    transform-origin: left center
+
+  .header-left
+    padding: 3em
+    position: absolute
+    z-index: $z-header
+
+  .header-right
+    left: $sidebar-width
+    padding: $main-padding
+    position: absolute
+    z-index: $z-header
+
+  #logo
+    border: 3px solid #fff
+    border-radius: 9999px
+    float: left
+    height: 7em
+    margin-right: 1.5em
+    width: 7em
+
+  h1
+    float: left
+    font-family: $font-title
+    font-size: 4em
+    font-weight: 400
+    line-height: 1em
+
+  a
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.2)
+    color: #fff
+    text-decoration: none
+    transition: 0.1s border-color
+
+    &:hover
+      border-bottom-color: #fff
+
+  nav
+    font-family: $font-title
+    font-size: 2em
+
+    a
+      margin-right: 1em
+      text-transform: lowercase
+
+#left
+  @include fill
+  background: $color-sidebar-background
+  box-shadow: 0 0 0.6em rgba(0, 0, 0, 0.45)
+  padding: $sidebar-padding
+  position: fixed
+  right: auto
+  width: $sidebar-width - (2 * $sidebar-padding)
+
+#main
+  margin-left: $sidebar-width
+  margin-top: $header-height
+  padding: $main-padding
+
+  p
+    font-size: 1.6em
+    margin-bottom: 1.5em
+    max-width: $main-max-width
+
+    &.splash
+      color: $color-splash
+      font-family: $font-heading
+      font-size: 3em
+      letter-spacing: -0.02em
+
+  h2
+    color: $color-heading
+    font-family: $font-heading
+    font-size: 2em
+    margin-bottom: 0.4em
+    padding-top: 0.8em
+
+
+////////////////////////////////////////////////////////////////////////////////
+// COMPONENTS
+
+.sample
+  background-color: #f0f0f0
+  border-bottom: 1px solid #e4e4e4
+  border-top: 1px solid #e4e4e4
+  margin: 0.5em #{-$main-padding} 1.5em
+  overflow: hidden
+  padding: 2em $main-padding
+
+  textarea
+    background: none
+    border: none
+    float: left
+    font-family: $font-monospace
+    font-size: 1.3em
+    outline: none
+    overflow: auto
+    -webkit-appearance: none
+    white-space: nowrap
+    min-width: calc(70% - (#{2 * $main-padding}))
+
+  .sample-code
+    float: left
+    min-width: calc(70% - (#{2 * $main-padding}))
+
+    .CodeMirror
+      background: transparent
+      font-family: $font-monospace
+      font-size: 1.2em
+      height: auto
+
+  .sample-result
+    float: left
+    font-size: 1.2em
+    min-width: calc(30% - (#{2 * $main-padding}))
+    padding: 1em
+
+    &:before
+      content: 'Result'
+      display: block
+      font-family: $font-heading
+      font-size: 1.5em
+
+    .janus-list > li
+      border-bottom: 1px solid #999
+      padding: 1em 0
+      &:last-child
+        border-bottom: none
+
+.CodeMirror.cm-s-default
+  .cm-def
+    color: #007ec7
+  .cm-keyword
+    color: #037d7d
+  .cm-string, .cm-string-2
+    color: #0c820a
+  .cm-variable
+    color: #7c00bb
+
+
+////////////////////////////////////////////////////////////////////////////////
+// IMPORTS
+
+@import '../node_modules/codemirror/lib/codemirror'
+

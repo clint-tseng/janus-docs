@@ -1,0 +1,17 @@
+{
+  "name": "janus-docs",
+  "version": "0.4.0",
+  "private": true,
+  "dependencies": {
+    "janus": "~0.4",
+    "janus-stdlib": "~0.4",
+    "jquery": "~3",
+    "codemirror": "~5",
+    "marked": "~0.4"
+  },
+  "devDependencies": {
+    "browserify": "~16",
+    "jsdom": "~11",
+    "node-sass": "~4"
+  }
+}
