@@ -7,6 +7,11 @@ const cases = { success, fail } = janus.defcase('org.janusjs.docs.eval', 'succes
 
 const inject = `const { ${Object.keys(janus).filter((x) => x !== 'default').join(', ')} } = janus`;
 
+// special method for success/fail cases which flatMaps successes/fails appropriately.
+// TODO: non-hack way to do this.
+success().__proto__.flatMap = function(f) { return f(this.value); };
+fail().__proto__.flatMap = function() { return this; };
+
 const compile = (code) => {
   try {
     const f_ = new Function('janus', '$', 'arg', `${inject}; ${code};`);

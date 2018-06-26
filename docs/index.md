@@ -59,7 +59,7 @@ return new KerbonautEditor(kerbonaut);
 const KerbonautCard = DomView.build($('<div class="greeting"/>'), template(
   find('.greeting').text(from('name.first').and('name.last').all.map((first, last) => `Hi, I'm ${first} ${last}!`))
 ));
-return [ arg, arg.mapSuccess((x) => new KerbonautCard(x.subject)).successOrElse(null) ];
+return [ arg, new KerbonautCard(arg.subject) ];
 ~~~
 
 Of course, the previous example isn't very interesting with static data. Here we rig
