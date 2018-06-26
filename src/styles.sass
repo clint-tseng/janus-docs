@@ -10,6 +10,7 @@ $color-splash: #085b5b
 $color-heading: #000
 
 $header-height: 12em
+$header-overdraw: 20em
 $sidebar-padding: 2.5em
 $sidebar-width: 28em
 $main-padding: 4em
@@ -60,7 +61,7 @@ html
   font-size: 62.5%
 
 body
-  background-color: $color-background
+  background-color: $color-sidebar-background
 
 ul, ol
   list-style-type: none
@@ -86,17 +87,17 @@ header
     background: $color-header-background-left
     box-shadow: 0 0 1.2em rgba(0, 0, 0, 0.8)
     left: 0
-    height: $header-height + 2em
-    top: -2em
+    height: $header-height + $header-overdraw + 2em
+    top: -2em - $header-overdraw
     width: $sidebar-width
     z-index: $z-header
 
   &:after
     background: $color-header-background-right
-    height: $header-height
+    height: $header-height + $header-overdraw
     left: $sidebar-width
     right: 0
-    top: 0
+    top: -$header-overdraw
     transform-origin: left center
 
   .header-left
@@ -152,10 +153,19 @@ header
   width: $sidebar-width - (2 * $sidebar-padding)
 
 #main
+  background: $color-background
   margin-left: $sidebar-width
-  margin-top: $header-height
   padding: $main-padding
+    top: $header-height + $main-padding
 
+footer
+  display: none // for now
+
+
+////////////////////////////////////////////////////////////////////////////////
+// CONTENT
+
+#main
   p
     font-size: 1.6em
     margin-bottom: 1.5em
