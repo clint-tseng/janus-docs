@@ -10,7 +10,7 @@ const $ = jquery(dom.window);
 global.window = { $ }; // TODO: ugh this hack hurts.
 
 const { getApp } = require('../app');
-const app = getApp(true);
+const app = getApp();
 const { Article } = require('../model/article');
 const article = Article.deserialize(JSON.parse(articleData));
 const articleView = app.vendView(article);
