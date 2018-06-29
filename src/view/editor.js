@@ -27,6 +27,11 @@ class EditorView extends DomView {
   _wireEvents() {
     this._cm.on('change', (cm) => { this.subject.setValue(cm.getValue()); });
   }
+
+  setCursor(line, col) {
+    this._cm.focus();
+    this._cm.setCursor(line - 1, col - 1);
+  }
 }
 
 module.exports = {

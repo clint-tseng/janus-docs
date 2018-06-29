@@ -8,6 +8,7 @@ $color-header-background-right: #057d7d
 $color-sidebar-background: #33333b
 $color-splash: #085b5b
 $color-heading: #000
+$color-error: #c44
 
 $header-height: 12em
 $header-overdraw: 20em
@@ -23,6 +24,8 @@ $font-monospace: consolas, monaco, monospace
 
 $z-header-base: 100
 $z-header: 101
+
+$ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +68,13 @@ body
 
 ul, ol
   list-style-type: none
+
+
+////////////////////////////////////////////////////////////////////////////////
+// GLOBAL
+
+.hide
+  display: none !important
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,12 +199,16 @@ footer
 // COMPONENTS
 
 .sample
+  $border-color: #e4e4e4
+
   background-color: #f0f0f0
-  border-bottom: 1px solid #e4e4e4
-  border-top: 1px solid #e4e4e4
+  border-bottom: 1px solid $border-color
+  border-top: 1px solid $border-color
+  box-shadow: 0 0 0 0 transparentize($color-error, 0.92) // for the transition
   margin: 0.5em #{-$main-padding} 1.5em
   overflow: hidden
   padding: 2em $main-padding
+  transition: 0.2s border-color, 0.2s box-shadow
 
   textarea
     background: none
@@ -210,7 +224,7 @@ footer
 
   .sample-code
     float: left
-    min-width: calc(70% - (#{2 * $main-padding}))
+    min-width: 65%
 
     .CodeMirror
       background: transparent
@@ -219,9 +233,8 @@ footer
       height: auto
 
   .sample-result
-    float: left
     font-size: 1.2em
-    min-width: calc(30% - (#{2 * $main-padding}))
+    overflow: hidden
     padding: 1em
 
     &:before
@@ -230,11 +243,46 @@ footer
       font-family: $font-heading
       font-size: 1.5em
 
-    .janus-list > li
+    > .janus-list > li
       border-bottom: 1px solid #999
       padding: 1em 0
       &:last-child
         border-bottom: none
+
+    .exception
+      position: relative
+
+      .exception-expando
+        bottom: 0
+        position: absolute
+        right: 0
+
+  .sample-error
+    clear: both
+    max-height: 0
+    margin: 0 -4em -2em
+    overflow: hidden
+    padding-top: 2em
+    transition: 0.6s max-height
+
+    .exception
+      background-color: $border-color
+      color: #fff
+      padding: 1.2em 4em 1em
+      transition: 0.2s background-color
+
+  &.error
+    border-color: $color-error
+    box-shadow: 0 0 0 4px transparentize($color-error, 0.92)
+
+    .sample-result:before
+      content: 'Last Result'
+
+    .sample-error
+      max-height: 9em
+
+      .exception
+        background-color: $color-error
 
 .CodeMirror.cm-s-default
   .CodeMirror-activeline-background
@@ -246,6 +294,9 @@ footer
   .CodeMirror-matchingbracket
     background: #d7d7d7
     color: inherit
+  .CodeMirror-nonmatchingbracket
+    background: #ecc
+    color: inherit
   .cm-property
     color: #666
   .cm-string, .cm-string-2
@@ -254,6 +305,86 @@ footer
     background: #e3e3e3
   .cm-variable
     color: #7c00bb
+
+.exception
+  animation-duration: 1s
+  animation-timing-function: $ease-extreme-out
+  animation-iteration-count: 1
+
+  .exception-message
+    font-family: $font-monospace
+    font-size: 1.2em
+
+  .exception-stack li ~ li
+    display: none
+
+  .exception-expando button
+    background: none
+    border: none
+    outline: none
+    padding: 0.2em
+
+    &:before
+      $size: 7px
+      @include reify
+      border-right: 2px solid #fff
+      border-bottom: 2px solid #fff
+      cursor: pointer
+      height: $size
+      transform: rotate(45deg)
+      transition: 1s transform $ease-extreme-out
+      width: $size
+
+    &.checked:before
+      transform: rotate(-135deg)
+
+  &.exception-name-SyntaxError
+    .exception-stack, .exception-expando
+      display: none
+
+  &.has-expanded 
+    animation-name: contract-margin
+
+  &.expanded
+    animation-name: expand-margin
+
+    .exception-stack li ~ li
+      display: block
+
+.view
+  .view-error.has-error
+    background-color: $color-error
+    color: #fff
+    margin-top: 1em
+    padding: 1em
+      top: 0.9em
+
+    &:before
+      content: 'Runtime Error'
+      font-weight: bold
+
+    .exception-message
+      padding: 0.1em 0 0.5em
+
+    .exception-stack a
+      color: #fff
+
+
+////////////////////////////////////////////////////////////////////////////////
+// KEYFRAMES
+// this is at the bottom because the vim sass highlighting freaks out about it.
+
+@keyframes contract-margin
+  from
+    margin-bottom: 12px
+  to
+    margin-bottom: 0
+
+@keyframes expand-margin
+  from
+    margin-bottom: -12px
+  to
+    margin-bottom: 0
 
 
 ////////////////////////////////////////////////////////////////////////////////

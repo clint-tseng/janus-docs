@@ -9,6 +9,8 @@ const getApp = () => {
   stdlib.view.registerWith(views);
   require('./view/article').registerWith(views);
   require('./view/sample').registerWith(views);
+  require('./view/view').registerWith(views);
+  require('./view/exception').registerWith(views);
 
   if (window && window.navigator) {
     require('./view/editor').registerWith(views);

@@ -1,5 +1,4 @@
 const { Model, attribute, List, bind, from } = require('janus');
-const { filter } = require('janus-stdlib').util.varying;
 const { compile, success, fail } = require('../util/eval');
 
 const noop = (x) => success(x);
@@ -12,9 +11,7 @@ const Sample = Model.build(
       ? noop
       : compile(code).successOrElse(noop))
     .all.flatMap((main, post) => main.flatMap((f) => f().flatMap(post)))
-  ),
-
-  bind('last_success', from('result').pipe(filter(success.match)))
+  )
 );
 
 const Samples = List.of(Sample);
