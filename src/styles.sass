@@ -2,9 +2,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 // K
 
+$color-accent: #0b9a9a
+$color-accent2: #057d7d
 $color-background: #f7f7f7
-$color-header-background-left: #0b9a9a
-$color-header-background-right: #057d7d
+$color-header-background-left: $color-accent
+$color-header-background-right: $color-accent2
 $color-sidebar-background: #33333b
 $color-splash: #085b5b
 $color-heading: #000
@@ -75,7 +77,6 @@ ul, ol
 
 .hide
   display: none !important
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
@@ -176,6 +177,13 @@ footer
 // CONTENT
 
 #main
+  h2
+    color: $color-heading
+    font-family: $font-heading
+    font-size: 2em
+    margin-bottom: 0.4em
+    padding-top: 0.8em
+
   p
     font-size: 1.6em
     margin-bottom: 1.5em
@@ -187,12 +195,19 @@ footer
       font-size: 3em
       letter-spacing: -0.02em
 
-  h2
-    color: $color-heading
-    font-family: $font-heading
-    font-size: 2em
-    margin-bottom: 0.4em
-    padding-top: 0.8em
+    a
+      border-bottom: 1px dotted $color-accent
+      color: $color-accent
+      text-decoration: none
+
+      &:hover, &:active, &:focus
+        border-bottom-style: solid
+
+      &:visited
+        color: $color-accent2
+
+    code
+      background-color: #eee
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +220,7 @@ footer
   border-bottom: 1px solid $border-color
   border-top: 1px solid $border-color
   box-shadow: 0 0 0 0 transparentize($color-error, 0.92) // for the transition
-  margin: 0.5em #{-$main-padding} 1.5em
+  margin: 0.5em #{-$main-padding} 2em
   overflow: hidden
   padding: 2em $main-padding
   transition: 0.2s border-color, 0.2s box-shadow
@@ -235,7 +250,6 @@ footer
   .sample-result
     font-size: 1.2em
     overflow: hidden
-    padding: 1em
 
     &:before
       content: 'Result'
@@ -243,7 +257,7 @@ footer
       font-family: $font-heading
       font-size: 1.5em
 
-    > .janus-list > li
+    .eval-success > .janus-list > li
       border-bottom: 1px solid #999
       padding: 1em 0
       &:last-child
@@ -276,7 +290,7 @@ footer
     box-shadow: 0 0 0 4px transparentize($color-error, 0.92)
 
     .sample-result:before
-      content: 'Last Result'
+      content: 'Last Successful Result'
 
     .sample-error
       max-height: 9em
@@ -315,8 +329,13 @@ footer
     font-family: $font-monospace
     font-size: 1.2em
 
-  .exception-stack li ~ li
-    display: none
+  .exception-stack
+    li ~ li
+      display: none
+
+    a
+      color: #fff
+
 
   .exception-expando button
     background: none
@@ -365,9 +384,6 @@ footer
 
     .exception-message
       padding: 0.1em 0 0.5em
-
-    .exception-stack a
-      color: #fff
 
 
 ////////////////////////////////////////////////////////////////////////////////
