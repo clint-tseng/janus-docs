@@ -225,18 +225,6 @@ footer
   padding: 2em $main-padding
   transition: 0.2s border-color, 0.2s box-shadow
 
-  textarea
-    background: none
-    border: none
-    float: left
-    font-family: $font-monospace
-    font-size: 1.3em
-    outline: none
-    overflow: auto
-    -webkit-appearance: none
-    white-space: nowrap
-    min-width: calc(70% - (#{2 * $main-padding}))
-
   .sample-code
     float: left
     min-width: 65%
@@ -246,6 +234,13 @@ footer
       font-family: $font-monospace
       font-size: 1.2em
       height: auto
+
+    .code-static
+      padding: 0.4em
+
+      code
+        font-family: $font-monospace
+        font-size: 1.2em
 
   .sample-result
     font-size: 1.2em

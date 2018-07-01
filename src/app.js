@@ -15,6 +15,7 @@ const baseViews = () => {
   if (window && window.navigator) {
     require('./view/editor').registerWith(views);
   } else {
+    require('./view/code').registerWith(views);
   }
 
   return views;
