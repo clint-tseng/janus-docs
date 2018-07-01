@@ -30,7 +30,8 @@ class SampleView extends DomView.build($(`
 
 // a passthrough renderer to get a result view to appear:
 const SuccessView = DomView.build($('<div class="eval-success"/>'), template(
-  find('div').render(from.self((view) => new List(view.subject.value)))
+  find('div').render(from.self((view) => new List(view.subject.value.result)))
+    .options(from.self((view) => ({ app: view.options.app.with({ views: view.subject.value.env.views }) })))
 ));
 
 module.exports = {

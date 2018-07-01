@@ -9,7 +9,7 @@ class StackLine extends Model {
     const [ , context, lineStr, colStr ] = lineRegex.exec(line);
     super({
       context,
-      line: parseInt(lineStr) - 2, // TODO: why?
+      line: parseInt(lineStr) - 3, // TODO: why? i'd expect 1 or maybe 2 but not 3.
       col: parseInt(colStr)
     });
   }

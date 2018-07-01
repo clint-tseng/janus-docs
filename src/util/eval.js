@@ -2,10 +2,13 @@
 // purposes. it's not possible to do so, and so we don't even try.
 
 const janus = require('janus');
+const { baseViews } = require('../app');
 const $ = require('./dollar');
+
 const cases = { success, fail } = janus.defcase('org.janusjs.docs.eval', 'success', 'fail');
 
 const inject = `const { ${Object.keys(janus).filter((x) => x !== 'default').join(', ')} } = janus`;
+const env = `const { views } = env`;
 
 // special method for success/fail cases which flatMaps successes/fails appropriately.
 // TODO: non-hack way to do this.
@@ -14,9 +17,12 @@ fail().__proto__.flatMap = function() { return this; };
 
 const compile = (code) => {
   try {
-    const f_ = new Function('janus', '$', 'arg', `${inject}; ${code};`);
+    const f_ = new Function('janus', 'env', '$', 'arg', `${inject}; ${env};\n${code};`);
     const wrapped = (x) => {
-      try { return success(f_.call({}, janus, $, x)); } catch(ex) { return fail(ex); }
+      const env = { views: baseViews() };
+      try {
+        return success({ result: f_.call({}, janus, env, $, x), env });
+      } catch(ex) { return fail(ex); }
     };
     return success(wrapped);
   } catch(ex) {
