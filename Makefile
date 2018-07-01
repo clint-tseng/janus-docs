@@ -17,7 +17,7 @@ dist:
 dist/%.json: docs/%.md dist node_modules
 	node src/build/article-to-json.js $< $@
 dist/%.html: dist/%.json
-	node src/build/json-to-html.js src/index.html docs/toc.json $< $@
+	node src/build/json-to-html.js src/app.html docs/toc.json $< $@
 
 
 dist/client.js: src/client.js dist node_modules $(CODE)
