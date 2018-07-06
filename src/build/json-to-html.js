@@ -15,7 +15,10 @@ const { Article } = require('../model/article');
 const article = Article.deserialize(JSON.parse(articleData));
 const articleView = app.vendView(article);
 $('#main').append(articleView.artifact());
-$('script').after(`<script>init(${[ tocData, articleData ].join(',')})</script>`);
+
+const inlineScript = $('<script/>');
+inlineScript.text(`init(${[ tocData, articleData ].join(',')})`);
+$('script').after(inlineScript);
 
 writeFileSync(outFile, dom.serialize(), 'utf8');
 
