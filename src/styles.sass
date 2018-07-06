@@ -176,7 +176,7 @@ footer
 ////////////////////////////////////////////////////////////////////////////////
 // CONTENT
 
-#main
+.article
   h2
     color: $color-heading
     font-family: $font-heading
@@ -195,6 +195,20 @@ footer
       font-size: 3em
       letter-spacing: -0.02em
 
+    code
+      background-color: #eee
+
+  > ul, > ul ul
+    $padding-left: 2em
+    list-style-type: circle
+    max-width: calc(#{$main-max-width} - #{$padding-left})
+    padding-left: $padding-left
+
+    li
+      font-size: 1.6em
+      padding-bottom: 0.5em
+
+  p, > ul
     a
       border-bottom: 1px dotted $color-accent
       color: $color-accent
@@ -205,10 +219,6 @@ footer
 
       &:visited
         color: $color-accent2
-
-    code
-      background-color: #eee
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // COMPONENTS
