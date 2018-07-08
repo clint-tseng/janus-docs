@@ -1,1 +1,29 @@
-{}
+[{
+  "title": "Welcome",
+  "path": "/"
+}, {
+  "title": "Introduction",
+  "path": "/intro",
+  "children": [{
+    "title": "Getting Started",
+    "path": "/intro/getting-started"
+  }, {
+    "title": "Next Steps",
+    "path": "/intro/next-steps"
+  }]
+}, {
+  "title": "A Practical Guide",
+  "path": "/hands-on"
+}, {
+  "title": "First Principles",
+  "path": "/theory"
+}, {
+  "title": "Cookbook",
+  "path": "/cookbook"
+}, {
+  "title": "API Reference",
+  "path": "/reference"
+}, {
+  "title": "Community",
+  "path": "/community"
+}]

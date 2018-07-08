@@ -8,13 +8,14 @@ $color-background: #f7f7f7
 $color-header-background-left: $color-accent
 $color-header-background-right: $color-accent2
 $color-sidebar-background: #33333b
+$color-sidebar-background-active: #44444b
 $color-splash: #085b5b
 $color-heading: #000
 $color-error: #c44
 
 $header-height: 12em
 $header-overdraw: 20em
-$sidebar-padding: 2.5em
+$sidebar-padding: 2.5rem
 $sidebar-width: 28em
 $main-padding: 4em
 $main-max-width: 65rem
@@ -77,6 +78,7 @@ ul, ol
 
 .hide
   display: none !important
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
@@ -158,10 +160,44 @@ header
   @include fill
   background: $color-sidebar-background
   box-shadow: 0 -0.6em 0.6em rgba(0, 0, 0, 0.45)
-  padding: $sidebar-padding
+  padding-top: $header-height + 4em
   position: fixed
   right: auto
-  width: $sidebar-width - (2 * $sidebar-padding)
+  width: $sidebar-width
+
+  .toc-entry
+    $vpadding: 0.8rem
+    $indent: 1.5rem
+
+    &.active
+      a, a:hover
+        background: $color-accent
+
+    a
+      color: #fff
+      display: block
+      font-family: $font-title
+      font-size: 2.2rem
+      padding: $vpadding $sidebar-padding
+      text-decoration: none
+      transition: 0.2s background
+
+      &:hover
+        background: $color-sidebar-background-active
+        transition: none
+
+    ul
+      padding-bottom: 1.5rem
+
+    .toc-entry
+      a
+        font-family: $font-body
+        font-size: 1.5rem
+        padding: $vpadding 1rem
+          left: $sidebar-padding + $indent
+
+      .toc-entry a
+        padding-left: $sidebar-padding + ($indent * 2)
 
 #main
   background: $color-background
