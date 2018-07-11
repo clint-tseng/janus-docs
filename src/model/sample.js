@@ -10,6 +10,7 @@ const Sample = Model.build(
     .and('postprocess').map((code) => (code == null)
       ? noop
       : compile(code).successOrElse(noop))
+    .and('reset')
     .all.flatMap((main, post) => main.flatMap((f) => f().flatMap(post)))
   )
 );
