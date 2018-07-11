@@ -1,12 +1,13 @@
 // Bundles all application assets together into a Janus App for dual purpose
 // used by the static site renderer and the live client renderer.
 
-const { App, Library } = require('janus').application;
+const { Library } = require('janus').application;
 const stdlib = require('janus-stdlib');
 
 const baseViews = () => {
   const views = new Library();
   stdlib.view.registerWith(views);
+  require('./view/app').registerWith(views);
   require('./view/article').registerWith(views);
   require('./view/exception').registerWith(views);
   require('./view/sample').registerWith(views);
@@ -22,9 +23,16 @@ const baseViews = () => {
   return views;
 };
 
-const baseApp = (path) => {
-  return new App({ path, views: baseViews() });
+const baseStores = () => {
+  const stores = new Library();
+  require('./model/app').registerWith(stores);
+  return stores;
 };
 
-module.exports = { baseViews, baseApp };
+const baseApp = (path) => {
+  const { App } = require('./model/app');
+  return new App({ path, stores: baseStores(), views: baseViews() });
+};
+
+module.exports = { baseViews, baseStores, baseApp };
 

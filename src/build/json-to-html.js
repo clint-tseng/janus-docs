@@ -12,7 +12,7 @@ const $ = jquery(dom.window);
 global.window = { $ }; // TODO: ugh this hack hurts.
 
 // 3. Obtain a Docs application.
-const { baseApp } = require('../app');
+const { baseApp } = require('../base');
 const urlPath = articleFile.replace(/(^dist)|((?:index)?.json$)/g, '');
 const app = baseApp(urlPath);
 

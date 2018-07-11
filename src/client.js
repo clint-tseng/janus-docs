@@ -1,5 +1,5 @@
 window.$ = require('jquery');
-const { baseApp } = require('./app');
+const { baseApp } = require('./base');
 
 const { Tocs } = require('./model/toc');
 const { Article } = require('./model/article');

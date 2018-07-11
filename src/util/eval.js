@@ -2,7 +2,7 @@
 // purposes. it's not possible to do so, and so we don't even try.
 
 const janus = require('janus');
-const { baseViews } = require('../app');
+const { baseViews } = require('../base');
 const $ = require('./dollar');
 
 const cases = { success, fail } = janus.defcase('org.janusjs.docs.eval', 'success', 'fail');
