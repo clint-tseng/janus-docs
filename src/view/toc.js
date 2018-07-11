@@ -4,10 +4,8 @@ const { Toc } = require('../model/toc');
 
 const TocViewModel = Model.build(
   bind('active', from('subject').watch('path')
-    .and.app('path')
-    .all.map((own, current) => (own === '/')
-      ? (current === '/')
-      : current.startsWith(own)))
+    .and.app('path').map((path) => path.replace(/^(.+)\/$/, '\1'))
+    .all.map((own, current) => own === current))
 );
 
 const TocView = DomView.build($(`
