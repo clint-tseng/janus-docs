@@ -13,6 +13,6 @@ window.init = (tocData, articleData) => {
   app.cacheArticle(path, Article.deserialize(articleData));
 
   // TODO: when we have .attach() use that instead of clobbering.
-  app.vendView(app).wireEvents();
+  app.view(app).wireEvents();
 };
 

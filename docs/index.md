@@ -15,7 +15,7 @@ templating language syntax to learn and compile. Instead, we use selectors and a
 syntax based on the jQuery API&mdash;things you already understand and rely upon.
 
 ~~~
-const dog = new Model({ name: 'Spot', age: 3 });
+const dog = new Map({ name: 'Spot', age: 3 });
 
 const DogTag = DomView.build($(`
   <div class="dog-tag">
@@ -161,7 +161,7 @@ all enumerations and traversals can be declared once and changes are automatical
 maintained. Consider, for instance, a user-defined custom metadata bag:
 
 ~~~
-const widget = new Model({
+const widget = new Map({
   id: 1138,
   name: 'Important Widget',
   metadata: {
@@ -173,9 +173,8 @@ const widget = new Model({
   }
 });
 
-return widget.enumeration()
-  .flatMap((key) => widget.watch(key)
-    .map((value) => `${key}: ${value}`));
+return widget.watchKeys()
+  .flatMap((key) => widget.watch(key).map((value) => `${key}: ${value}`));
 ~~~
 
 Another example of enumeration involves the shadow-copy feature of Maps and Models.

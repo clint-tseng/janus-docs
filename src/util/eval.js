@@ -7,7 +7,7 @@ const $ = require('janus-dollar');
 
 const cases = { success, fail } = janus.defcase('org.janusjs.docs.eval', 'success', 'fail');
 
-const inject = `const { ${Object.keys(janus).filter((x) => x !== 'default').join(', ')} } = janus`;
+const inject = `const { ${Object.keys(janus).join(', ')} } = janus`;
 const env = `const { views } = env`;
 
 // special method for success/fail cases which flatMaps successes/fails appropriately.
