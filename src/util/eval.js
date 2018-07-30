@@ -12,7 +12,7 @@ const env = `const { views } = env`;
 
 // special method for success/fail cases which flatMaps successes/fails appropriately.
 // TODO: non-hack way to do this.
-success().__proto__.flatMap = function(f) { return f(this.value); };
+success().__proto__.flatMap = function(f) { return f(this.get()); };
 fail().__proto__.flatMap = function() { return this; };
 
 const compile = (code) => {
