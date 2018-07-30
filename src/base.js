@@ -14,7 +14,7 @@ const baseViews = () => {
   require('./view/toc').registerWith(views);
   require('./view/view').registerWith(views);
 
-  if (window && window.navigator) {
+  if (typeof window !== 'undefined') {
     require('./view/editor').registerWith(views);
   } else {
     require('./view/code').registerWith(views);

@@ -1,8 +1,8 @@
 const { DomView, template, find, from } = require('janus');
-const { filter } = require('janus-stdlib').util.varying;
+const { filter } = require('janus-stdlib').varying;
 const { exists } = require('../util/util');
 const { App } = require('../model/app');
-const $ = require('../util/dollar');
+const $ = require('janus-dollar');
 
 class AppView extends DomView.build($('body').clone(), template(
   find('#left nav').render(from('toc')),

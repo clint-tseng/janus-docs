@@ -1,5 +1,5 @@
 const { Varying, DomView, mutators, from } = require('janus');
-const $ = require('../util/dollar');
+const $ = require('janus-dollar');
 const { exists } = require('../util/util');
 
 class ViewView extends DomView {

@@ -1,5 +1,5 @@
 const { DomView, template, find, from, Model, bind } = require('janus');
-const $ = require('../util/dollar');
+const $ = require('janus-dollar');
 const { Toc } = require('../model/toc');
 
 const TocViewModel = Model.build(

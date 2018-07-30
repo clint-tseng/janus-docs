@@ -1,5 +1,5 @@
 const { Model, attribute, bind, List, DomView, template, find, from } = require('janus');
-const $ = require('../util/dollar');
+const $ = require('janus-dollar');
 const { always } = require('../util/util');
 
 const lineRegex = /^ *at ([^ ]+)(?:[^<]+<anonymous>:(\d+):(\d+))?/;

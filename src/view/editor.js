@@ -1,5 +1,5 @@
 const { DomView, attribute } = require('janus');
-const $ = require('../util/dollar');
+const $ = require('janus-dollar');
 
 require('codemirror/addon/edit/closebrackets');
 require('codemirror/addon/edit/matchbrackets');

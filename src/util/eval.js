@@ -3,7 +3,7 @@
 
 const janus = require('janus');
 const { baseViews } = require('../base');
-const $ = require('./dollar');
+const $ = require('janus-dollar');
 
 const cases = { success, fail } = janus.defcase('org.janusjs.docs.eval', 'success', 'fail');
 

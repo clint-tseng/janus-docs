@@ -1,8 +1,7 @@
 const { readFileSync, writeFileSync } = require('fs');
 
 const md = require('marked');
-const jquery = require('jquery');
-const { JSDOM } = require('jsdom');
+const $ = require('janus-dollar');
 
 const [ , , infile, outfile ] = process.argv;
 
@@ -13,11 +12,10 @@ const last = (xs) => xs[xs.length - 1];
 
 // convert markdown to html and feed it to jsdom/jquery for postprocessing.
 const converted = md(readFileSync(infile, 'utf8'));
-const dom = new JSDOM(`<html><body><div class="article">${converted}</div></body></html>`);
-const $ = jquery(dom.window);
+const dom = $(`<div class="article">${converted}</div>`);
 
 // extract code samples as long as they exist in the document.
-while ((first = $('pre:first')).length > 0) {
+while ((first = dom.find('pre:first')).length > 0) {
   // grab all contiguous <pre>s.
   const pres = [ first ];
   while ((next = last(pres).next()).is('pre'))
@@ -41,7 +39,7 @@ while ((first = $('pre:first')).length > 0) {
 }
 
 // now export the article html as-is to the article data.
-article.html = dom.window.document.body.innerHTML;
+article.html = dom.get(0).outerHTML;
 
 // write final file.
 writeFileSync(outfile, JSON.stringify(article));

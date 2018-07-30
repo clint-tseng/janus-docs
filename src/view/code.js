@@ -1,5 +1,5 @@
 const { DomView, template, find, from, attribute } = require('janus');
-const $ = require('../util/dollar');
+const $ = require('janus-dollar');
 
 // used in place of the codemirror editor in ./editor.js on the server-side.
 const StaticCodeView = DomView.build(
