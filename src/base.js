@@ -23,16 +23,16 @@ const baseViews = () => {
   return views;
 };
 
-const baseStores = () => {
-  const stores = new Library();
-  require('./model/app').registerWith(stores);
-  return stores;
+const baseResolvers = () => {
+  const resolvers = new Library();
+  require('./model/app').registerWith(resolvers);
+  return resolvers;
 };
 
 const baseApp = (path) => {
   const { App } = require('./model/app');
-  return new App({ path, stores: baseStores(), views: baseViews() });
+  return new App({ path, resolvers: baseResolvers(), views: baseViews() });
 };
 
-module.exports = { baseViews, baseStores, baseApp };
+module.exports = { baseViews, baseResolvers, baseApp };
 
