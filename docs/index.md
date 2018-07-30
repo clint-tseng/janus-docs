@@ -1,7 +1,8 @@
 <p class="splash">
-Janus is a functional, reactive Javascript framework which makes realizing complex
-user interfaces safe and easy. Modular but opinionated, Janus is built on a strong
-formal base but provides powerful, familiar building blocks.
+Janus is a functional, reactive Javascript framework which makes complex user
+interfaces safe and easy to realize. <span class="splash-two">Modular but
+opinionated, Janus is built on a strong formal base but provides powerful,
+familiar building blocks.</span>
 </p>
 
 Rather than wax poetic on what we&rsquo;re about, we&rsquo;ll let the code speak for
@@ -131,7 +132,7 @@ display a list of just the names of dogs.
 const Pet = Model.build(
   attribute('name', attribute.Text),
   attribute('kind', class extends attribute.Enum {
-    values() { return [ 'dog', 'cat', 'rabbit', 'hamster', 'iguana', 'parrot', 'fish' ]; }
+    values() { return [ 'dog', 'cat', 'rabbit', 'hamster', 'iguana', 'parrot' ]; }
   }));
 
 const PetEditor = DomView.build(
@@ -146,7 +147,7 @@ const pets = new List([
   new Pet({ name: 'Gertrude', kind: 'cat' }),
   new Pet({ name: 'Maizie', kind: 'dog' }),
   new Pet({ name: 'Widget', kind: 'cat' }),
-  new Pet({ name: 'Flutters', kind: 'parrot' })
+  new Pet({ name: 'Squawks', kind: 'parrot' })
 ]);
 const editors = pets.map((pet) => new PetEditor(pet));
 const dogNames = pets
