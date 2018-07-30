@@ -14,7 +14,7 @@ class SampleView extends DomView.build($(`
   </div>`), template(
 
   find('.sample').classed('error', from('result').map(fail.match)),
-  find('.sample-code').render(from.attribute('main')).context('edit').criteria({ attributes: { style: 'code' } }),
+  find('.sample-code').render(from.attribute('main')).context('edit').criteria({ style: 'code' }),
   find('.sample-result').render(from('result').pipe(filter(success.match))),
   find('.sample-error').render(from('result').map((x) => x.failOrElse(null)).pipe(filter(exists))),
   find('.sample-styles').text(from('styles'))

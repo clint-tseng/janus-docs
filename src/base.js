@@ -1,7 +1,7 @@
 // Bundles all application assets together into a Janus App for dual purpose
 // used by the static site renderer and the live client renderer.
 
-const { Library } = require('janus').application;
+const { Library } = require('janus');
 const stdlib = require('janus-stdlib');
 
 const baseViews = () => {

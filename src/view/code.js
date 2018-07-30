@@ -9,6 +9,6 @@ const StaticCodeView = DomView.build(
 
 module.exports = {
   StaticCodeView,
-  registerWith: (library) => library.register(attribute.Text, StaticCodeView, { context: 'edit', attributes: { style: 'code' } })
+  registerWith: (library) => library.register(attribute.Text, StaticCodeView, { context: 'edit', style: 'code' })
 };
 
