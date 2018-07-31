@@ -28,7 +28,7 @@ const DogTag = DomView.build($(`
   template(
     find('.name').text(from('name')),
     find('.age').text(from('age')),
-    find('.human-age').text(from('age').map((age) => age * 7))
+    find('.human-age').text(from('age').map(age => age * 7))
   )
 );
 
@@ -74,7 +74,7 @@ example:
 
 ~~~
 const list = new List([ 4, 8, 15, 16, 23, 42 ]);
-const mapped = list.map((x) => x * 2);
+const mapped = list.map(x => x * 2);
 return [ list, mapped ];
 
 // add: list.add(list.at(-1) + list.at(-2))
@@ -149,10 +149,10 @@ const pets = new List([
   new Pet({ name: 'Widget', kind: 'cat' }),
   new Pet({ name: 'Squawks', kind: 'parrot' })
 ]);
-const editors = pets.map((pet) => new PetEditor(pet));
+const editors = pets.map(pet => new PetEditor(pet));
 const dogNames = pets
-  .filter((pet) => pet.watch('kind').map((kind) => kind === 'dog'))
-  .flatMap((pet) => pet.watch('name'));
+  .filter(pet => pet.watch('kind').map(kind => kind === 'dog'))
+  .flatMap(pet => pet.watch('name'));
 
 return [ editors, dogNames ];
 ~~~
@@ -175,7 +175,7 @@ const widget = new Map({
 });
 
 return widget.watchKeys()
-  .flatMap((key) => widget.watch(key).map((value) => `${key}: ${value}`));
+  .flatMap(key => widget.watch(key).map(value => `${key}: ${value}`));
 ~~~
 
 Another example of enumeration involves the shadow-copy feature of Maps and Models.
@@ -198,7 +198,7 @@ const Editor = DomView.build(
     find('.child-name').render(from('child').attribute('name')).context('edit')
   ));
 
-const changed = shadow.watchModified().map((modified) => `Changed: ${modified}`);
+const changed = shadow.watchModified().map(modified => `Changed: ${modified}`);
 
 return [ new Editor(shadow), changed ];
 ~~~
@@ -243,10 +243,10 @@ const TodoList = DomView.build($(`
     <a href="#add" class="add">Add Item</a>
   </div>`), template(
 
-  find('.completed').text( from('items').flatMap((items) =>
-    items.filter((item) => item.watch('done')).watchLength())),
+  find('.completed').text(from('items').flatMap(items =>
+    items.filter(item => item.watch('done')).watchLength())),
 
-  find('.total').text(from('items').flatMap((items) => items.watchLength())),
+  find('.total').text(from('items').flatMap(items => items.watchLength())),
 
   find('.items').render(from('items')),
 
