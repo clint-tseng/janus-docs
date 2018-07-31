@@ -17,15 +17,22 @@ class AppView extends DomView.build($('body').clone(), template(
     dom.on('click', 'a', (event) => {
       if (event.isDefaultPrevented()) return;
       if (event.target.host !== location.host) return;
+      if (event.ctrlKey || event.shiftKey || event.metaKey) return;
 
-      event.preventDefault();
-      const path = event.target.pathname;
-      window.history.pushState({ path }, '', path);
-      app.set('path', path);
+      const { pathname, hash } = event.target;
+      if (pathname !== location.pathname) { // navigating to different page
+        event.preventDefault();
+      } else if (hash === '') { // navigating from #anchor to same-page
+        event.preventDefault();
+        window.scrollTo(0, 0); // TODO: this clobbers scroll history :( :( :(
+      }
+
+      window.history.pushState(null, '', pathname + hash);
+      app.set('path', pathname);
     });
 
     $(window).on('popstate', (event) => {
-      app.set('path', event.originalEvent.state.path);
+      app.set('path', location.pathname);
     });
   }
 }

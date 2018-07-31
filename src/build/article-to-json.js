@@ -14,6 +14,14 @@ const last = (xs) => xs[xs.length - 1];
 const converted = md(readFileSync(infile, 'utf8'));
 const dom = $(`<div class="article">${converted}</div>`);
 
+// move around some of the markup.
+dom.find('h2').each((_, h2_) => {
+  const h2 = $(h2_);
+  const anchor = $('<a/>').attr('id', h2.attr('id'));
+  h2.attr('id', null);
+  h2.prepend(anchor);
+});
+
 // extract code samples as long as they exist in the document.
 while ((first = dom.find('pre:first')).length > 0) {
   // grab all contiguous <pre>s.

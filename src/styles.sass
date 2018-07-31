@@ -13,11 +13,11 @@ $color-splash: #085b5b
 $color-heading: #000
 $color-error: #c44
 
-$header-height: 12em
-$header-overdraw: 20em
+$header-height: 12rem
+$header-overdraw: 20rem
 $sidebar-padding: 2.5rem
-$sidebar-width: 28em
-$main-padding: 4em
+$sidebar-width: 28rem
+$main-padding: 4rem
 $main-max-width: 65rem
 
 $font-title: 'malaga-narrow', "Helvetica Neue", Helvetica, Arial, sans-serif
@@ -100,8 +100,8 @@ header
     background: $color-header-background-left
     box-shadow: 0 0 1.2em rgba(0, 0, 0, 0.8)
     left: 0
-    height: $header-height + $header-overdraw + 2em
-    top: -2em - $header-overdraw
+    height: $header-height + $header-overdraw + 2rem
+    top: -2rem - $header-overdraw
     width: $sidebar-width
     z-index: $z-header
 
@@ -163,7 +163,7 @@ header
   @include fill
   background: $color-sidebar-background
   box-shadow: 0 -0.6em 0.6em rgba(0, 0, 0, 0.45)
-  padding-top: $header-height + 4em
+  padding-top: $header-height + $main-padding
   position: fixed
   right: auto
   width: $sidebar-width
@@ -234,6 +234,13 @@ footer
     font-size: 2em
     margin-bottom: 0.4em
     padding-top: 0.8em
+
+    a
+      $dist: $header-height + $main-padding
+      display: block
+      margin-top: -$dist
+      padding-top: $dist
+      pointer-events: none
 
   p
     font-size: 1.6em
