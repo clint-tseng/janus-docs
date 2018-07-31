@@ -258,6 +258,7 @@ footer
 
     code
       background-color: #eee
+      font-size: 1.2em
 
   > ul, > ul ul
     $padding-left: 2em
@@ -280,6 +281,24 @@ footer
 
       &:visited
         color: $color-accent2
+
+  .feature
+    svg
+      $size: 8em
+      float: left
+      height: $size
+      margin-right: 1.5em
+      margin-top: 1em
+      width: $size
+
+      path
+        fill: #aaa
+
+    p
+      margin-bottom: 0.5em
+
+    + p
+      margin-top: 2em
 
 ////////////////////////////////////////////////////////////////////////////////
 // COMPONENTS

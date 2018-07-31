@@ -11,7 +11,6 @@ class DocsApp extends App.build(
     default() { return []; }
   })
 ) {
-
   resolver() {
     return Resolver.caching(new Resolver.MemoryCache(),
       Resolver.oneOf(this.articleCache(), Resolver.fromLibrary(this.get('resolvers'))));

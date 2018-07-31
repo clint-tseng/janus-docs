@@ -5,8 +5,42 @@ opinionated, Janus is built on a strong formal base but provides powerful,
 familiar building blocks.</span>
 </p>
 
-Rather than wax poetic on what we&rsquo;re about, we&rsquo;ll let the code speak for
-itself. Each of the following sections demonstrates a major framework component.
+Janus is built around a <em>declare-once, work-forever</em> philosophy. It
+provides powerful tools for describing data transformations, bindings, and
+actions. Janus does the work of making sure those declarations&mdash;your
+rules&mdash;remain true whenever your data changes. It features:
+
+<div class="feature">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><path d="M48.7418,51,33.82,19a3.6051,3.6051,0,0,0-2.9326-2h-5A3.6051,3.6051,0,0,1,28.82,19L43.7418,51a3.6051,3.6051,0,0,0,2.9326,2h5A3.6051,3.6051,0,0,1,48.7418,51Z"/><path d="M34.1434,30,23.8846,52a1.8026,1.8026,0,0,1-1.4663,1h4.5L37.6434,30Z"/><path d="M70.071,34.1135,55.6243,19.6668,53.3614,21.93,65.4647,35.649,53.3375,50.6677l1.6251,1.6251L70.071,37.1844A2.1709,2.1709,0,0,0,70.071,34.1135Z"/><path d="M2.849,37.8461,17.2957,52.2928l2.263-2.263L7.4553,36.3106,19.5825,21.2919l-1.6251-1.6251L2.849,34.7752A2.1709,2.1709,0,0,0,2.849,37.8461Z"/></svg>
+<h2>Templated View Components</h2>
+<p>
+A simple, extensible views and templating library that uses plain HTML and
+Javascript with familiar, jQuery-like syntax.
+<a href="#views-and-templating">See examples</a>.
+</p>
+</div>
+
+<div class="feature">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><path d="M35.75,38.3174l-13.25-7.65v-15.3l13.25-7.65L49,15.3677v15.3ZM25.5,28.9351l10.25,5.9184L46,28.9351V17.1L35.75,11.1816,25.5,17.1Z"/><path d="M50.75,63.3174,37.5,55.668V40.3672l13.25-7.6494L64,40.3672V55.668ZM40.5,53.9355l10.25,5.917L61,53.9355V42.1l-10.25-5.918L40.5,42.1Z"/><path d="M20.75,63.3174,7.5,55.668V40.3672l13.25-7.6494L34,40.3672V55.668ZM10.5,53.9355l10.25,5.917L31,53.9355V42.1l-10.25-5.918L10.5,42.1Z"/></svg>
+<h2>Collections and Model Library</h2>
+<p>
+Core structures which treat data operations like <code>map</code> as declarative
+transformation rules which should always hold true, rather than as individual
+point-in-time mutations. <a href="#data-structures-and-models">See examples</a>.
+</p>
+</div>
+
+<div class="feature">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><path d="M36.5,12A23.5,23.5,0,1,1,13,35.5,23.5,23.5,0,0,1,36.5,12m0-3A26.5,26.5,0,1,0,63,35.5,26.5,26.5,0,0,0,36.5,9Z"/><path d="M36.5,12a11.75,11.75,0,0,1,0,23.5,11.75,11.75,0,0,0,0,23.5,23.5,23.5,0,0,0,0-47Z"/></svg>
+<h2>Application Layer</h2>
+<p>
+The tools you need to assemble these components into a full application, including
+the ability to render server- and client-side with the same codebase.
+</p>
+</div>
+
+Below are some small code samples to give you a sense for what Janus looks like.
+They are simple, but they are fully representative of real-world Janus code.
 
 Views and Templating
 --------------------
