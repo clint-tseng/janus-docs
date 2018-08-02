@@ -228,12 +228,16 @@ footer
 // CONTENT
 
 .article
-  h2
+  h1, h2
     color: $color-heading
     font-family: $font-heading
-    font-size: 2em
     margin-bottom: 0.4em
     padding-top: 0.8em
+  h1
+    font-size: 3em
+
+  h2
+    font-size: 2em
 
     a
       $dist: $header-height + $main-padding
@@ -256,21 +260,31 @@ footer
       .splash-two
         color: $color-accent2
 
-    code
-      background-color: #eee
-      font-size: 1.2em
+    + ul
+      margin-top: -1em
 
-  > ul, > ul ul
+  > ul, > ol
     $padding-left: 2em
-    list-style-type: circle
     max-width: calc(#{$main-max-width} - #{$padding-left})
+    padding-bottom: 1em
     padding-left: $padding-left
 
-    li
+    ul, ol
+      padding-left: 1em
+      padding-top: 0.5em
+
+    > li
       font-size: 1.6em
+    li
       padding-bottom: 0.5em
 
-  p, > ul
+  > ul, > ul ul, > ol ul
+    list-style-type: circle
+
+  > ol, > ol ol, > ul ol
+    list-style-type: decimal
+
+  p, > ul, > ol
     a
       border-bottom: 1px dotted $color-accent
       color: $color-accent
@@ -282,7 +296,33 @@ footer
       &:visited
         color: $color-accent2
 
-  .feature
+    code
+      background-color: #eee
+      font-size: 1.2em
+
+  blockquote
+    background-color: #f0f0f0
+    border-left: 0.6em solid #ddd
+    margin-bottom: 1.5em
+    max-width: 60rem
+    padding: 1.3em
+      left: 1.6em
+
+    p, h1
+      margin: 0
+      padding: 0
+
+    h1
+      font-size: 1.8em
+      padding-bottom: 0.3em
+
+    p
+      font-size: 1.4em
+
+    code
+      background-color: #ddd
+
+  .feature // TODO: move this out.
     svg
       $size: 8em
       float: left

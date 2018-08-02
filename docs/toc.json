@@ -7,9 +7,6 @@
   "children": [{
     "title": "Getting Started",
     "path": "/intro/getting-started"
-  }, {
-    "title": "Next Steps",
-    "path": "/intro/next-steps"
   }]
 }, {
   "title": "A Practical Guide",
