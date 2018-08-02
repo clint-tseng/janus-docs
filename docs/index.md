@@ -6,9 +6,10 @@ familiar building blocks.</span>
 </p>
 
 Janus is built around a <em>declare-once, work-forever</em> philosophy. It
-provides powerful tools for describing data transformations, bindings, and
-actions. Janus does the work of making sure those declarations&mdash;your
-rules&mdash;remain true whenever your data changes. It features:
+provides easy-to-use but powerful tools for describing data transformations,
+bindings, and actions. Janus does the work of making sure those
+declarations&mdash;your rules&mdash;remain true whenever your data changes.
+It features:
 
 <div class="feature">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><path d="M48.7418,51,33.82,19a3.6051,3.6051,0,0,0-2.9326-2h-5A3.6051,3.6051,0,0,1,28.82,19L43.7418,51a3.6051,3.6051,0,0,0,2.9326,2h5A3.6051,3.6051,0,0,1,48.7418,51Z"/><path d="M34.1434,30,23.8846,52a1.8026,1.8026,0,0,1-1.4663,1h4.5L37.6434,30Z"/><path d="M70.071,34.1135,55.6243,19.6668,53.3614,21.93,65.4647,35.649,53.3375,50.6677l1.6251,1.6251L70.071,37.1844A2.1709,2.1709,0,0,0,70.071,34.1135Z"/><path d="M2.849,37.8461,17.2957,52.2928l2.263-2.263L7.4553,36.3106,19.5825,21.2919l-1.6251-1.6251L2.849,34.7752A2.1709,2.1709,0,0,0,2.849,37.8461Z"/></svg>
@@ -45,9 +46,10 @@ They are simple, but they are fully representative of real-world Janus code.
 Views and Templating
 --------------------
 
-Janus is just plain HTML and Javascript. There are no goofy custom tags, there is no
-templating language syntax to learn and compile. Instead, we use selectors and a binding
-syntax based on the jQuery API&mdash;things you already understand and rely upon.
+Janus is just plain HTML and Javascript. There are no goofy custom tags, there is
+no templating language syntax to learn and compile. Instead, we use selectors and
+a binding syntax based on the jQuery API&mdash;things you already understand and
+rely upon.
 
 ~~~
 const dog = new Map({ name: 'Spot', age: 3 });
@@ -72,7 +74,7 @@ return new DogTag(dog);
 Of course, the previous example isn't very interesting with static data. Here we rig
 up a basic Model definition and edit view. The `.render()` call looks at the given
 object and inserts an appropriate view for it&mdash;in this case, from the Janus
-[standard library](/stdlib):
+[standard library](/api/stdlib):
 
 ~~~
 const Dog = Model.build(
@@ -306,12 +308,15 @@ A Closer Look
 
 For more information about Janus, please take a look at the following resources:
 
-* There are two different [introduction guides](/intro) available.
-  One is a more practical guide for those who learn best by doing, while the other
-  builds more comprehensively up from principles and elements.
-* The [Janus Samples](https://github.com/clint-tseng/janus-samples) contains
-  complete example projects that show Janus in use in context.
+* The [introduction](/intro) walks through the general setup and explains each
+  component we ship in greater detail.
+* There are two different introductory guides available. One is a more [practical
+  how-to](/hands-on) for those who want to just get coding and learn best by doing,
+  while the [first principles](/theory) section builds a deeper picture of the hows
+  and whys from motivations and principles.
 * The [cookbook](/cookbook) is a compendium of common problems and answers that
   serve as a quick solutions reference, but also illustrate how to approach
   problem-solving in Janus.
+* The [Janus Samples](https://github.com/clint-tseng/janus-samples) repository
+  contains complete example projects that show Janus in use in context.
 
