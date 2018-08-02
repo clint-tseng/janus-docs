@@ -4,6 +4,7 @@ const $ = require('janus-dollar');
 require('codemirror/addon/edit/closebrackets');
 require('codemirror/addon/edit/matchbrackets');
 require('codemirror/addon/edit/trailingspace');
+require('codemirror/mode/xml/xml');
 require('codemirror/mode/javascript/javascript');
 const CodeMirror = require('codemirror');
 
@@ -16,7 +17,7 @@ class EditorView extends DomView {
     }, {
       autoCloseBrackets: true,
       matchBrackets: true,
-      mode: 'javascript',
+      mode: this.options.language || 'javascript',
       showTrailingSpace: true,
       value: this.subject.getValue(),
       viewportMargin: Infinity
