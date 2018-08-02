@@ -35,7 +35,17 @@ while ((first = dom.find('pre:first')).length > 0) {
   for (const pre of pres) {
     const code = pre.children('code');
     const [ , subtype ] = /^$|^language-(.*)$/.exec(code.prop('class'));
-    sample[subtype || 'main'] = code.text();
+
+    if (subtype === 'noexec') {
+      sample.noexec = true;
+      sample.main = code.text();
+    } else if (subtype === 'html') {
+      sample.noexec = true;
+      sample.language = 'xml';
+      sample.main = code.text();
+    } else {
+      sample[subtype || 'main'] = code.text();
+    }
   }
 
   // remove found elements, replace with marker.

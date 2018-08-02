@@ -13,8 +13,10 @@ class SampleView extends DomView.build($(`
     <style class="sample-styles"></style>
   </div>`), template(
 
-  find('.sample').classed('error', from('result').map(fail.match)),
-  find('.sample-code').render(from.attribute('main')).context('edit').criteria({ style: 'code' }),
+  find('.sample')
+    .classed('error', from('result').map(fail.match))
+    .classed('noexec', from('noexec')),
+
   find('.sample-result').render(from('result').pipe(filter(success.match))),
   find('.sample-error').render(from('result').map((x) => x.failOrElse(null)).pipe(filter(exists))),
   find('.sample-styles').text(from('styles'))
@@ -22,7 +24,7 @@ class SampleView extends DomView.build($(`
   _wireEvents() {
     // TODO: less haphazard way to plumb this action through.
     const dom = this.artifact();
-    dom.on('code-navigate', (event, { line, col }) => {
+    dom.on('code-navigate', (_, { line, col }) => {
       dom.find('.code-editor').data('view').setCursor(line, col);
     });
   }

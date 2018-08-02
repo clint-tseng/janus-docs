@@ -5,7 +5,7 @@ const janus = require('janus');
 const { baseViews } = require('../base');
 const $ = require('janus-dollar');
 
-const cases = { success, fail } = janus.defcase('org.janusjs.docs.eval', 'success', 'fail');
+const cases = { success, fail, inert } = janus.defcase('success', 'fail', 'inert');
 
 const inject = `const { ${Object.keys(janus).join(', ')} } = janus`;
 const env = `const { views } = env`;
@@ -14,6 +14,7 @@ const env = `const { views } = env`;
 // TODO: non-hack way to do this.
 success().__proto__.flatMap = function(f) { return f(this.get()); };
 fail().__proto__.flatMap = function() { return this; };
+inert().__proto__.flatMap = function() { return this; };
 
 const compile = (code) => {
   try {
@@ -30,5 +31,5 @@ const compile = (code) => {
   }
 };
 
-module.exports = { compile, success, fail };
+module.exports = { compile, success, fail, inert };
 
