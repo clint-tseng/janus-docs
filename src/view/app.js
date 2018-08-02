@@ -31,6 +31,13 @@ class AppView extends DomView.build($('body').clone(), template(
       app.set('path', pathname);
     });
 
+    dom.on('click', 'code', (event) => {
+      if (window.getSelection == null) return;
+      const selection = window.getSelection();
+      if (selection.isCollapsed === true)
+        selection.selectAllChildren(event.target);
+    });
+
     $(window).on('popstate', (event) => {
       app.set('path', location.pathname);
     });
