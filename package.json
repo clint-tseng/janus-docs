@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "browserify": "~16",
-    "node-sass": "~4",
-    "marked": "~0.4"
+    "marked": "~0.4",
+    "node-sass": "~4"
   }
 }
