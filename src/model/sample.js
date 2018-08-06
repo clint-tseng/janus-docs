@@ -1,22 +1,84 @@
-const { Model, attribute, List, bind, from } = require('janus');
+const $ = require('janus-dollar');
+const janus = require('janus');
+const { Model, attribute, List, bind, from, DomView } = janus;
+const stdlib = require('janus-stdlib');
 const { compile, success, fail, inert } = require('../util/eval');
 
+// doing nothing as a happy result.
 const noop = (x) => success(x);
+
+// replicate jQuery's own markup-detection logic here (see core/init in
+// jquery/jquery) to decide how to route $ calls when shimmed.
+const rQuickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]+))$/;
+const isMarkup = (selector) => {
+  if (typeof selector !== 'string') return false;
+  if ((selector[0] === '<') && (selector[selector.length - 1] === '>') && (selector.length >= 3))
+    return true;
+  const match = rQuickExpr.exec(selector);
+  return ((match != null) && (match[1] != null));
+};
+
+// quick and dirty view that simply hosts an fragment instance.
+const htmlView = (html) => {
+  if (html == null) return null;
+  class HtmlView extends DomView { _render() { return $(html); } }
+  return new HtmlView();
+};
 
 const Sample = Model.build(
   attribute('main', attribute.Text),
 
-  bind('computation', from('main').map(compile)
-    .and('postprocess').map((code) => (code == null)
-      ? noop
-      : compile(code).successOrElse(noop))
-    .all.flatMap((main, post) => main.flatMap((f) => f().flatMap(post)))
-  ),
+  ////////////////////////////////////////////////////////////////////////////////
+  // EVAL ENV
+  // here we set up a bunch of the env inputs and outputs surrounding the actual
+  // code sample itself:
 
-  // we don't want to compile or run the sample code unless we actually care
-  // about it, so we don't directly involve computation in our fromchain.
-  bind('result', from('noexec').and.self().all.flatMap((noexec, self) =>
-    (noexec == true) ? inert() : self.watch('computation')))
+  // if there is a custom dom target, we need to create a mock view with the
+  // specified html to render. otherwise ignore. we need to be able to reset with
+  // each execution so appends don't stack.
+  bind('env.view', from('target-html').all.map(htmlView)),
+
+  // if there is a custom dom target, we have to do some work to make it work
+  // transparently to the code sample:
+  bind('env.dollar', from('env.view').map((view) => (view == null)
+    ? $
+    : ((selector) => isMarkup(selector)
+      ? $(selector)
+      : view.artifact().filter(selector).add(view.artifact().find(selector))))),
+
+  // our default env is simply everything janus provides, plus $:
+  bind('env.default', from('env.dollar').map(($) => Object.assign({ $, stdlib }, janus))),
+
+  // but if the code block has custom require()s in it instead, we need to provide
+  // require(), along with shims to bridge $.
+  bind('env.final', from('env.default').and('manual-require').all.map((env, manual) => {
+    if (manual !== true) return env;
+    else return {
+      require: (target) => {
+        if ((target === 'jquery') || (target === 'janus-dollar')) return env.$;
+        else if ((target === 'janus') || (target === 'janus-stdlib')) return require(target);
+      }
+    };
+  })),
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // EVAL EXEC
+  // actual compilation and computation of the final code block:
+
+  bind('compiled.main', from('env.final').and('main').all.map(compile)),
+  bind('compiled.postprocess', from('env.default').and('postprocess').all.map((env, code) =>
+    (code == null) ? noop : compile(env, code).successOrElse(noop))),
+
+  bind('result.raw', from('compiled.main').and('compiled.postprocess')
+    .all.flatMap((main, post) => main.flatMap((f) => f().flatMap(post)))),
+
+  // TODO: perhaps don't bother with any of this at all if noexec.
+  bind('result.final', from('result.raw').and('env.view').and('noexec')
+    .all.flatMap((result, htmlView, noexec) => {
+      if (noexec === true) return inert();
+      else if (htmlView != null) return result.mapSuccess(() => htmlView);
+      else return result;
+    }))
 );
 
 const Samples = List.of(Sample);

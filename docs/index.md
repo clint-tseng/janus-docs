@@ -147,7 +147,7 @@ const SampleView = DomView.build($(`
   })
 ));
 
-const [ list, mapped ] = arg.result;
+const [ list, mapped ] = __arg;
 return new SampleView(new Model({ list, mapped }));
 ~~~
 
@@ -252,6 +252,7 @@ const Item = Model.build(
   attribute('done', attribute.Boolean),
   attribute('description', attribute.Text)
 );
+const Main = Model.build();
 
 const ItemView = DomView.build($(`
   <div class="todo-item">
@@ -292,8 +293,13 @@ const TodoList = DomView.build($(`
   })
 ));
 
-views.register(Item, ItemView);
-return new TodoList(new Model({ items: new List() }));
+const app = new App();
+stdlib.view.registerWith(app.get('views'));
+app.get('views').register(Item, ItemView);
+app.get('views').register(Main, TodoList);
+const view = app.view(new Main({ items: new List() }));
+view.wireEvents();
+return view;
 ~~~
 
 ~~~ styles

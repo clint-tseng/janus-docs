@@ -70,13 +70,13 @@ Printing Some Text
 
 First, we'll have to create an HTML file to house the application. Create a new
 file `index.html`, and add something like this; the important parts are the
-`<script>` tag and the `<div id="main">`.
+`<script>` tag and the `<div id="app">`.
 
 ~~~ html
 <!doctype html>
 <html>
   <body>
-    <div id="main"></div>
+    <div id="app"></div>
     <script src="app.js"></script>
   </body>
 </html>
@@ -87,7 +87,7 @@ code for the browser, we'll actually name our source file `client.js`, and then
 generate `app.js` from it. Create that file, and let's just get some basic components
 working to make sure everything is glued together right.
 
-~~~ noexec
+~~~ manual-require
 const $ = require('jquery');
 const { Map, DomView, template, find, from } = require('janus');
 
@@ -101,7 +101,10 @@ const ItemView = DomView.build(
 
 const item = new Map({ name: 'Red Potion', price: 120 });
 const view = new ItemView(item);
-$('#main').append(view.artifact());
+$('#app').append(view.artifact());
+~~~
+~~~ target-html
+<div id="app"></div>
 ~~~
 
 As you can see, we require some tools from Janus, make an item for our shop to
@@ -115,7 +118,7 @@ application. If you run into trouble with this command, double-check that your
 `package.json` looks right, as shown in the previous section, and try running
 `npm install` again just in case.
 
-You should, when you open the HTML page in a browser, see &ldquo;Red Potion120&rdquo;
+You should, when you open the HTML page in a browser, see &ldquo;Red Potion 120&rdquo;
 on screen. That may not seem very exciting, but think about what we've just done:
 we've described how any piece of data of some particular shape should be displayed
 in our interface, and fed it some random piece of data to show&mdash;and it worked!
@@ -140,7 +143,7 @@ together.
 
 So, let's make those two changes now:
 
-~~~ noexec
+~~~ manual-require
 const $ = require('jquery');
 const { Model, DomView, template, find, from, App } = require('janus');
 
@@ -159,7 +162,10 @@ app.get('views').register(Item, ItemView);
 
 const item = new Item({ name: 'Red Potion', price: 120 });
 const view = app.view(item);
-$('#main').append(view.artifact());
+$('#app').append(view.artifact());
+~~~
+~~~ target-html
+<div id="app"></div>
 ~~~
 
 As you can see, we declare a class `Item`, and our `item` is now an instance of
@@ -183,7 +189,7 @@ Making Something Happen
 Now that that's out of the way, let's get our application to actually do useful
 interactive things: we'll add the ability to place an order.
 
-~~~ noexec
+~~~ manual-require
 const $ = require('jquery');
 const { Model, DomView, template, find, from, App } = require('janus');
 
@@ -202,7 +208,7 @@ const ItemView = DomView.build(
 const SaleView = DomView.build($(`
   <div>
     <h1>Inventory</h1> <div class="inventory"></div>
-    <h1>Order Details</h1> <div class="total"></div>
+    <h1>Order Total</h1> <div class="total"></div>
   </div>`),
   template(
     find('.inventory').render(from('inventory')),
@@ -210,7 +216,7 @@ const SaleView = DomView.build($(`
   )
 );
 
-const item = new Model({ name: 'Red Potion', price: 120 });
+const item = new Item({ name: 'Red Potion', price: 120 });
 const sale = new Sale({ inventory: item });
 
 const app = new App();
@@ -218,8 +224,11 @@ app.get('views').register(Item, ItemView);
 app.get('views').register(Sale, SaleView);
 
 const view = app.view(sale);
-$('#main').append(view);
+$('#app').append(view.artifact());
 view.wireEvents();
+~~~
+~~~ target-html
+<div id="app"></div>
 ~~~
 
 A lot of new code! But almost all of it you've seen already.
@@ -246,7 +255,7 @@ Hey, That Doesn't Seem Very Useful
 Okay, fine. Ordering a single item once is pretty boring. Let's add some `List`s
 to the mix and see what happens.
 
-~~~ noexec
+~~~ manual-require
 const $ = require('jquery');
 const { List, Model, DomView, template, find, from, App } = require('janus');
 const stdlib = require('janus-stdlib');
@@ -266,7 +275,7 @@ const ItemView = DomView.build(
 const SaleView = DomView.build($(`
   <div>
     <h1>Inventory</h1> <div class="inventory"></div>
-    <h1>Order Details</h1> <div class="total"></div>
+    <h1>Order Total</h1> <div class="total"></div>
   </div>`),
   template(
     find('.inventory').render(from('inventory')),
@@ -276,9 +285,9 @@ const SaleView = DomView.build($(`
 );
 
 const inventory = new List([
-  new Model({ name: 'Green Potion', price: 60 }),
-  new Model({ name: 'Red Potion', price: 120 }),
-  new Model({ name: 'Blue Potion', price: 160 })
+  new Item({ name: 'Green Potion', price: 60 }),
+  new Item({ name: 'Red Potion', price: 120 }),
+  new Item({ name: 'Blue Potion', price: 160 })
 ]);
 const sale = new Sale({ inventory, order: new List() });
 
@@ -288,8 +297,11 @@ app.get('views').register(Item, ItemView);
 app.get('views').register(Sale, SaleView);
 
 const view = app.view(sale);
-$('#main').append(view);
+$('#app').append(view.artifact());
 view.wireEvents();
+~~~
+~~~ target-html
+<div id="app"></div>
 ~~~
 
 Not too much has actually changed. We now need the standard library, since it

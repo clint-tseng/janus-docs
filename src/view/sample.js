@@ -14,14 +14,14 @@ class SampleView extends DomView.build($(`
   </div>`), template(
 
   find('.sample')
-    .classed('error', from('result').map(fail.match))
+    .classed('error', from('result.final').map(fail.match))
     .classed('noexec', from('noexec')),
 
   find('.sample-code').render(from.attribute('main')).context('edit').criteria({ style: 'code' })
-    .options(from('language').map((l) => ({ language: l }))),
+    .options(from('language').map((language) => ({ language }))),
 
-  find('.sample-result').render(from('result').pipe(filter(success.match))),
-  find('.sample-error').render(from('result').map((x) => x.failOrElse(null)).pipe(filter(exists))),
+  find('.sample-result').render(from('result.final').pipe(filter(success.match))),
+  find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
   find('.sample-styles').text(from('styles'))
 )) {
   _wireEvents() {
@@ -35,8 +35,7 @@ class SampleView extends DomView.build($(`
 
 // a passthrough renderer to get a result view to appear:
 const SuccessView = DomView.build($('<div class="eval-success"/>'), template(
-  find('div').render(from.self((view) => new List(view.subject.get().result)))
-    .options(from.self((view) => ({ app: view.options.app.with({ views: view.subject.get().env.views }) })))
+  find('div').render(from.self((view) => new List(view.subject.get())))
 ));
 
 module.exports = {

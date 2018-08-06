@@ -39,6 +39,9 @@ while ((first = dom.find('pre:first')).length > 0) {
     if (subtype === 'noexec') {
       sample.noexec = true;
       sample.main = code.text();
+    } else if (subtype === 'manual-require') {
+      sample['manual-require'] = true;
+      sample.main = code.text();
     } else if (subtype === 'html') {
       sample.noexec = true;
       sample.language = 'xml';

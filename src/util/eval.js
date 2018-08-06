@@ -7,22 +7,20 @@ const $ = require('janus-dollar');
 
 const cases = { success, fail, inert } = janus.defcase('success', 'fail', 'inert');
 
-const inject = `const { ${Object.keys(janus).join(', ')} } = janus`;
-const env = `const { views } = env`;
-
 // special method for success/fail cases which flatMaps successes/fails appropriately.
 // TODO: non-hack way to do this.
 success().__proto__.flatMap = function(f) { return f(this.get()); };
 fail().__proto__.flatMap = function() { return this; };
 inert().__proto__.flatMap = function() { return this; };
 
-const compile = (code) => {
+const compile = (env, code) => {
+  const inject = `const { ${Object.keys(env).join(', ')} } = __env`;
+
   try {
-    const f_ = new Function('janus', 'env', '$', 'arg', `${inject}; ${env};\n${code};`);
+    const f_ = new Function('__env', '__arg', `${inject};\n${code};`);
     const wrapped = (x) => {
-      const env = { views: baseViews() };
       try {
-        return success({ result: f_.call({}, janus, env, $, x), env });
+        return success(f_.call(null, env, x));
       } catch(ex) { return fail(ex); }
     };
     return success(wrapped);
