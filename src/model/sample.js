@@ -4,6 +4,10 @@ const { Model, attribute, List, bind, from, DomView } = janus;
 const stdlib = require('janus-stdlib');
 const { compile, success, fail, inert } = require('../util/eval');
 
+
+////////////////////////////////////////
+// UTIL FUNCS
+
 // doing nothing as a happy result.
 const noop = (x) => success(x);
 
@@ -25,6 +29,10 @@ const htmlView = (html) => {
   return new HtmlView();
 };
 
+
+////////////////////////////////////////////////////////////////////////////////
+// SAMPLE MODEL,
+// which handles the actual inteprertation of sample code.
 const Sample = Model.build(
   attribute('main', attribute.Text),
 
@@ -36,7 +44,10 @@ const Sample = Model.build(
   // if there is a custom dom target, we need to create a mock view with the
   // specified html to render. otherwise ignore. we need to be able to reset with
   // each execution so appends don't stack.
-  bind('env.view', from('target-html').all.map(htmlView)),
+  //
+  // get a new view to plumb through every time the main code changes, since we
+  // need to reset to a clean state after any mutations.
+  bind('env.view', from('target-html').and('main').all.map(htmlView)),
 
   // if there is a custom dom target, we have to do some work to make it work
   // transparently to the code sample:
@@ -73,12 +84,8 @@ const Sample = Model.build(
     .all.flatMap((main, post) => main.flatMap((f) => f().flatMap(post)))),
 
   // TODO: perhaps don't bother with any of this at all if noexec.
-  bind('result.final', from('result.raw').and('env.view').and('noexec')
-    .all.flatMap((result, htmlView, noexec) => {
-      if (noexec === true) return inert();
-      else if (htmlView != null) return result.mapSuccess(() => htmlView);
-      else return result;
-    }))
+  bind('result.final', from('result.raw').and('noexec').all.flatMap((result, noexec) =>
+    (noexec === true) ? inert() : result))
 );
 
 const Samples = List.of(Sample);

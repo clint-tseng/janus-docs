@@ -20,7 +20,9 @@ class SampleView extends DomView.build($(`
   find('.sample-code').render(from.attribute('main')).context('edit').criteria({ style: 'code' })
     .options(from('language').map((language) => ({ language }))),
 
-  find('.sample-result').render(from('result.final').pipe(filter(success.match))),
+  find('.sample-result').render(from('result.final').pipe(filter(success.match))
+    .and('env.view').all.map((result, customView) => customView || result)),
+
   find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
   find('.sample-styles').text(from('styles'))
 )) {
