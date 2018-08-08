@@ -15,7 +15,8 @@ class SampleView extends DomView.build($(`
 
   find('.sample')
     .classed('error', from('result.final').map(fail.match))
-    .classed('noexec', from('noexec')),
+    .classed('noexec', from('noexec'))
+    .classed('custom-view', from('env.view').map(exists)),
 
   find('.sample-code').render(from.attribute('main')).context('edit').criteria({ style: 'code' })
     .options(from('language').map((language) => ({ language }))),
