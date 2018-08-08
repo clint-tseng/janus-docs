@@ -13,7 +13,35 @@
   "path": "/hands-on"
 }, {
   "title": "First Principles",
-  "path": "/theory"
+  "path": "/theory",
+  "children": [{
+    "title": "Origins and Goals",
+    "path": "/theory/origins-and-goals"
+  }, {
+    "title": "Rederiving Janus",
+    "path": "/theory/rederiving-janus"
+  }, {
+    "title": "Varying",
+    "path": "/theory/varying"
+  }, {
+    "title": "Case Classes",
+    "path": "/theory/case-classes"
+  }, {
+    "title": "From-chaining",
+    "path": "/theory/from-chaining"
+  }, {
+    "title": "Collections",
+    "path": "/theory/collections"
+  }, {
+    "title": "Models",
+    "path": "/theory/models"
+  }, {
+    "title": "App and Applications",
+    "path": "/theory/app-and-applications"
+  }]
+}, {
+  "title": "Further Reading",
+  "path": "/more"
 }, {
   "title": "Cookbook",
   "path": "/cookbook"

@@ -213,6 +213,11 @@ header
       .toc-entry a
         padding-left: $sidebar-padding + ($indent * 2)
 
+    .toc-children
+      display: none
+    &.prefix .toc-children
+      display: block
+
 #main
   background: $color-background
   margin-left: $sidebar-width
