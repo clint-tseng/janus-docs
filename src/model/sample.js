@@ -6,7 +6,7 @@ const { compile, success, fail, inert } = require('../util/eval');
 
 
 ////////////////////////////////////////
-// UTIL FUNCS
+// UTIL
 
 // doing nothing as a happy result.
 const noop = (x) => success(x);
@@ -28,6 +28,10 @@ const htmlView = (html) => {
   class HtmlView extends DomView { _render() { return $(html); } }
   return new HtmlView();
 };
+
+// we need env to not be a plain object so that it assigns into Model as a single
+// unit. so we make it a simple class.
+class Env { constructor(...props) { Object.assign(this, ...props); } };
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +62,7 @@ const Sample = Model.build(
       : view.artifact().filter(selector).add(view.artifact().find(selector))))),
 
   // our default env is simply everything janus provides, plus $:
-  bind('env.default', from('env.dollar').map(($) => Object.assign({ $, stdlib }, janus))),
+  bind('env.default', from('env.dollar').map(($) => new Env({ $, stdlib }, janus))),
 
   // but if the code block has custom require()s in it instead, we need to provide
   // require(), along with shims to bridge $.
