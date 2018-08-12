@@ -5,7 +5,7 @@ At the very heart of Janus is `Varying`. Varying is a container type which can
 house any value. It provides three important tools for dealing with the housed
 value:
 
-1. It can return the value, or call a callback function when the value changes.
+1. It take a value. It can return it, or call a callback when the value changes.
 2. It can be given a mapping function, and return a new Varying whose value is
    always the mapped result of the value from the original Varying.
 3. It can take a nested `Varying[Varying[x]]` situation and flatten it, so that
@@ -15,14 +15,15 @@ Some of you will recognize these three operations as fundamental laws of a certa
 nature. Don't worry if you don't&mdash;all that matters is that together, these
 three operations are quite powerful.
 
-Varying has a couple of other tricks up its sleeve, which we will discuss later
-in this article: the ability to deal with multiple Varyings at once, and a set
-of tools to help deal with resource management and garbage collection.
+Varying has a couple of other tricks up its sleeve. We will discuss the process
+of fusing multiple Varyings together later in this article. Later in this series,
+we will cover ways to deal with resource management and garbage collection.
 
-For now, we will start with all the things you can do with a single Varying. We're
-going to cover the usage details, then move on to the underlying mechanics; for
-more examples of usage, see the [practical guide](/hands-on/varying) article on
-this subject.
+Here, we're going to cover the usage details, then move on to the underlying
+mechanics; for more examples of usage, see the [practical guide](/hands-on/varying)
+article on this subject.
+
+For now, we will start with all the things you can do with a single Varying.
 
 Creating a Varying
 ==================
@@ -35,6 +36,7 @@ const b = new Varying(new Varying(8));
 
 const c = Varying.of(15);
 const d = Varying.of(new Varying(16));
+const e = Varying.of(Varying.of(23));
 
 return [ a, b, c, d ]; //.map(inspect);
 ~~~
@@ -44,7 +46,7 @@ the given value. `Varying.of`, on the other hand, will simply hand you back the
 input value if it is already a Varying, or else it will do the same thing as the
 constructor, wrapping the value in a Varying and handing it back.
 
-> Those of you who dislike `new Varying(x)` syntax can use `Varying.pure(x)` instead.
+> Those of you who dislike `new Varying(x)` syntax can use `Varying.box(x)` instead.
 
 In reality, it will be rare that you manually construct a Varying. For the most
 part, you'll be instead making use of Varyings that more advanced tools in Janus
@@ -75,15 +77,15 @@ too often. Instead, problem solving in Janus is usually best done by accounting
 for all possible values over time:
 
 ~~~
-const result = [];
+const results = [];
 const v = new Varying(1);
-v.react((value) => { result.push(value) });
+v.react((value) => { results.push(value) });
 
 v.set(2);
 v.set(4);
 v.set(8);
 
-return result;
+return results;
 ~~~
 
 So `react` is the Varying equivalent of Datum `onChange` from the pretend framework
@@ -250,6 +252,10 @@ Flattening a Varying
 What does it mean to flatten a Varying? Consider the following practical situation,
 where we end up with a bit of an awkward result.
 
+List has a neat method called `watchLength` which gives you a Varying containing
+the live length of that list at all times. What we are trying to do is to see if
+perhaps it is too big.
+
 ~~~
 const quota = new Varying(10);
 const items = new List([ 1, 1, 3, 8 ]);
@@ -260,15 +266,27 @@ const exceededQuota = quota.map((q) =>
 return exceededQuota.get(); // inspect(exceededQuota.get());
 ~~~
 
-List has a neat method called `watchLength` which gives you a Varying containing
-the live length of that list at all times. What we are trying to do is to see if
-perhaps it is too big.
+Shoot, we called `get` on our Varying, but instead of retrieving the useful result
+we wanted, we got some other Varying back that was inside of it.
 
-Of course, part of the awkwardness here is that we don't yet know how to take two
-Varyings side-by-side and perform some simple work on them at once, so we have to
-nest the two together like this. But either way, this result doesn't really work;
-anybody trying to listen in to this result has to do a lot of homework to get rid
-of that Varying that has snuck its way into our output.
+> # Aside
+> Why is there no value inside the Varying when we look at it on the right? The
+> `inspect` facility snoops on Varying while trying not to impact it, so it never
+> calls `get` or `react`. The answer should be clear from that&mdash;think about
+> it for a moment, and if it's still not clicking, read on.
+>
+> When we call `map` on a Varying, we get a Mapped Varying back. And remember,
+> it tries to be as lazy as possible, so if nobody ever `get`s or `react`s on it,
+> it assumes that nobody is looking and so it doesn't populate its own value.
+>
+> You can confirm that the correct result _does_ exist by adding a second `.get()`.
+
+Of course, part of the awkwardness here is how we nested `items.watchLength.map`
+inside of `quota.map`, but that's simply because we don't yet know how to take
+two Varyings side-by-side and perform some simple work on them at once, so we have
+to nest the two together like this. But either way, this result doesn't really
+work; anybody trying to listen in to this result has to do a lot of homework to
+get rid of that Varying that has snuck its way into our output.
 
 This is where flattening comes in. When a Varying `x` that contains a Varying `y`
 is flattened, that new flattened Varying will always contain the same value as `y`.
@@ -322,8 +340,84 @@ One last note on flattening&mdash;it only works on one layer at a time. If you
 have, for example, a `Varying[Varying[Varying[x]]]`, you'll have to call `flatten`
 _twice_ before you get a `Varying[x]`.
 
-Mapping and Reacting: Underlying Mechanics
-==========================================
+Multiple Varyings
+=================
+
+Varying provides quite a few ways to deal with multiple varyings at once. The
+most direct are `mapAll` and `flatMapAll`:
+
+~~~
+const results = [];
+const x = new Varying(3);
+const y = new Varying(6);
+
+Varying
+  .mapAll(x, y, (x, y) => x * y)
+  .react((z) => { results.push(z); });
+
+x.set(5);
+y.set(1);
+return results;
+~~~
+
+If you prefer your `map` to actually be called `map`, there is a way to do that
+(which of course also works with `flatMap`):
+
+~~~
+const results = [];
+const x = new Varying(3);
+const y = new Varying(6);
+
+Varying.all([ x, y ])
+  .map((x, y) => x * y)
+  .react((z) => { results.push(z); });
+
+x.set(5);
+y.set(1);
+return results;
+~~~
+
+The truly functional nerd way to do this, though, is to use `lift`. Lifting is
+a functional programming operation that takes some function that just deals with
+plain values and returns a new "lifted" function that has been taught how to deal
+with some particular kind of box that contains those values (in our case, Varying):
+
+~~~
+const results = [];
+const x = new Varying(3);
+const y = new Varying(6);
+
+const multiply = (x, y) => x * y;
+const multiplyVaryings = Varying.lift(multiply);
+
+multiplyVaryings(x, y).react((z) => { results.push(z); });
+x.set(5);
+y.set(1);
+return results;
+~~~
+
+The one thing you'll note about all these examples is that they always reduce the
+multiple parameters down to a single output value _before_ we `react` on them.
+This is a pretty natural result of the fact that functions only return one value,
+and Varyings only store one value. But if you are doing something complicated and
+expensive (like rendering some canvas graphics, say) and you just want to apply
+some mutation every time any one of several inputs change, `Varying.all` has the
+answer for you:
+
+~~~
+const results = [];
+const x = new Varying(3);
+const y = new Varying(6);
+
+Varying.all([ x, y ]).react((x, y) => { results.push(x * y); });
+
+x.set(5);
+y.set(1);
+return results;
+~~~
+
+Underlying Mechanics
+====================
 
 Now that we've discussed _what_ these features are, we should address how it is
 they actually work. In the extreme majority of cases, these details shouldn't matter.
@@ -331,10 +425,9 @@ But if you're pushing the framework to its limits, or you're working on the inte
 this knowledge will be important.
 
 If you're not really here to learn that sort of thing, it's totally okay to skip
-this section entirely and move on to [Multiple Varyings](#multiple-varyings) below.
-On the other hand, these subtleties are about as weedy as Janus gets, so if one
-of your goals is to risk-assess the darkest corners of the framework, this is the
-place to be.
+this section entirely and jump on ahead to the [Recap](#recap) below. On the other
+hand, these subtleties are about as weedy as Janus gets, so if one of your goals
+is to risk-assess the darkest corners of the framework, this is the place to be.
 
 Change Propagation
 ------------------
@@ -433,188 +526,6 @@ to stop reacting on it. This way, we are sure to stop work that is no longer nee
 > and there is _always_ a mapping function&mdash;`flatten` just assigns `identity`
 > as the mapping function which passes the value through unchanged.
 
-Multiple Varyings
-=================
-
-Varying provides quite a few ways to deal with multiple varyings at once. The
-most direct are `mapAll` and `flatMapAll`:
-
-~~~
-const results = [];
-const x = new Varying(3);
-const y = new Varying(6);
-
-Varying
-  .mapAll(x, y, (x, y) => x * y)
-  .react((z) => { results.push(z); });
-
-x.set(5);
-y.set(1);
-return results;
-~~~
-
-If you prefer your `map` to actually be called `map`, there is a way to do that
-(which of course also works with `flatMap`):
-
-~~~
-const results = [];
-const x = new Varying(3);
-const y = new Varying(6);
-
-Varying.all([ x, y ])
-  .map((x, y) => x * y)
-  .react((z) => { results.push(z); });
-
-x.set(5);
-y.set(1);
-return results;
-~~~
-
-The truly functional nerd way to do this, though, is to use `lift`. Lifting is
-a functional programming operation that takes some function that just deals with
-plain values and returns a new "lifted" function that has been taught how to deal
-with some particular kind of box that contains those values (in our case, Varying):
-
-~~~
-const results = [];
-const x = new Varying(3);
-const y = new Varying(6);
-
-const multiply = (x, y) => x * y;
-const multiplyVaryings = Varying.lift(multiply);
-
-multiplyVaryings(x, y).react((z) => { results.push(z); });
-x.set(5);
-y.set(1);
-return results;
-~~~
-
-The one thing you'll note about all these examples is that they always reduce the
-multiple parameters down to a single output value _before_ we `react` on them.
-This is a pretty natural result of the fact that functions only return one value.
-But if you are doing something complicated and expensive (like rendering some
-canvas graphics, say) and you just want to apply some mutation every time any one
-of several inputs change, `Varying.all` has the answer for you:
-
-~~~
-const results = [];
-const x = new Varying(3);
-const y = new Varying(6);
-
-Varying.all([ x, y ]).react((x, y) => { results.push(x * y); });
-
-x.set(5);
-y.set(1);
-return results;
-~~~
-
-Resource Management
-===================
-
-Once again, this section is not essential reading for the majority of practical
-cases. It's rare that you'll have to create one of these on your own. But again,
-it is something that will come up when you peruse Janus internals, or if you are
-doing fancier things. In the interest of providing a full theoretical foundation,
-we'll delve into it here.
-
-It feels like we've already talked quite a bit about resource management, especially
-if you read the [Underlying Mechanics](#underlying-mechanics) section above. But
-what we've discussed so far in this direction pertains just to Varyings themselves.
-What happens if providing a value for a Varying involves generating some expensive
-resource?
-
-> # Aside
-> This is another spot where we should talk about other FRP systems for a moment.
-> Many of them distinguish between ["hot" and "cold" observables](https://alligator.io/rxjs/hot-cold-observables/).
-> It's&hellip; all actually rather quite complicated when you first run into it,
-> and it actually has to do with where the observable values _originate_ from
-> (remember that in conventional FRP, observables represent _streams of values_
-> over time).
->
-> In practice, what it means is that you have to be a bit careful writing and
-> consuming observables in case you, for example, end up making the same network
-> request over and over again just by subscribing to the same observable more
-> than once. In Janus, there is only one Varying.
-
-As always, the goal is to be as lazy as possible. If, say, we need to generate a
-Varying whose value relates to a bunch of math on all the terms of a List (which,
-because this is Janus, must be continually kept up to date every time one of the
-terms change), we still want to be able to return that Varying, but we don't want
-to do and continually maintain all that math unless somebody cares.
-
-So, the first question is: how do we tell if somebody cares?
-
-Varying provides a very primitive tool and a somewhat fancier one to help solve
-this problem. The primitive one is `Varying.refCount()`:
-
-~~~
-const results = [];
-const v = new Varying(42);
-v.refCount().react((count) => { results.push(count); });
-
-const observable1 = v.react(() => null);
-const observable2 = v.react(() => null);
-observable1.stop();
-observable2.stop();
-return results;
-~~~
-
-`refCount` is _itself_ a Varying, so you can return your inert Varying but listen
-to its `refCount`, and start performing the expensive computation right when it's
-actually needed. The sequence of events is carefully orchestrated so that `refCount`
-will update (and so any code you write that handles `refCount` will run), and _then_
-the present value of the Varying will be handed to the `react` callback, so you
-have a window to sneak the correct answer in there:
-
-~~~
-const results = [];
-const v = new Varying(0);
-v.refCount().react((count) => { if (count > 0) v.set(42); });
-
-v.react((x) => { results.push(x); });
-return results;
-~~~
-
-But this all sounds quite repetitive. Surely there is some way to hand off all
-of that homework, and just focus on what matters.
-
-~~~
-class ExpensiveClass {
-  result() { return 42; }
-  destroy() {
-    // free up resources..
-  }
-}
-class AnotherExpensiveClass extends ExpensiveClass {}
-
-const v = Varying.managed(
-  (() => new ExpensiveClass()),
-  (() => new AnotherExpensiveClass()),
-  (expensive, anotherExpensive) => Varying.of(expensive.result())
-);
-
-const results = [];
-// this forces the expensive classes to be created:
-const observable = v.react((x) => { results.push(x); });
-// and this calls destroy() on them:
-observable.stop();
-return results;
-~~~
-
-The `Varying.managed` method takes a bunch of functions that each returns some
-kind of expensive resource, and a final function that takes those resources and
-returns a Varying with the correct answer. It hangs on to all of these things
-until somebody comes along and `get`s or `react`s on it, at which point it calls
-all the resource functions, and hands those resources off to your function that
-gives the correct Varying result.
-
-When nobody cares again, it frees up those resources.
-
-Freeing up those resources is worth a quick look: you'll see repeatedly in Janus
-the method `destroy()`, which we call whenever we think we don't need an instance
-anymore. This is your chance to clear event listeners, remove foreign references
-that might trip up the garbage collector, and so on.
-
 Recap
 =====
 
@@ -623,14 +534,19 @@ That was a whole ton of reading. Here's a quick reminder of what we've just cove
 * Varyings contain a value that might change over time.
 * You can `get` the value of a Varying at any point in time, or `react` on it to
   do some action every time it changes.
+  * Calling `react` on a Varying gets you a ticket that you can use to terminate
+    the reaction.
 * You can also `map` a Varying, which gives you a new Varying which always contains
   the original value mapped by your function. Use `flatMap` if your function might
   itself return a Varying.
-* If you have many Varyings, all of whose values you need to compute some result,
-  you can use `Varying.all`, `.mapAll`, `.flatMapAll`, or `.lift`.
-* You can see how many people are currently reacted on a Varying using `.refCount`.
-* If you have expensive resources to marshal or computations to kick off, you can
-  use `Varying.managed`.
+  * Functions given to `map` and `flatMap` must be pure.
+  * If you have many Varyings, all of whose values you need to compute some result,
+    you can use `Varying.all`, `.mapAll`, `.flatMapAll`, or `.lift`.
+* In translating these ideas to reality, there are some practicalities that surface
+  as subtle behavior, like the order in which values propagate. But Varying does
+  its best to patch things together in a predictable, straightforward manner.
+* And internally, all a Mapped Varying does when `react`ed is call `react` in turn
+  on its own source value parent, and so on up the line.
 
 That's the hardest stuff. We went into relatively excruciating detail here
 because&mdash;well, for one, you signed up for it, but also&mdash;this knowledge

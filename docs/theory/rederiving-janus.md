@@ -73,12 +73,12 @@ Now we have a way of tracking a single piece of information, and notifying any
 interested parties when that information changes. One of those interested parties
 is our mutator, which we upgrade to take a Datum.
 
-You can see that previously, `mutate` had a `(target) => (value) => impure!`
-signature, whereas now we have combined the parameters into a single call. Before,
-we had to call the mutator every time the value changed, so it made sense to bind
-the target node context first. Now, the whole operation kicks off in one go (all
-the relevant context is provided at once) and it just runs itself, so the
-higher-order contextualization is no longer so useful.
+> You can see that previously, `mutate` had a `(target) => (value) => impure!`
+> signature, whereas now we have combined the parameters into a single call. Before,
+> we had to call the mutator every time the value changed, so it made sense to
+> bind the target node context first. Now, the whole operation kicks off in one
+> go (all the relevant context is provided at once) and it just runs itself, so
+> the higher-order contextualization is no longer so useful.
 
 The next requirement we had described was some way to perform some transformation
 on the source value before it is used as the input to the mutator. So we need to
@@ -92,8 +92,8 @@ the correct value to give the mutator. Looking at the code, we have a few option
    and have it run the transformation function each time it gets a new value. But
    this gets annoying (and inefficient!) if, say, multiple mutators want to use
    the same transformation.
-3. Add some way to perhaps `.transform()` the Datum itself and give a new Datum,
-   which always houses the transformed value.
+3. Add something to Datum itself&mdash;perhaps some way to call `.transform()`
+   and get a new Datum which always houses the transformed value.
 
 This last one looks promising! Our mutator doesn't have to understand the difference
 at all, so we don't have to change it. We also get a general-purpose way of reusing
@@ -209,7 +209,7 @@ greeting.set('yo!');
 <div class="target"/>
 ~~~
 
-We're also just using `greeting.map()` directly rather than instantiating the
+We're now just using `greeting.map()` directly rather than instantiating the
 `transformedGreeting` variable in between, but the result is the same.
 
 And also, we've added the `mutateClass` mutator, but it turns out we need another
@@ -217,7 +217,6 @@ parameter to make it work: we need to be able to take in the actual name of the
 class to add or remove to the node, depending on the truthiness of the given data.
 You can inspect the "YO!" text in the sample result to verify that it is `.excited`.
 
-> # Aside
 > Sharp observers will notice that you could sneakily use `map` anywhere you would
 > use `onChange` and everything would behave the same. This is true! But only in
 > this simplified case. In real Janus, things don't work quite that way: the two
@@ -235,7 +234,9 @@ start making this look a little more like a framework, and make some reusable vi
 with more than one mutation. Let's see what that code would look like.
 
 ~~~ noexec
-const view = (mutators) => (target) => ..uhh
+const mutateText = (target, datum) => datum.onChange((x) => target.text(x));
+
+const view = (...mutators) => (target) => ..uhh
 
 // err, wait. we can't make our mutators to pass to views in the first place
 // without the targets to begin with. okay, let's change mutator a bit:
@@ -247,13 +248,21 @@ const view = (...mutators) => (target) => mutators.forEach((m) => m(target));
 
 const greetingView = view(mutateText('.greeting', ..something
 
-// ...oh. hmm. we can't really make a generic greetingView yet.
+// ...oh. hmm. we forgot that the mutator won't know about the data either.
+// okay, let's start with view and reconsider what that should look like.
+
+const view = (...mutators) => (...data, target) =>
+  mutators.forEach((m) => m(target));
+
+// so every time someone calls this view they need to look up exactly what
+// data it demands and in what order? gross!
 ~~~
 
 We run into trouble, because right now we can't formulate a mutator without a
 concrete piece of data to reference, and we can't formulate a generic reusable
-view without knowing what mutators we want to apply to it. Somehow, we need to
-be able to create mutators and promise them that they'll get their data later.
+view without knowing what mutators we want to apply to it. There are some direct
+solutions imaginable but as you saw they are not pretty. Somehow, we need to be
+able to create mutators and promise them that they'll get their data later.
 
 Datum Indirection
 =================
@@ -286,9 +295,12 @@ bind against data it must happen on demand and if our views are to be reusable t
 contextualization will possibly occur repeatedly, each time yielding a different
 Datum.
 
-Okay, let's just do something simple, then: with an eye toward some eventual world
-where we are binding views againts some sort of key/value model-like entity, we'll
-just use some placeholder value called `of`, which is just a string, for now:
+Okay, let's just do something simple, then: we'll remember some description of
+the data, and take a function down the road that understands what datum to supply
+given that description. What should the description be? With an eye toward some
+eventual world where we are binding views against some sort of key/value model-like
+entity, we'll just use some placeholder value called `of`, which is just a string,
+for now:
 
 ~~~
 const identity = (x) => x;
@@ -446,9 +458,10 @@ _definition_ of `greetingView` is reasonably tight, readable, and generic. Reall
 it just follows the shape of the mutators themselves.
 
 > # Aside
-> It may feel awkward that views are given some ethereal function that resolves
-> these references to data haphazardly into things we happen to have sitting around.
-> This situation will improve immensely once we get to the real framework.
+> It may feel awkward that views are given some ethereal "datumifier" function
+> (what kind of name is that?) that resolves these vague references to data into
+> things we happen to have sitting around. This situation will improve immensely
+> once we get to the real framework.
 
 A Quick Recap
 =============

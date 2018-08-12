@@ -36,7 +36,7 @@ resulted in a new set of goals, which we will briefly cover.
 Goals
 =====
 
-Janus today is built on a few simple goals:
+Janus today is built on three higher-level goals:
 
 * Present purely functional programming in a friendly, pragmatic manner.
   * We do not shy away from impurity where it does not pose problems.

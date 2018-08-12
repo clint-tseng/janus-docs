@@ -39,6 +39,9 @@
     "title": "Models",
     "path": "/theory/models"
   }, {
+    "title": "Resource Management",
+    "path": "/theory/resource-management"
+  }, {
     "title": "App and Applications",
     "path": "/theory/app-and-applications"
   }]
