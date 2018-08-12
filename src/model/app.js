@@ -34,6 +34,7 @@ class ArticleRequest extends Request {
     super();
     this.path = path;
   }
+  signature() { return this.path; }
 }
 
 const articleResolver = (request) => {
