@@ -111,7 +111,7 @@ As you can see, we require some tools from Janus, make an item for our shop to
 sell, and make a simple view that just tells us what it is and how much it costs.
 The template syntax selects each element we are interested in from the HTML
 fragment, and assigns it a text `from` some properties we care about. We then
-instantiate one of these views, and add it to the document.
+instantiate one of these views against a piece of data, and add it to the document.
 
 Run `browserify client.js > app.js` and you should now have a working initial
 application. If you run into trouble with this command, double-check that your
@@ -124,9 +124,9 @@ we've described how any piece of data of some particular shape should be display
 in our interface, and fed it some random piece of data to show&mdash;and it worked!
 
 > # Aside
-Eagle-eyed observers may notice that `app.js` is somewhat large. This is because
-Browserify tries to include `domino`, which we need server-side but not on the
-client. Adding `--exclude domino` to the command will slim up the file by a lot.
+> Eagle-eyed observers may notice that `app.js` is somewhat large. This is because
+> Browserify tries to include `domino`, which we need server-side but not on the
+> client. Adding `--exclude domino` to the command will slim up the file by a lot.
 
 A Little Bit of Organization
 ----------------------------
@@ -236,13 +236,14 @@ A lot of new code! But almost all of it you've seen already.
 We've done a few things here. We added a `Sale` model to represent this transaction
 as a whole, and made a view for it that shows our current inventory. We do this by
 using the `.render()` call, which takes something to be rendered and uses the same
-`app.view()` call we do at the bottom to actually get an appropriate view for it.
+`app.view()` call we have been using in our own code to actually get an appropriate
+view for it.
 
 We also show the current total price for the sale, by watching the `price` of the
 ordered item.
 
 Finally, we actually rig up some actions, placing an event handler on the `button`
-on each item which sets the `order` on the sale to that item. In order for that
+on the item which sets the `order` on the sale to that item. In order for that
 event handler to actually take effect, we call `.wireEvents()` at the very end.
 Janus does not wire in any event handlers unless you make this call, so that
 it doesn't waste time with them during server-side rendering, where they will
@@ -316,14 +317,14 @@ list from a list of items into a list of prices (by mapping each item to its pri
 Then, we are taking the sum of that resulting list.
 
 > # Aside
-Why are we calling `.flatMap()` all over the place instead of just `.map()`? We'll
-cover this in more depth in the next chapter, but whenever we say `flatMap` in
-Janus, what we mean is that we want to perform a `map` just like you would on a
-list or an Option type (don't worry if you don't know what that is), but our mapping
-function might return a `Varying`: we might change our mind about what value to
-map to at some point in the future. For example, in this case, the `list.flatMap`
-ensures that if the item price changes in the future, our list of prices remains
-correct.
+> Why are we calling `.flatMap()` all over the place instead of just `.map()`? We'll
+> cover this in more depth in the next chapter, but whenever we say `flatMap` in
+> Janus, what we mean is that we want to perform a `map` just like you would on a
+> list or an Option type (don't worry if you don't know what that is), but our
+> mapping function might return a `Varying`: we might change our mind about what
+> value to map to at some point in the future. For example, in this case, the
+> `list.flatMap` ensures that if the item price changes in the future, our list
+> of prices remains correct.
 
 Next Steps
 ==========
@@ -331,7 +332,7 @@ Next Steps
 We have just covered a lot of things:
 
 * How to create a new Janus project and install the dependencies you need.
-* Basic work with `Map`s, `Model`s, and `View`s.
+* Some basic work with `Map`s, `Model`s, and `View`s.
 * How to organize components of code into an application.
 
 Hopefully, everything here made some amount of intuitive sense. It may still seem
