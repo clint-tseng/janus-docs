@@ -548,12 +548,20 @@ $thinker-effect-height: 60em
   background: radial-gradient(#ddd, #d4d4d4)
   bottom: $thinker-offset
   clip-path: circle()
-  display: none
   height: $thinker-size
-  opacity: 0.85
+  opacity: 0
+  pointer-events: none
   position: fixed
   right: $thinker-offset
+  transition: 0.5s opacity
   width: $thinker-size
+
+  &.thinking
+    opacity: 0.85
+    transition-delay: 0.3s // wait a moment before showing
+
+    div:before, div:after
+      animation-name: thinker
 
 .thinker-1, .thinker-2, .thinker-3, .thinker-4
   height: 100%
@@ -561,7 +569,6 @@ $thinker-effect-height: 60em
   position: absolute
 
   &:before, &:after
-    animation-name: thinker
     animation-iteration-count: infinite
     animation-timing-function: linear
     content: ''

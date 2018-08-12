@@ -5,6 +5,8 @@ const { baseApp } = require('./base');
 const { Tocs } = require('./model/toc');
 const { Article } = require('./model/article');
 
+const { think } = require('./view/thinker');
+
 window.init = (tocData, articleData) => {
   const path = window.location.pathname;
   const app = baseApp(path);
@@ -14,5 +16,8 @@ window.init = (tocData, articleData) => {
 
   // TODO: when we have .attach() use that instead of clobbering.
   app.view(app).wireEvents();
+
+  // wire up the thinker.
+  app.on('resolvedRequest', (_, thought) => { think(thought); });
 };
 
