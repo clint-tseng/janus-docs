@@ -38,7 +38,7 @@ const c = Varying.of(15);
 const d = Varying.of(new Varying(16));
 const e = Varying.of(Varying.of(23));
 
-return [ a, b, c, d ]; //.map(inspect);
+return [ a, b, c, d, e ].map(inspect);
 ~~~
 
 When you invoke the constructor with `new`, you will always get a Varying containing
@@ -263,7 +263,7 @@ const items = new List([ 1, 1, 3, 8 ]);
 const exceededQuota = quota.map((q) =>
   items.watchLength().map((count) => count > q));
 
-return exceededQuota.get(); // inspect(exceededQuota.get());
+return inspect(exceededQuota.get());
 ~~~
 
 Shoot, we called `get` on our Varying, but instead of retrieving the useful result
@@ -322,7 +322,7 @@ const items = new List([ 1, 1, 3, 8 ]);
 const exceededQuota = quota.flatMap((q) =>
   items.watchLength().map((count) => count > q));
 
-return exceededQuota.get(); // inspect(exceededQuota.get());
+return inspect(exceededQuota.get());
 ~~~
 
 Note how we only had to change the outer `map` to a `flatMap`; the inner one only

@@ -5,6 +5,7 @@
   "dependencies": {
     "janus": "~0.4",
     "janus-stdlib": "~0.4",
+    "janus-inspect": "~0",
     "janus-dollar": "git+https://github.com/clint-tseng/janus-dollar-jquery",
     "codemirror": "~5"
   },

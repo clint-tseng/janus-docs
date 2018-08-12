@@ -3,10 +3,12 @@
 
 const { Library } = require('janus');
 const stdlib = require('janus-stdlib');
+const inspect = require('janus-inspect');
 
 const baseViews = () => {
   const views = new Library();
   stdlib.view.registerWith(views);
+  inspect.view.registerWith(views);
   require('./view/app').registerWith(views);
   require('./view/article').registerWith(views);
   require('./view/exception').registerWith(views);

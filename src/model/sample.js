@@ -2,6 +2,7 @@ const $ = require('janus-dollar');
 const janus = require('janus');
 const { Model, attribute, List, bind, from, DomView } = janus;
 const stdlib = require('janus-stdlib');
+const { inspect } = require('janus-inspect');
 const { compile, success, fail, inert } = require('../util/eval');
 
 
@@ -62,7 +63,7 @@ const Sample = Model.build(
       : view.artifact().filter(selector).add(view.artifact().find(selector))))),
 
   // our default env is simply everything janus provides, plus $:
-  bind('env.default', from('env.dollar').map(($) => new Env({ $, stdlib }, janus))),
+  bind('env.default', from('env.dollar').map(($) => new Env({ $, stdlib, inspect }, janus))),
 
   // but if the code block has custom require()s in it instead, we need to provide
   // require(), along with shims to bridge $.
