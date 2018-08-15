@@ -7,6 +7,7 @@ const { Map, Model, attribute, dēfault, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
 const { nonblank } = require('../util/util');
 
+const and = (x, y) => x && y;
 const baseEnv = Object.assign({ $, stdlib, inspect }, janus);
 
 class Statement extends Model.build(
@@ -23,7 +24,9 @@ class Statement extends Model.build(
   bind('context.pairs', from('statements').and('seqId').all.map((statements, seqId) =>
     statements
       .take(seqId)
-      .filter((statement) => statement.watch('named'))
+      .filter((statement) => Varying.mapAll(and,
+        statement.watch('named'),
+        statement.watch('result').map(success.match)))
       .flatMap((statement) =>
         Varying.mapAll(statement.watch('name'), statement.watch('result'),
           (name, result) => ({ [name]: result.getSuccess() }))))),
