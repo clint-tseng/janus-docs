@@ -614,20 +614,20 @@ footer
       color: $placeholder-color
       content: '>'
 
-  &.named
-    .repl-statement-name
-      &:after
-        color: #333
-        content: '='
-      input
-        color: #333
+  &.named .repl-statement-name
+    input
+      color: #333
+
+    &:after
+      color: #333
+      content: '='
 
   .repl-statement-status
     $size: 0.6em
     border-radius: $size
     float: left
     height: $size
-    margin: 0.6em
+    margin: 0.5em
       right: 1em
     width: $size
 
