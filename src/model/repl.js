@@ -5,7 +5,7 @@ const { inspect } = require('janus-inspect');
 
 const { Map, Model, attribute, dēfault, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
-const { nonblank } = require('../util/util');
+const { blank, nonblank } = require('../util/util');
 
 const and = (x, y) => x && y;
 const baseEnv = Object.assign({ $, stdlib, inspect }, janus);
@@ -48,11 +48,13 @@ class Statement extends Model.build(
   bind('result', from('compiled').map((compiled) => compiled.flatMap((f) => f())))
 ) {
   commit() {
-    // do nothing if we've already committed:
+    // fallthrough to default if we've already committed:
     if (this.get('active') === true) return false;
-
-    // do nothing if we do not compile:
+    // or if we do not compile:
     if (!success.match(this.get('compiled'))) return false;
+    // or if we have no code:
+    const code = this.get('code');
+    if (blank(code) || /^\s+$/m.test(code)) return false;
 
     // going through with it.
     // commit our preprocessor munges:
