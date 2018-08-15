@@ -54,7 +54,13 @@ class ReplView extends DomView.build($(`
       renderItem: (render) => render.options({ onCommit: () => { view.commit(); } })
     }))),
 
-  find('.repl-pins').render(from('statements').map((stmts) => stmts.filter((stmt) => stmt.watch('pinned'))))
+  find('.repl-pins').render(from('statements').map((stmts) => stmts.filter((stmt) => stmt.watch('pinned')))),
+
+  find('.repl-main')
+    .on('click', (event, _, view) => {
+      if (event.target === view.artifact().find('.repl-main')[0])
+        view.focusLast();
+    })
 )) {
   commit() {
     this.subject.commit();

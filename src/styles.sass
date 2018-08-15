@@ -572,12 +572,18 @@ footer
     .CodeMirror-scroll
       height: auto
 
+  .repl .repl-main
+    min-height: 100vh
+
   .repl-statement
     border-bottom: 1px dotted #ddd
     overflow: hidden
 
   li:last-child .repl-statement
     border-bottom: none
+
+.repl .repl-main
+  cursor: text
 
 .repl-statement
   $placeholder-color: #888
@@ -640,7 +646,8 @@ footer
       font-family: $font-monospace
       font-size: 1.2em
 
-    .entity-content .janus-literal
+    .entity-content .janus-literal,
+    > .eval-success > .janus-list > li > .janus-literal
       font-family: $font-monospace
 
 ////////////////////////////////////////
