@@ -3,13 +3,14 @@
   "version": "0.4.0",
   "private": true,
   "dependencies": {
+    "codemirror": "^5.39.2",
     "janus": "~0.4",
-    "janus-stdlib": "~0.4",
-    "janus-inspect": "~0",
     "janus-dollar": "git+https://github.com/clint-tseng/janus-dollar-jquery",
-    "codemirror": "~5"
+    "janus-inspect": "~0",
+    "janus-stdlib": "~0.4"
   },
   "devDependencies": {
+    "babel-minify": "~0",
     "browserify": "~16",
     "marked": "~0.4",
     "node-sass": "~4"

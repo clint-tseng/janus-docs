@@ -11,6 +11,7 @@ $color-sidebar-background: #33333b
 $color-sidebar-background-active: #44444b
 $color-splash: #085b5b
 $color-heading: #000
+$color-success: #4c4
 $color-error: #c44
 
 $header-height: 12rem
@@ -19,6 +20,7 @@ $sidebar-padding: 2.5rem
 $sidebar-width: 28rem
 $main-padding: 4rem
 $main-max-width: 65rem
+$repl-left-gutter: 12rem
 
 $font-title: 'malaga-narrow', "Helvetica Neue", Helvetica, Arial, sans-serif
 $font-heading: malaga, "Helvetica Neue", Helvetica, Arial, sans-serif
@@ -27,6 +29,7 @@ $font-monospace: consolas, monaco, monospace
 
 $z-header-base: 100
 $z-header: 101
+$z-repl: 150
 
 $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
@@ -225,6 +228,16 @@ header
   min-height: calc(100vh - #{2 * $main-padding + $header-height})
   padding: $main-padding
     top: $header-height + $main-padding
+
+#repl
+  background: rgba(238, 238, 238, 0.97)
+  bottom: 0
+  box-shadow: -5px 0 0 rgba(0, 0, 0, 0.45)
+  position: fixed
+  right: 0
+  top: 0
+  width: 35%
+  z-index: $z-repl
 
 footer
   display: none // for now
@@ -536,6 +549,99 @@ footer
 
     .exception-message
       padding: 0.1em 0 0.5em
+
+#repl
+  overflow-x: auto
+  overflow-y: auto
+
+  &:before
+    @include reify
+    border-right: 1px solid #ccc
+    height: 100%
+    left: $repl-left-gutter
+    pointer-events: none
+    position: absolute
+    top: 0
+
+  .CodeMirror
+    background: transparent
+    font-family: $font-monospace
+    font-size: 1.2em
+    height: auto
+
+    .CodeMirror-scroll
+      height: auto
+
+  .repl-statement
+    border-bottom: 1px dotted #ddd
+    overflow: hidden
+
+  li:last-child .repl-statement
+    border-bottom: none
+
+.repl-statement
+  $placeholder-color: #888
+  padding: 0.8em 1.3em
+    left: 0.8rem + $repl-left-gutter
+  position: relative
+
+  .repl-statement-name
+    float: left
+    font-family: $font-monospace
+    font-size: 1.4em
+    margin-left: -1 * $repl-left-gutter
+    padding-top: 0.15em
+    width: $repl-left-gutter
+
+    input
+      background: none
+      border: none
+      font-family: $font-monospace
+      margin-right: 0.4em
+      outline: none
+      text-align: right
+      width: calc(100% - 3em)
+      &::placeholder
+        color: $placeholder-color
+
+    &:after
+      color: $placeholder-color
+      content: '>'
+
+  &.named
+    .repl-statement-name
+      &:after
+        color: #333
+        content: '='
+      input
+        color: #333
+
+  .repl-statement-status
+    $size: 0.6em
+    border-radius: $size
+    float: left
+    height: $size
+    margin: 0.6em
+      right: 1em
+    width: $size
+
+    &.status-success
+      background-color: $color-success
+    &.status-error
+      background-color: $color-error
+    &.no-status
+      background-color: #ccc
+
+  .repl-statement-result
+    .janus-literal
+      font-size: 1.2em
+
+    .entity-title, .entity-content:before, .entity-content:after
+      font-family: $font-monospace
+      font-size: 1.2em
+
+    .entity-content .janus-literal
+      font-family: $font-monospace
 
 ////////////////////////////////////////
 // COMPONENT: thinker

@@ -3,7 +3,7 @@ const janus = require('janus');
 const { Model, attribute, List, bind, from, DomView } = janus;
 const stdlib = require('janus-stdlib');
 const { inspect } = require('janus-inspect');
-const { compile, success, fail, inert } = require('../util/eval');
+const { compile, success, fail, inert, Env } = require('../util/eval');
 
 
 ////////////////////////////////////////
@@ -29,10 +29,6 @@ const htmlView = (html) => {
   class HtmlView extends DomView { _render() { return $(html); } }
   return new HtmlView();
 };
-
-// we need env to not be a plain object so that it assigns into Model as a single
-// unit. so we make it a simple class.
-class Env { constructor(...props) { Object.assign(this, ...props); } };
 
 
 ////////////////////////////////////////////////////////////////////////////////

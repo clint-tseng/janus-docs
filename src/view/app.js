@@ -6,7 +6,8 @@ const $ = require('janus-dollar');
 
 class AppView extends DomView.build($('body').clone(), template(
   find('#left nav').render(from('toc')),
-  find('#main').render(from('article').pipe(filter(exists)))
+  find('#main').render(from('article').pipe(filter(exists))),
+  find('#repl').render(from('repl'))
 )) {
   dom() { return $('body'); }
 

@@ -16,23 +16,53 @@ class EditorView extends DomView {
       setTimeout(() => { this._cm.refresh(); }, 0);
     }, {
       autoCloseBrackets: true,
+      extraKeys: {
+        Enter: (cm) => {
+          const fallthrough = () => { cm.execCommand('newlineAndIndent'); };
+
+          // immediate aborts:
+          if ((cm.doc.getCursor().line + 1) < cm.doc.lineCount()) return fallthrough();
+          if (cm.doc.getSelection().length > 0) return fallthrough();
+
+          // bailout cases (do nothing):
+          if (typeof this.options.onCommit === 'function')
+            if (this.options.onCommit() === true)
+              return;
+
+          // default behaviour:
+          fallthrough();
+        }
+      },
       matchBrackets: true,
       mode: this.options.language || 'javascript',
       showTrailingSpace: true,
-      value: this.subject.getValue(),
+      value: this.subject.getValue() || '',
       viewportMargin: Infinity
     });
+
+    this.subject.watchValue().react(false, (value) => {
+      if (this._lock !== true) this._cm.setValue(value);
+    });
+
     return wrapper;
   }
 
   _wireEvents() {
-    this._cm.on('change', (cm) => { this.subject.setValue(cm.getValue()); });
+    this._cm.on('change', (cm) => {
+      this._lock = true;
+      this.subject.setValue(cm.getValue());
+      this._lock = false;
+    });
   }
 
   setCursor(line, col) {
     this._cm.focus();
     this._cm.setCursor(line - 1, col - 1);
   }
+
+  focus() {
+    this._cm.focus();
+  };
 }
 
 module.exports = {

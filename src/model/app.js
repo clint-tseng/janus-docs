@@ -1,15 +1,14 @@
-const { App, Varying, attribute, types, from, Request, Resolver } = require('janus');
+const { App, Varying, attribute, dēfault, types, from, Request, Resolver } = require('janus');
 const { Article } = require('./article');
+const { Repl } = require('./repl');
 
 class DocsApp extends App.build(
   attribute('article', attribute.Reference.to(
     from('path').map((path) => new ArticleRequest(path)))
   ),
 
-  attribute('cache.articles', class extends attribute.Attribute {
-    get writeDefault() { return true; }
-    default() { return []; }
-  })
+  dēfault.writing('cache.articles', []),
+  dēfault.writing('repl', new Repl())
 ) {
   resolver() {
     return Resolver.caching(new Resolver.MemoryCache(),

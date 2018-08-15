@@ -29,5 +29,9 @@ const compile = (env, code) => {
   }
 };
 
-module.exports = { compile, success, fail, inert };
+// we need env to not be a plain object so that it assigns into Model as a single
+// unit. so we make it a simple class.
+class Env { constructor(...props) { Object.assign(this, ...props); } };
+
+module.exports = { compile, success, fail, inert, Env };
 
