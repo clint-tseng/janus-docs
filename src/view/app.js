@@ -7,13 +7,18 @@ const $ = require('janus-dollar');
 class AppView extends DomView.build($('body').clone(), template(
   find('#left nav').render(from('toc')),
   find('#main').render(from('article').pipe(filter(exists))),
-  find('#repl').render(from('repl'))
+
+  find('#repl')
+    .render(from('repl'))
+    .classed('active', from('repl.active'))
 )) {
   dom() { return $('body'); }
 
   _wireEvents() {
     const dom = this.artifact();
     const app = this.subject;
+
+    // global events:
 
     dom.on('click', 'a', (event) => {
       if (event.isDefaultPrevented()) return;
@@ -41,6 +46,15 @@ class AppView extends DomView.build($('body').clone(), template(
 
     $(window).on('popstate', (event) => {
       app.set('path', location.pathname);
+    });
+
+    // header events:
+    dom.find('#repl-link').on('click', (event) => {
+      event.preventDefault();
+      const active = !app.get('repl.active');
+      app.set('repl.active', active);
+      if (active)
+        dom.find('#repl .repl').data('view').focusLast();
     });
   }
 }
