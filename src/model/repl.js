@@ -18,6 +18,7 @@ class Statement extends Model.build(
   // seqId: int
 
   bind('named', from('name').map(nonblank)),
+  bind('has_code', from('code').map((code) => nonblank(code) && /[^\s]/.test(code))),
 
   // build the context of all previous named results given the full context
   // map and the list of available identifiers.
@@ -53,8 +54,7 @@ class Statement extends Model.build(
     // or if we do not compile:
     if (!success.match(this.get('compiled'))) return false;
     // or if we have no code:
-    const code = this.get('code');
-    if (blank(code) || /^\s+$/m.test(code)) return false;
+    if (!this.get('has_code')) return false;
 
     // going through with it.
     // commit our preprocessor munges:

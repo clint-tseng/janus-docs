@@ -1,6 +1,6 @@
 const { Model, attribute, bind, List, DomView, template, find, from } = require('janus');
 const $ = require('janus-dollar');
-const { always } = require('../util/util');
+const { give } = require('../util/util');
 
 const lineRegex = /^ *at ([^ ]+)(?:[^<]+<anonymous>:(\d+):(\d+))?/;
 
@@ -66,7 +66,7 @@ const ExceptionView = DomView.build($(`
     find('.exception-expando').render(from.attribute('expanded'))
       .context('edit')
       .criteria({ attributes: { style: 'button' } })
-      .options({ stringify: always('') })
+      .options({ stringify: give('') })
       .on('click', (_, subject) => { subject.set('has_expanded', true); })
   ), { viewModelClass: ExceptionViewModel });
 

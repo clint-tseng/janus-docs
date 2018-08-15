@@ -4,7 +4,7 @@ const { inspect } = require('janus-inspect');
 
 const { Statement, Repl } = require('../model/repl');
 const { success, fail } = require('../util/eval');
-const { blank } = require('../util/util');
+const { blank, not, give } = require('../util/util');
 
 
 const StatementView = DomView.build($(`
@@ -22,9 +22,8 @@ const StatementView = DomView.build($(`
 
   find('.repl-statement-status')
     .classGroup('status-', from('result').map(match(
-      success(_ => 'success'), fail(_ => 'error')
-    )))
-    .classed('no-status', from('code').map(blank)),
+      success(give('success')), fail(give('error')))))
+    .classed('no-status', from('has_code').map(not)),
 
   find('.repl-statement-result').render(from('active')
     .and('result').map((result) => result.mapSuccess(inspect))
