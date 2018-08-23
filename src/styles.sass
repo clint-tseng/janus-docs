@@ -16,6 +16,7 @@ $color-error: #c44
 
 $header-height: 12rem
 $header-overdraw: 20rem
+$logo-size: 7.2em
 $sidebar-padding: 2.5rem
 $sidebar-width: 28rem
 $main-padding: 4rem
@@ -27,6 +28,7 @@ $font-heading: malaga, "Helvetica Neue", Helvetica, Arial, sans-serif
 $font-body: ratio, "Helvetica Neue", Helvetica, Arial, sans-serif
 $font-monospace: consolas, monaco, monospace
 
+$z-mobile-toc: 1
 $z-header-base: 100
 $z-header: 101
 $z-repl: 150
@@ -86,6 +88,9 @@ ul, ol
 ////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
 
+////////////////////////////////////////
+// LAYOUT: base
+
 header
   color: #fff
   left: 0
@@ -98,13 +103,14 @@ header
     @include reify
     position: absolute
     transform: skewY(-3deg)
+    transform-origin: left center
 
   &:before
     background: $color-header-background-left
     box-shadow: 0 0 1.2em rgba(0, 0, 0, 0.8)
     left: 0
     height: $header-height + $header-overdraw + 2rem
-    top: -2rem - $header-overdraw
+    top: -1.3rem - $header-overdraw
     width: $sidebar-width
     z-index: $z-header
 
@@ -114,7 +120,6 @@ header
     left: $sidebar-width
     right: 0
     top: -$header-overdraw
-    transform-origin: left center
 
   .header-left
     padding: 3em
@@ -127,14 +132,52 @@ header
     position: absolute
     z-index: $z-header
 
+  #show-toc
+    background: none
+    border: none
+    cursor: pointer
+    display: none
+    margin: 0
+    outline: none
+    padding: 0
+    position: absolute
+    right: 3em
+    top: 4.3em
+    z-index: $z-header
+
+    &:after
+      $size: 0.4em
+      @include reify
+      border: $size solid transparent
+        bottom: none
+        top-color: #fff
+      left: calc(100% + 0.5em)
+      position: absolute
+      top: calc(50% - #{$size / 2})
+      transition: transform 0.2s
+
+    .icon
+      $height: 0.9em
+      $width: 1.4em
+      border-bottom: 2px solid #fff
+      border-top: 2px solid #fff
+      height: $height
+      width: $width
+
+      &:before
+        @include reify
+        border-bottom: 2px solid #fff
+        height: calc(#{$height / 2} - 1px)
+        width: $width
+
   #logo
     border: 3px solid rgba(255, 255, 255, 0.1)
     border-radius: 9999px
     float: left
-    height: 7.2em
+    height: $logo-size
     margin-right: 1.5em
     margin-top: -0.7em
-    width: 7.2em
+    width: $logo-size
 
     svg path
       fill: #fff
@@ -167,6 +210,8 @@ header
   @include fill
   background: $color-sidebar-background
   box-shadow: 0 -0.6em 0.6em rgba(0, 0, 0, 0.45)
+  overflow-x: hidden
+  overflow-y: auto
   padding-top: $header-height + $main-padding
   position: fixed
   right: auto
@@ -232,6 +277,8 @@ header
 #repl
   @include fill
   left: auto
+  max-width: 100%
+  min-width: 40rem
   overflow: hidden
   pointer-events: none
   position: fixed
@@ -258,6 +305,64 @@ header
 
 footer
   display: none // for now
+
+
+////////////////////////////////////////
+// LAYOUT: lesser widths
+
+@media (max-width: 1260px)
+  #main
+    .sample-code
+      float: none
+
+    .sample-result
+      padding-top: 3em
+
+
+@media (max-width: 810px)
+  header
+    &:before
+      box-shadow: 0 0 1.2em rgba(0, 0, 0, 0)
+      width: 85rem
+    &:after
+      display: none
+    .header-right
+      left: 22rem
+
+    #show-toc
+      display: block
+
+  #left
+    box-shadow: 0 0 0.6em rgba(0, 0, 0, 0)
+    left: 100vw
+    transform: translateX(0)
+    transition: transform 0.3s ease-in
+    z-index: $z-mobile-toc
+
+  #main
+    margin-left: 0
+    transition: filter 0.1s
+
+  .show-toc
+    #show-toc:after
+      transform: rotate(-90deg)
+
+    #left
+      box-shadow: 0 0 1.4em rgba(0, 0, 0, 0.6)
+      transform: translateX(#{-1 * $sidebar-width})
+      transition: transform 0.3s $ease-extreme-out
+    #main
+      filter: blur(0.2em)
+
+@media (max-width: 600px)
+  header .header-right
+    left: $logo-size
+    padding: 6em
+    top: 1.5em
+
+    nav
+      font-size: 1.5em
+
 
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -56,6 +56,11 @@ class AppView extends DomView.build($('body').clone(), template(
       if (active)
         dom.find('#repl .repl').data('view').focusLast();
     });
+
+    dom.find('#show-toc').on('click', (event) => {
+      event.preventDefault();
+      dom.toggleClass('show-toc');
+    });
   }
 }
 
