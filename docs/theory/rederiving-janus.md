@@ -1,9 +1,23 @@
+Rederiving Janus
+================
+
+Here, we are going to start with the fundamental goals and desires we covered in
+the [previous article](/theory/origins-and-goals), and work forwards from them
+one step at a time, building pieces as we go to create something resembling a
+frontend framework.
+
+The goal with this article is to show why a lot of the major core components of
+Janus exist and work the way they do, as well as to preview some very rudimentary
+versions of those components to give you a taste for how they form the bigger
+picture.
+
+We will start off by trying to make a single mutation to the DOM.
+
 A Single Mutation
 =================
 
-In our [previous article](/theory/origins-and-goals), we described some of the
-functionality a framework must provide in order to fulfill our goals and principles.
-One of those was idempotent mutation.
+Previously, we described some of the functionality a framework must provide in
+order to fulfill our goals and principles. One of those was idempotent mutation.
 
 Well, this isn't so hard; we can just rely on something like jQuery to get this
 done. Let's start with a simple example, setting the text of some node.
@@ -57,7 +71,7 @@ class Datum {
     listener(this.value); // run immediately!
   }
 }
-const mutate = (target, datum) => datum.onChange((value) => target.text(value));
+const mutate = (target, datum) => datum.onChange(value => target.text(value));
 
 // implementation:
 const greeting = new Datum('hello.');
@@ -117,15 +131,15 @@ class Datum {
   }
   transform(f) {
     const result = new Datum();
-    this.onChange((value) => result.set(f(value)));
+    this.onChange(value => result.set(f(value)));
     return result;
   }
 }
-const mutate = (target, datum) => datum.onChange((value) => target.text(value));
+const mutate = (target, datum) => datum.onChange(value => target.text(value));
 
 // implementation:
 const greeting = new Datum('hello.');
-const transformedGreeting = greeting.transform((x) => x.toUpperCase());
+const transformedGreeting = greeting.transform(x => x.toUpperCase());
 mutate($('.target'), transformedGreeting);
 
 greeting.set('yo!');
@@ -169,7 +183,7 @@ Let's use this entire mechanism again, just to be sure we really understand it
 and it really works in a variety of situations. Let's say we want to set the greeting
 text, but we also want to toggle some html class on the target node at the same
 time.  Datum is unchanged here besides the rename of `transform` to `map`; the
-only additions are the definition and usage of the `mutateClass` (impure) function.
+only additions are the definition and usage of the `mutateClass` impure function.
 
 ~~~
 class Datum {
@@ -187,21 +201,21 @@ class Datum {
   }
   map(f) {
     const result = new Datum();
-    this.onChange((value) => result.set(f(value)));
+    this.onChange(value => result.set(f(value)));
     return result;
   }
 }
 const mutateText = (target, datum) =>
-  datum.onChange((value) => target.text(value));
+  datum.onChange(value => target.text(value));
 
 const mutateClass = (target, className, datum) =>
-  datum.onChange((value) => target.toggleClass(className, (value === true)));
+  datum.onChange(value => target.toggleClass(className, (value === true)));
 
 // implementation:
 const greeting = new Datum('hello.');
 
-mutateText($('.target'), greeting.map((x) => x.toUpperCase()));
-mutateClass($('.target'), 'excited', greeting.map((x) => x.includes('!')));
+mutateText($('.target'), greeting.map(x => x.toUpperCase()));
+mutateClass($('.target'), 'excited', greeting.map(x => x.includes('!')));
 
 greeting.set('yo!');
 ~~~
@@ -210,7 +224,7 @@ greeting.set('yo!');
 ~~~
 
 We're now just using `greeting.map()` directly rather than instantiating the
-`transformedGreeting` variable in between, but the result is the same.
+`transformedGreeting` variable in between, but the effect is the same.
 
 And also, we've added the `mutateClass` mutator, but it turns out we need another
 parameter to make it work: we need to be able to take in the actual name of the
@@ -234,7 +248,7 @@ start making this look a little more like a framework, and make some reusable vi
 with more than one mutation. Let's see what that code would look like.
 
 ~~~ noexec
-const mutateText = (target, datum) => datum.onChange((x) => target.text(x));
+const mutateText = (target, datum) => datum.onChange(x => target.text(x));
 
 const view = (...mutators) => (target) => ..uhh
 
@@ -242,9 +256,9 @@ const view = (...mutators) => (target) => ..uhh
 // without the targets to begin with. okay, let's change mutator a bit:
 
 const mutateText = (selector, datum) => (target) =>
-  datum.onChange((value) => target.find(selector).text(value));
+  datum.onChange(value => target.find(selector).text(value));
 
-const view = (...mutators) => (target) => mutators.forEach((m) => m(target));
+const view = (...mutators) => (target) => mutators.forEach(m => m(target));
 
 const greetingView = view(mutateText('.greeting', ..something
 
@@ -252,7 +266,7 @@ const greetingView = view(mutateText('.greeting', ..something
 // okay, let's start with view and reconsider what that should look like.
 
 const view = (...mutators) => (...data, target) =>
-  mutators.forEach((m) => m(target));
+  mutators.forEach(m => m(target));
 
 // so every time someone calls this view they need to look up exactly what
 // data it demands and in what order? gross!
@@ -262,7 +276,8 @@ We run into trouble, because right now we can't formulate a mutator without a
 concrete piece of data to reference, and we can't formulate a generic reusable
 view without knowing what mutators we want to apply to it. There are some direct
 solutions imaginable but as you saw they are not pretty. Somehow, we need to be
-able to create mutators and promise them that they'll get their data later.
+able to create mutators against data we don't yet have, and promise we'll give
+them that data later.
 
 Datum Indirection
 =================
@@ -271,8 +286,8 @@ Let's review our goals for a moment before we try to construct a solution to thi
 problem:
 
 1. We want to be able to construct reusable Views.
-   * At definition time, Views should take a bunch of mutators (or things that
-     will become mutators).
+   * At definition time, Views should take a bunch of mutators (or, rather,
+     descriptions of mutations that will become mutators).
    * At execution time, a View should be created by taking a target node and
      some concrete piece of data to bind against. Those mutators should be put
      to work on this new context.
@@ -306,7 +321,7 @@ for now:
 const identity = (x) => x;
 class Predatum {
   constructor(of, _mapper = identity) { Object.assign(this, { of, _mapper }); }
-  map(f) { return new Predatum(this.of, (x) => f(this._mapper(x))); }
+  map(f) { return new Predatum(this.of, x => f(this._mapper(x))); }
   toDatum(datumifier) { return datumifier(this.of).map(this._mapper); }
 }
 class Datum {
@@ -324,22 +339,22 @@ class Datum {
   }
   map(f) {
     const result = new Datum();
-    this.onChange((value) => result.set(f(value)));
+    this.onChange(value => result.set(f(value)));
     return result;
   }
 }
 
 const mutateText = (selector, predatum) => (target, datumifier) =>
-  predatum.toDatum(datumifier).onChange((value) => target.find(selector).text(value));
+  predatum.toDatum(datumifier).onChange(value => target.find(selector).text(value));
 
 const mutateClass = (selector, className, predatum) => (target, datumifier) =>
-  predatum.toDatum(datumifier).onChange((value) =>
+  predatum.toDatum(datumifier).onChange(value =>
     target.find(selector).toggleClass(className, (value === true)));
 
 // implementation:
 const pregreeting = new Predatum('greeting');
-const textMutator = mutateText('.target', pregreeting.map((x) => x.toUpperCase()));
-const classMutator = mutateClass('.target', 'excited', pregreeting.map((x) => x.includes('!')));
+const textMutator = mutateText('.target', pregreeting.map(x => x.toUpperCase()));
+const classMutator = mutateClass('.target', 'excited', pregreeting.map(x => x.includes('!')));
 
 const greeting = new Datum('hello.');
 const target = $('.container');
@@ -399,7 +414,7 @@ all this code already. Only `view` and its usage are new.
 const identity = (x) => x;
 class Predatum {
   constructor(of, _mapper = identity) { Object.assign(this, { of, _mapper }); }
-  map(f) { return new Predatum(this.of, (x) => f(this._mapper(x))); }
+  map(f) { return new Predatum(this.of, x => f(this._mapper(x))); }
   toDatum(datumifier) { return datumifier(this.of).map(this._mapper); }
   static of(of) { return new Predatum(of); }
 }
@@ -418,24 +433,24 @@ class Datum {
   }
   map(f) {
     const result = new Datum();
-    this.onChange((value) => result.set(f(value)));
+    this.onChange(value => result.set(f(value)));
     return result;
   }
 }
 const view = (...partialMutators) => (target, datumifier) =>
-  partialMutators.forEach((mutator) => mutator(target, datumifier));
+  partialMutators.forEach(mutator => mutator(target, datumifier));
 
 const mutateText = (selector, predatum) => (target, datumifier) =>
-  predatum.toDatum(datumifier).onChange((value) => target.find(selector).text(value));
+  predatum.toDatum(datumifier).onChange(value => target.find(selector).text(value));
 
 const mutateClass = (selector, className, predatum) => (target, datumifier) =>
-  predatum.toDatum(datumifier).onChange((value) =>
+  predatum.toDatum(datumifier).onChange(value =>
     target.find(selector).toggleClass(className, (value === true)));
 
 // implementation:
 const greetingView = view(
-  mutateText('.target', Predatum.of('greeting').map((x) => x.toUpperCase())),
-  mutateClass('.target', 'excited', Predatum.of('greeting').map((x) => x.includes('!')))
+  mutateText('.target', Predatum.of('greeting').map(x => x.toUpperCase())),
+  mutateClass('.target', 'excited', Predatum.of('greeting').map(x => x.includes('!')))
 );
 
 const greeting = new Datum('hello.');
@@ -536,7 +551,8 @@ work with it.
 > on. But the reality, and the source of many of our woes, is that what we really
 > manipulate in our code isn't the generalized, constant notion of a `Person`, it
 > is some particular snapshot of that person at some instant in time. We think
-> about the river, but what we actually manipulate is the water itself.
+> about the river, but what we actually manipulate is the water in the river at
+> some given instant.
 >
 > This mismatch between reason and reality causes a lot of problems. What Varying
 > does is give you a genuine way to talk about the river itself, and work with
@@ -553,16 +569,21 @@ In fact, that extensibility system is what motivates the third and final coremos
 Janus component, the one we haven't touched on here, which are case classes.
 
 And lastly, mutators are extremely similar to what you just saw here. Just take
-a look at the function signature of a [true Janus mutator](https://github.com/clint-tseng/janus/blob/master/src/view/mutators.coffee):
+a look at the function signature of a [true Janus mutator](https://github.com/clint-tseng/janus/blob/master/src/view/mutators.coffee) compared to what we did here:
 
 ~~~ noexec
-(/* domain-specific parameters */) => (dom, point, immediate) => Observation
+// our example:
+(selector, /* usage-specific parameters */) => (target, datumifier) => impure!
+
+// janus:
+(/* usage-specific parameters */) => (dom, point, immediate) => Observation
 ~~~
 
 It's almost exactly the same. We don't take a selector here, there is a separate
-system for that which works with mutators and views. `point` is just the actual
-name for `datumifier`. And we also take an `immediate`, which for one thing is
-optional and for another provides some powerful functionality we will cover later.
+system for that which works with mutators and views. `target` is named `dom`, and
+`point` is just the actual name for `datumifier`. And we also take an `immediate`,
+which for one thing is optional and for another provides some powerful functionality
+we will cover later.
 
 In fact, let's take a look at how we would assemble our last example above, but
 using the most elementary Janus facilities. To avoid using some of the fancier
@@ -572,18 +593,18 @@ some "framework."
 ~~~
 const mutate = (selector, mutator) => (dom, point) =>
   mutator(dom.find(selector), point);
-const view = (...mutators) => (dom, point) => mutators.forEach((m) => m(dom, point));
+const view = (...mutators) => (dom, point) => mutators.forEach(m => m(dom, point));
 
 // implementation:
 const greetingView = view(
-  mutate('.target', mutators.text(from('greeting').map((x) => x.toUpperCase(x)))),
-  mutate('.target', mutators.classed('excited', from('greeting').map((x) =>
+  mutate('.target', mutators.text(from('greeting').map(x => x.toUpperCase(x)))),
+  mutate('.target', mutators.classed('excited', from('greeting').map(x =>
     x.includes('!'))))
 );
 
 const greeting = new Varying('hello.');
 const point = match(
-  types.from.dynamic((of) => {
+  types.from.dynamic(of => {
     if (of === 'greeting') return greeting;
     else null; // again, handle other things..
   })
@@ -616,8 +637,11 @@ out of them: `Model.watch('somekey')` yields a `Varying`, for example.  Or
 to receive these core pieces and do meaningful work based on them, using the
 friendliest syntax we could come up with.
 
-Through it all, the one constant is the philosophy that time does not matter. By
-placing `Varying` at the center of everything we do, and building a system of
+Through it all, the one constant is the philosophy that computation should be
+usefully expressible in extremely generic terms: that rules can be defined free
+of specific references to specific objects, and even free of time itself.
+
+By placing `Varying` at the center of everything we do, and building a system of
 rules-based computation around it via `map`, we create an environment wherein all
 you are ever doing is _describing how the program should be, always_. It doesn't
 matter if the value changes. It doesn't matter if you don't have the value yet.

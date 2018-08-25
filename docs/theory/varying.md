@@ -8,7 +8,7 @@ value:
 1. It take a value. It can return it, or call a callback when the value changes.
 2. It can be given a mapping function, and return a new Varying whose value is
    always the mapped result of the value from the original Varying.
-3. It can take a nested `Varying[Varying[x]]` situation and flatten it, so that
+3. It can take a nested `Varying[Varying[x]]` structure and flatten it, so that
    you get back just a `Varying[x]`.
 
 Some of you will recognize these three operations as fundamental laws of a certain
@@ -56,14 +56,16 @@ Getting a Value
 ===============
 
 One major way in which Janus differs from conventional Functional Reactive Programming
-is that Varyings _always contain a value_. In most FRP approaches like Rx and
-ReactiveSwift, the main Varying-like abstraction is more of a way to subscribe to
-and manipulate a stream of values than it is a value-containing entity. In those
-approaches, you can have one of these boxes in your hand but have no idea what
-its value might be until you subscribe to it _and_ a new value comes along.
+is that Varyings _always contain a value_. In most FRP approaches like [Rx](http://reactivex.io/)
+and [ReactiveCocoa/Swift](https://github.com/ReactiveCocoa/ReactiveSwift), the main
+Varying-like abstraction is more of a way to subscribe to and manipulate a stream
+of values than it is a value-containing entity. In those approaches, you can have
+one of these boxes in your hand but have no idea what its value might be until
+you subscribe to it _and_ a new value comes along.
 
 In Janus, if you have a Varying you have a value. This is similar to, for example,
-Mutable Properties in ReactiveSwift.
+[Mutable Properties](https://github.com/ReactiveCocoa/ReactiveSwift/blob/master/Documentation/FrameworkOverview.md#properties)
+in ReactiveSwift.
 
 There are two ways to get the value back out of a Varying. The first is simple:
 
@@ -79,7 +81,7 @@ for all possible values over time:
 ~~~
 const results = [];
 const v = new Varying(1);
-v.react((value) => { results.push(value) });
+v.react(value => { results.push(value) });
 
 v.set(2);
 v.set(4);
@@ -103,7 +105,7 @@ moment_.
 
 If you are sure you don't need to immediately perform some action (for instance
 if the initial value is known or unimportant), you can pass `false` as the first
-parameter. This paramater is known throughout the framework as `immediate`; a
+parameter. This parameter is known throughout the framework as `immediate`; a
 false `immediate` requests no callback for the immediate value.
 
 ~~~
@@ -128,6 +130,12 @@ that the value changed, and then hand you the same value again!
 So any time a Varying value is changed, it first performs a strict equality (`===`)
 comparison on its extant value, and it will do absolutely nothing if they match.
 
+> In practice, you'll find yourself writing `.react` quite seldom. Like most web
+> frameworks, Janus provides the datamost and rendermost layers of your application,
+> and you fill in your domain-specific logic in between. In Janus, this manifests
+> physically in that you'll be doing tons of `map`ping of Varyings, but very little
+> creation or reaction yourself.
+
 Halting a Reaction
 ------------------
 
@@ -136,7 +144,7 @@ You can also stop a reaction in one of two ways. The first is the most widely us
 ~~~
 const results = [];
 const v = new Varying(1);
-const observation = v.react((value) => { results.push(value); });
+const observation = v.react(value => { results.push(value); });
 v.set(2);
 v.set(3);
 observation.stop();
@@ -171,20 +179,20 @@ Mapping a Varying
 =================
 
 It's great that we can apply a result directly to some destination, but often
-we need to do some work in advance. We can just cram all of this work inside our
-callback to `react`, but what if we want to reuse some of that work? Or worse,
-what if we aren't the ones actually calling `react` (as you saw with our mutators
-in the previous article)?
+we need to do some kind of transformation work in advance to prepare the value.
+We can just cram all of this work inside our callback to `react`, but what if we
+want to reuse some of that work? Or worse, what if we aren't the ones actually
+calling `react` (as you saw with our mutators in the previous article)?
 
 Then we'll have to `map` the value. Again, we already covered this when we rederived
 Janus, but there are some differences and additions that are worth discussing.
 
 ~~~
 const a = new Varying(4);
-const b = a.map((x) => x * 4);
+const b = a.map(x => x * 4);
 
 const results = [];
-b.react((x) => { results.push(x) });
+b.react(x => { results.push(x); });
 a.set(6);
 return results;
 ~~~
@@ -194,7 +202,7 @@ This much shouldn't be too surprising. But this might be:
 ~~~
 const results = [];
 const a = new Varying(4);
-const b = a.map((x) => results.push(x));
+const b = a.map(x => { results.push(x); });
 
 a.set(5);
 a.set(6);
@@ -209,7 +217,7 @@ we know how to get a value. Let's see what happens if we use that:
 ~~~
 const results = [];
 const a = new Varying(4);
-const b = a.map((x) => x * 4);
+const b = a.map(x => x * 4);
 
 results.push(b.get());
 a.set(6);
@@ -217,30 +225,32 @@ results.push(b.get());
 return results;
 ~~~
 
-So it still works. What's going on here is that Varying is as lazy as possible,
-and in certain places this laziness depends on purity. Let's dig into that for
-just a moment.
+So at least that still works.
 
-Some of you may have been concerned after seeing how we put Datum together about
-how haphazardly we were generating new pieces of computation and gluing them
+What's going on here is that Varying is as lazy as possible, and in certain places
+this laziness assumes functional purity. Let's dig into that for just a moment.
+
+Some of you may have been concerned after seeing [how we put Datum together](/theory/rederiving-janus)
+about how haphazardly we were generating new pieces of computation and gluing them
 together, without any hope of halting those computations. In reality, Janus is
 quite careful about such things. It wants to perform as little work as possible
 while still fulfilling its obligations.
 
-So, until `get` or `react` are called, which are the only ways to actually extract
-a value _out_ of a Varying, it assumes that you simply don't care what that mapped
-value might be, and so it doesn't bother running the function. In this sense,
-mappings on top of Varyings are really just descriptions of computation, rather
-than active demands to perform some task. The demand only comes when that value
-is needed.
+So, until `get` or `react` are called, which are the only defined ways to actually
+extract a value _out_ of a Varying, it assumes that you simply don't care what
+that mapped value might be, and so it doesn't bother running the function. In
+this sense, mappings on top of Varyings are really just descriptions of computation,
+rather than active demands to perform some task. The demand only comes when that
+value is needed.
 
-As a result, `map` _must_ be pure. A pure function is, among other things, one
-that relies only on its inputs, and does nothing other than return its output.
-(You can, for the most part, consider values from pure closure contexts to be part
-of the input to the function). You can try to rely on `map` to perform _impure_
-actions elsewhere&mdash;that is to cause other side effects in your program&mdash;but
-it is dangerous to do so because you don't know for sure that your mapping function
-will ever actually be run.
+As a result, functions handed to `map` _must_ be pure. A pure function is, among
+other things, one that relies only on its inputs, and does nothing other than return
+its output. (You can, for the most part, consider values from pure closure contexts
+to be part of the input to the function). You can try to rely on `map` to perform
+_impure_ actions&mdash;that is to cause side effects elsewhere, or to mutate the
+inputs themselves&mdash;but it is dangerous to do so because you don't know for
+sure when or if your mapping function will ever actually be run, or even how many
+times it might be run when it is.
 
 On the other hand, the nice thing about this approach is that it is (relatively)
 free to _describe_ a computation: you can create `map`s left and right full of
@@ -260,38 +270,29 @@ perhaps it is too big.
 const quota = new Varying(10);
 const items = new List([ 1, 1, 3, 8 ]);
 
-const exceededQuota = quota.map((q) =>
-  items.watchLength().map((count) => count > q));
+const exceededQuota =
+  quota.map(q => items.watchLength().map(count => count > q));
 
 return inspect(exceededQuota.get());
 ~~~
 
 Shoot, we called `get` on our Varying, but instead of retrieving the useful result
-we wanted, we got some other Varying back that was inside of it.
-
-> # Aside
-> Why is there no value inside the Varying when we look at it on the right? The
-> `inspect` facility snoops on Varying while trying not to impact it, so it never
-> calls `get` or `react`. The answer should be clear from that&mdash;think about
-> it for a moment, and if it's still not clicking, read on.
->
-> When we call `map` on a Varying, we get a Mapped Varying back. And remember,
-> it tries to be as lazy as possible, so if nobody ever `get`s or `react`s on it,
-> it assumes that nobody is looking and so it doesn't populate its own value.
->
-> You can confirm that the correct result _does_ exist by adding a second `.get()`.
+we wanted, we got some other Varying back that was inside of it&mdash; rather
+than yielding a `Varying[bool]` as we might have hoped, we have created a
+`Varying[Varying[bool]]`.
 
 Of course, part of the awkwardness here is how we nested `items.watchLength.map`
 inside of `quota.map`, but that's simply because we don't yet know how to take
 two Varyings side-by-side and perform some simple work on them at once, so we have
 to nest the two together like this. But either way, this result doesn't really
 work; anybody trying to listen in to this result has to do a lot of homework to
-get rid of that Varying that has snuck its way into our output.
+get rid of that extra Varying that has snuck its way into our output.
 
 This is where flattening comes in. When a Varying `x` that contains a Varying `y`
-is flattened, that new flattened Varying will always contain the same value as `y`.
-If we set a new Varying `z` into `x`, the flattened result will move over to track
-`z` instead. Maybe that was a bit confusing&mdash;let's see this in action.
+is flattened, that new flattened Varying will always contain the same value as `y`,
+even as `y` changes. If we set a new Varying `z` into `x`, the flattened result
+will move over to track `z` instead. Maybe that was a bit confusing&mdash;let's
+see this in action.
 
 ~~~
 const results = [];
@@ -301,8 +302,8 @@ const evens = new Varying(2);
 const choose = new Varying('odds');
 
 choose
-  .flatMap((which) => (which === 'odds') ? odds : evens)
-  .react((x) => { results.push(x); }); // expect 1
+  .flatMap(which => (which === 'odds') ? odds : evens)
+  .react(x => { results.push(x); }); // expect 1
 
 choose.set('evens'); // expect 2
 evens.set(4); // expect 4
@@ -319,8 +320,8 @@ example.
 const quota = new Varying(10);
 const items = new List([ 1, 1, 3, 8 ]);
 
-const exceededQuota = quota.flatMap((q) =>
-  items.watchLength().map((count) => count > q));
+const exceededQuota =
+  quota.flatMap(q => items.watchLength().map(count => count > q));
 
 return inspect(exceededQuota.get());
 ~~~
@@ -353,7 +354,7 @@ const y = new Varying(6);
 
 Varying
   .mapAll(x, y, (x, y) => x * y)
-  .react((z) => { results.push(z); });
+  .react(z => { results.push(z); });
 
 x.set(5);
 y.set(1);
@@ -370,7 +371,7 @@ const y = new Varying(6);
 
 Varying.all([ x, y ])
   .map((x, y) => x * y)
-  .react((z) => { results.push(z); });
+  .react(z => { results.push(z); });
 
 x.set(5);
 y.set(1);
@@ -380,7 +381,8 @@ return results;
 The truly functional nerd way to do this, though, is to use `lift`. Lifting is
 a functional programming operation that takes some function that just deals with
 plain values and returns a new "lifted" function that has been taught how to deal
-with some particular kind of box that contains those values (in our case, Varying):
+with some particular kind of box that contains those values (in our case, Varying),
+and returns a new box with the pure function applied to the contents:
 
 ~~~
 const results = [];
@@ -390,7 +392,7 @@ const y = new Varying(6);
 const multiply = (x, y) => x * y;
 const multiplyVaryings = Varying.lift(multiply);
 
-multiplyVaryings(x, y).react((z) => { results.push(z); });
+multiplyVaryings(x, y).react(z => { results.push(z); });
 x.set(5);
 y.set(1);
 return results;
@@ -398,7 +400,7 @@ return results;
 
 The one thing you'll note about all these examples is that they always reduce the
 multiple parameters down to a single output value _before_ we `react` on them.
-This is a pretty natural result of the fact that functions only return one value,
+This is a pretty natural result of the facts that functions only return one value,
 and Varyings only store one value. But if you are doing something complicated and
 expensive (like rendering some canvas graphics, say) and you just want to apply
 some mutation every time any one of several inputs change, `Varying.all` has the
@@ -450,9 +452,9 @@ const results = [];
 const v = new Varying(2);
 
 // coerce v to an integer always:
-v.react((x) => { v.set(Math.round(x)); });
+v.react(x => { v.set(Math.round(x)); });
 
-v.react((x) => { results.push(x); });
+v.react(x => { results.push(x); });
 
 v.set(3.5);
 return results;
@@ -463,10 +465,12 @@ desirable outcome. But two subtleties are at work in this sequence of events.
 
 The first is that we registered the `results.push` reaction _after_ the coercion.
 If we hadn't, our results would also include an intermediate `3.5` result. This
-is scary, yes, but remember again that this is a rather degenerate code sample.
+is scary, yes, but remember again that this is a rather degenerate code sample,
+and that the final result is still correct.
 
 The second subtlety is that we don't also see a `3.5` _after_ the `4`. Why would
-you? Consider the actual underlying sequence of events:
+you? Consider the underlying sequence of events, and how the change might be
+carried out:
 
 1. `a` is set to `3.5`. It knows it must call `react` handlers 1 and 2.
 2. `react` handler 1 is called with `3.5`.
@@ -479,29 +483,29 @@ you? Consider the actual underlying sequence of events:
 This doesn't seem so bad, necessarily. That `3.5` _did_ happen at some point,
 after all, so it seems natural that it should show up in the results array. But
 two things make this an unacceptable result. The first is that as far as `results`
-are concerned, because it sees the values in reverse order, `4` is _the most recent_
-result.
+are concerned, because it sees the values in reverse order, `3.5` is _the final_
+canonical result.
 
-The second problem follows after the first: if, say, instead of being a results
-array handler 2 was somehow some other Varying, and so the most recently seen value
-_is_ the present value, then it would carry the wrong value. And in fact, as we
-will see in the next subsection, `map` does indeed become a `react` at some point
-internally, and so `map` would in this scenario also carry the wrong result.
+This becomes a big problem once we learn how Varyings actually perform mapping
+in the following section: eventually, to fulfill `map`s, Varyings will `react`
+on their mapping source. So any mapped Varyings chained off this one would carry
+the wrong result.
 
-And so each Varying keeps track of which `generation` of value propagation it is
-currently sending out. If at any point it senses that it is about to propagate
-an old value, one from an older generation, it bails out. So at step 3 in the
-above list, when `react` handler 2 is about to called with `3.5`, our actual
-Varying knows not to carry through with it.
+And so each Varying keeps track of which wave (internally called `generation`)
+of value propagation it is currently sending out. If at any point it senses that
+it is about to repropagate an old wave, it bails out. So at step 3 in the above
+list, when `react` handler 2 is about to called with `3.5`, our actual Varying
+sees that it has already sent out `4`, which is a newer value, to all interested
+parties, and so it halts.
 
 Map Execution
 -------------
 
 The next mechanic to cover is the true nature of `map`. As previously mentioned,
 Varying will not bother running `map` functions or carrying values unless it
-absolutely must. (By the way, this is part of why we use `.get()` instead of
-directly accessing a `value` property&mdash;we might have to do work to answer
-the question.)
+absolutely must. (By the way, this is part of why we make people call `.get()`
+instead of offering direct access to some `value` property&mdash;we might have
+to do work to answer the question.)
 
 But we've also previously mentioned that the _only_ ways to get values out of a
 Varying are `get` and `react`. There is no super-secret backdoor (yet) that Varying
@@ -518,13 +522,14 @@ no longer has any reactions on it, it stops reacting on its source Varying.
 A `flatMap`ped Varying is quite similar, except that when it sees a Varying come
 through after mapping, it will `react` on _that_ Varying to track its inner value.
 Then, if some new value comes along to replace that inner Varying, it makes sure
-to stop reacting on it. This way, we are sure to stop work that is no longer needed.
+to stop reacting on the old one. This way, we are sure to stop work that is no
+longer needed.
 
 > # Aside
 > Actually, `map`, `flatMap`, and `flatten` are all implemented in a single place,
 > as `FlatMappedVarying`. Internally, there's a flag that tracks whether to flatten,
 > and there is _always_ a mapping function&mdash;`flatten` just assigns `identity`
-> as the mapping function which passes the value through unchanged.
+> as the mapping function which passes the inner value through unchanged.
 
 Recap
 =====
@@ -540,8 +545,8 @@ That was a whole ton of reading. Here's a quick reminder of what we've just cove
   the original value mapped by your function. Use `flatMap` if your function might
   itself return a Varying.
   * Functions given to `map` and `flatMap` must be pure.
-  * If you have many Varyings, all of whose values you need to compute some result,
-    you can use `Varying.all`, `.mapAll`, `.flatMapAll`, or `.lift`.
+  * If you have many Varyings, all of whose values you need in order to compute
+    some result, you can use `Varying.all`, `.mapAll`, `.flatMapAll`, or `.lift`.
 * In translating these ideas to reality, there are some practicalities that surface
   as subtle behavior, like the order in which values propagate. But Varying does
   its best to patch things together in a predictable, straightforward manner.
@@ -550,10 +555,10 @@ That was a whole ton of reading. Here's a quick reminder of what we've just cove
 
 That's the hardest stuff. We went into relatively excruciating detail here
 because&mdash;well, for one, you signed up for it, but also&mdash;this knowledge
-here forms the base for everything else we are going to do in Janus. Very little
-from this point forward will look unfamiliar at all: we are going to talk about
-things like Maps and Lists and Models, and these things will all look exactly
-like you would expect, just flavored by the existence of Varying.
+here forms the base for everything else we are going to do in Janus. Once we get
+through the core concepts, very little will look unfamiliar at all: we are going
+to talk about things like Maps and Lists and Models, and these things will all
+look exactly like you would expect, just flavored by the existence of Varying.
 
 Next Up
 =======
