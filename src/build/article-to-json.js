@@ -23,7 +23,7 @@ dom.find('h2').each((_, h2_) => {
 });
 
 // extract code samples as long as they exist in the document.
-while ((first = dom.find('pre:first')).length > 0) {
+while ((first = dom.children('pre:first')).length > 0) {
   // grab all contiguous <pre>s.
   const pres = [ first ];
   while ((next = last(pres).next()).is('pre'))
