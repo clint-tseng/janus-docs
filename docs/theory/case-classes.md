@@ -337,14 +337,14 @@ case instead of one. We call this case arity, and there is a default mechanism
 for requesting this behavior, by calling `defcase.withOptions`:
 
 ~~~
-const { sqrt, pow } = Math;
-const square = (x) => pow(x, 2);
+const { sqrt } = Math;
+const square = (x) => x * x;
 
 const { raw, scaled } = defcase.withOptions({ arity: 2 })('raw', 'scaled');
 
 const magnitude = match(
   raw((x, y) => sqrt(square(x) + square(y))),
-  scaled((x, y) => sqrt(square(x * 8) + square(y * 8)))
+  scaled((x, y) => 8 * sqrt(square(x) + square(y)))
 );
 
 return [
@@ -452,8 +452,8 @@ part of the data. This would mean that `raw` takes two values, `x` and `y`, whil
 `scaled` wants three: `x`, `y`, and some `factor`.
 
 ~~~
-const { sqrt, pow } = Math;
-const square = (x) => pow(x, 2);
+const { sqrt } = Math;
+const square = (x) => x * x;
 
 const { raw, scaled } = defcase({
   raw: (kase) => (x, y) => new kase(x, f => f(x, y)),
@@ -462,7 +462,7 @@ const { raw, scaled } = defcase({
 
 const magnitude = match(
   raw((x, y) => sqrt(square(x) + square(y))),
-  scaled((x, y, factor) => magnitude(raw(x * factor, y * factor)))
+  scaled((x, y, factor) => factor * magnitude(raw(x, y)))
 );
 
 return [
