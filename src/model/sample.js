@@ -58,8 +58,15 @@ const Sample = Model.build(
       ? $(selector)
       : view.artifact().filter(selector).add(view.artifact().find(selector))))),
 
+  // some samples want to define magic handwavy functions without having to expose
+  // the source; returning an object from env-additions adds those members to the
+  // local space.
+  bind('env.additions', from('env-additions').map((code) =>
+    compile(janus, code).flatMap((f) => f().successOrElse({})))),
+
   // our default env is simply everything janus provides, plus $:
-  bind('env.default', from('env.dollar').map(($) => new Env({ $, stdlib, inspect }, janus))),
+  bind('env.default', from('env.dollar').and('env.additions').all.map(($, additions) =>
+    new Env({ $, stdlib, inspect }, janus, additions))),
 
   // but if the code block has custom require()s in it instead, we need to provide
   // require(), along with shims to bridge $.
