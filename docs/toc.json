@@ -27,11 +27,11 @@
     "title": "Case Classes",
     "path": "/theory/case-classes"
   }, {
-    "title": "From-chaining",
-    "path": "/theory/from-chaining"
+    "title": "From Expressions",
+    "path": "/theory/from-expressions"
   }, {
-    "title": "Templates and Mutators",
-    "path": "/theory/templates-and-mutators"
+    "title": "Views, Templates, Mutators",
+    "path": "/theory/views-templates-mutators"
   }, {
     "title": "Collections",
     "path": "/theory/collections"
