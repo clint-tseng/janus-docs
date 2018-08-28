@@ -531,6 +531,69 @@ longer needed.
 > and there is _always_ a mapping function&mdash;`flatten` just assigns `identity`
 > as the mapping function which passes the inner value through unchanged.
 
+Other Advanced Features
+=======================
+
+We haven't covered everything here. Later on, we'll talk about [using `Varying.managed`](/theory/resource-management)
+to manage the creation and disposal of expensive resources when needed.
+
+We also haven't covered cases in which Varying _shouldn't_ reflect truth at all
+times&mdash;for instance, if you want to debounce an input so it doesn't fire
+some handler too frequently:
+
+~~~
+const debounce = (interval, varying) => {
+  const result = new Varying(varying.get());
+  let timer = null;
+  varying.react((value) => {
+    if (timer != null) clearTimeout(timer);
+    timer = setTimeout((() => result.set(value)), interval);
+  });
+  return result;
+};
+
+const v = new Varying(4);
+const output = debounce(2000, v);
+
+v.set(8);
+v.set(15);
+v.set(16);
+v.set(23);
+v.set(42);
+
+return [ v, output ].map(inspect);
+~~~
+
+Of course, it would be nice if the debounced varying were lazy, just like a Mapped
+Varying would be, not actually doing any work until it knew it was needed. And,
+while this is a neat trick, it doesn't really entail any new core functionality,
+so why cover it here?
+
+The first question involves the `Varying.managed` resource management feature we
+mention at the top of this section. The second touches on the Janus Standard
+Library, which offers a small pile of useful transformers like this one, and
+`throttle` or `filter`. To help with using these, we introduce an incredibly
+simple helper method `.pipe(f)` which just returns `f(this)`:
+
+~~~
+const { debounce } = stdlib.varying;
+const v = new Varying(4);
+const output = v.pipe(debounce(2000));
+
+v.set(8);
+v.set(15);
+v.set(16);
+v.set(23);
+v.set(42);
+
+return [ v, output ].map(inspect);
+~~~
+
+As you'll see when we talk about `from` later on, having this standard interface
+and making `debounce` currying (that is, it is willing to take just the interval
+at first, then take the varying later with a second call) will allow us to express
+complicated transformations with ease.
+
 Recap
 =====
 
