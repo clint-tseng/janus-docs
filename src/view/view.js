@@ -4,7 +4,8 @@ const { exists } = require('../util/util');
 
 class ViewView extends DomView {
   _initialize() {
-    this.subject.options.app = this.options.app;
+    if (this.subject.options.app == null)
+      this.subject.options.app = this.options.app;
     this.error = new Varying();
   }
 
@@ -42,7 +43,9 @@ class ViewView extends DomView {
 
   _destroy() {
     this.subject.destroy();
-    if (this._bindings != null) this._bindings.forEach((binding) => binding.stop());
+    if (this._bindings != null)
+      for (const binding of this._bindings)
+        binding.stop();
   }
 }
 
