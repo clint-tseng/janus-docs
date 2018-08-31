@@ -33,11 +33,14 @@
     "title": "Views, Templates, Mutators",
     "path": "/theory/views-templates-mutators"
   }, {
-    "title": "Collections",
-    "path": "/theory/collections"
-  }, {
     "title": "Models",
     "path": "/theory/models"
+  }, {
+    "title": "References",
+    "path": "/theory/references"
+  }, {
+    "title": "Collections",
+    "path": "/theory/collections"
   }, {
     "title": "Resource Management",
     "path": "/theory/resource-management"
