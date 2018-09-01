@@ -14,8 +14,9 @@ window.init = (tocData, articleData) => {
   app.set('toc', Tocs.deserialize(tocData))
   app.cacheArticle(path, Article.deserialize(articleData));
 
-  // TODO: when we have .attach() use that instead of clobbering.
-  app.view(app).wireEvents();
+  const appView = app.view(app)
+  appView.attach($('body'));
+  appView.wireEvents();
 
   // wire up the thinker.
   app.on('resolvedRequest', (_, thought) => { think(thought); });
