@@ -273,7 +273,7 @@ const ItemView = DomView.build($(`
   })
 ));
 
-const TodoList = DomView.build($(`
+const TodoListView = DomView.build($(`
   <div class="todo-list">
     <span class="completed"/> of <span class="total"/> items done
     <div class="items"/>
@@ -296,7 +296,7 @@ const TodoList = DomView.build($(`
 const app = new App();
 stdlib.view.registerWith(app.get('views'));
 app.get('views').register(Item, ItemView);
-app.get('views').register(Main, TodoList);
+app.get('views').register(Main, TodoListView);
 const view = app.view(new Main({ items: new List() }));
 view.wireEvents();
 return view;
