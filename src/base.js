@@ -11,6 +11,7 @@ const baseViews = () => {
   inspect.view.registerWith(views);
   require('./view/app').registerWith(views);
   require('./view/article').registerWith(views);
+  require('./view/context').registerWith(views);
   require('./view/exception').registerWith(views);
   require('./view/repl').registerWith(views);
   require('./view/sample').registerWith(views);
