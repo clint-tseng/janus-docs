@@ -660,7 +660,8 @@ out of the way:
   * We also see a `bind()` call in the Model definition. This one is pretty
     straightforward: that key on the Model will always carry the given computed
     value.
-  * We'll get into these things in the [next chapter](/theory/models), on Models.
+  * We'll get into these things in the [next chapter](/theory/maps-and-models),
+    on (Maps and) Models.
 * Here, as promised, is an example of the `.context` and `.criteria` subchain
   methods on `render`. They describe to the Library the kind of view we are
   looking for (try removing the `.criteria` line, for example).
@@ -895,7 +896,7 @@ Next Up
 
 We're taking huge leaps now that we're past the `Varying`, `case`, and `from` core
 facilities. Here we covered all of the templating and view infrastructure, and
-in our next chapter we're going to [talk about Models](/theory/models).
+in our next chapter we're going to [talk about Maps and Models](/theory/maps-and-models).
 
 See you there!
 
