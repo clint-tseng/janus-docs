@@ -608,7 +608,7 @@ const PersonViewModel = Model.build(
   bind('children.count', from('subject').watch('children')
     .flatMap(cs => (cs == null) ? 0 : cs.watchLength()))
 );
-const PersonView = DomView.build($(`
+const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).build($(`
   <div>
     <div class="name"/>
     <div class="child-count">
@@ -636,7 +636,7 @@ const PersonView = DomView.build($(`
     .render(from('subject').watch('children'))
     .classed('hide', from('children.show').map(x => !x))
 
-), { viewModelClass: PersonViewModel });
+));
 
 const app = new App();
 stdlib.view.registerWith(app.get('views'));
@@ -671,7 +671,7 @@ out of the way:
   CSS class which applies `display: none !important;` to the element.
 
 But the star of the show here is the extra parameter we've given to our DomView
-builder, that `{ viewModelClass: PersonViewModel }` at the end. Notice that we're
+builder, that `{ viewModelClass: PersonViewModel }` at the start. Notice that we're
 still just `register`ing `PersonView` to `Person`, nothing about the View Model
 there. And likewise, when we ask our app for a view, we just give it a `Person`,
 not a View Model.

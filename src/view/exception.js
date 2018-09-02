@@ -48,7 +48,7 @@ const ExceptionViewModel = Model.build(
     new List(error.stack.split('\n').slice(1).map((x) => new StackLine(x)))))
 );
 
-const ExceptionView = DomView.build($(`
+const ExceptionView = DomView.withOptions({ viewModelClass: ExceptionViewModel }).build($(`
   <div class="exception">
     <div class="exception-message"></div>
     <div class="exception-stack"></div>
@@ -68,7 +68,7 @@ const ExceptionView = DomView.build($(`
       .criteria({ attributes: { style: 'button' } })
       .options({ stringify: give('') })
       .on('click', (_, subject) => { subject.set('has_expanded', true); })
-  ), { viewModelClass: ExceptionViewModel });
+  ));
 
 
 module.exports = {
