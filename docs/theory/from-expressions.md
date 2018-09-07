@@ -373,7 +373,7 @@ those case class instances are run through `point`.
 If you want to use your own set of case classes, use `from.build()`:
 
 ~~~
-const cases = defcase('name', 'property', 'method');
+const cases = Case.build('name', 'property', 'method');
 
 class Dog extends Model {
   isYoung() { return this.watch('age').map(age => age < 7); }
@@ -408,7 +408,7 @@ a Model even though we already had the default one, we also could back these new
 semantics with some concrete data implementation that has nothing to do with Model:
 
 ~~~
-const cases = defcase('name', 'property', 'method');
+const cases = Case.build('name', 'property', 'method');
 
 const name = new Varying('Spot');
 const properties = { age: new Varying(7) };

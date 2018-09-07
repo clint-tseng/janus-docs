@@ -81,8 +81,8 @@ ones you saw in the example above. But you can always define your own, and then
 use the same matcher you saw above:
 
 ~~~ manual-require
-const { defcase, match } = require('janus');
-const { red, blue, green } = defcase('red', 'blue', 'green');
+const { Case, match } = require('janus');
+const { red, blue, green } = Case.build('red', 'blue', 'green');
 
 const colorToString = match(
   red(x => `red: ${x}`),
@@ -225,7 +225,7 @@ There are three methods that every case class instance provides that help you
 identify and manipulate them without directly matching: `xOrElse`, `getX`, and
 `mapX`, where `x` in each case is the name of a case in the set.
 
-So if we define a case class set `defcase('even', 'odd')`, for example, _every_
+So if we define a case class set `Case.build('even', 'odd')`, for example, _every_
 case class instance will have the methods `.evenOrElse` and `.oddOrElse`, and
 likewise for `getEven` and `getOdd`, and `mapEven` and `mapOdd`.
 
@@ -235,7 +235,7 @@ type, or else it will give you the value you specify. `getEven` does the same,
 but will simply return the original case class instance unless it is `even`.
 
 ~~~
-const { even, odd } = defcase('even', 'odd');
+const { even, odd } = Case.build('even', 'odd');
 
 return [
   even(42).evenOrElse(0),
@@ -257,7 +257,7 @@ The `mapX` methods take a mapping function, and will always return the same type
 of case class, but will map the inner value only if it is of the specified type.
 
 ~~~
-const { even, odd } = defcase('even', 'odd');
+const { even, odd } = Case.build('even', 'odd');
 
 return [
   even(42).mapEven(x => x * 2),
@@ -292,7 +292,7 @@ Case Superclasses
 Case superclasses are defined when the case class set is defined.
 
 ~~~
-const color = defcase('purple', {
+const color = Case.build('purple', {
   warm: [ 'red', 'orange' ],
   cool: [ 'blue', 'green' ] });
 
@@ -334,13 +334,13 @@ modern Javascript there oughtn't be much need to deviate from this default.
 
 That said, sometimes it's just cleaner to, for instance, take two values for each
 case instead of one. We call this case arity, and there is a default mechanism
-for requesting this behavior, by calling `defcase.withOptions`:
+for requesting this behavior, by calling `Case.withOptions().build()`:
 
 ~~~
 const { sqrt } = Math;
 const square = (x) => x * x;
 
-const { raw, scaled } = defcase.withOptions({ arity: 2 })('raw', 'scaled');
+const { raw, scaled } = Case.withOptions({ arity: 2 }).build('raw', 'scaled');
 
 const magnitude = match(
   raw((x, y) => sqrt(square(x) + square(y))),
@@ -455,7 +455,7 @@ part of the data. This would mean that `raw` takes two values, `x` and `y`, whil
 const { sqrt } = Math;
 const square = (x) => x * x;
 
-const { raw, scaled } = defcase({
+const { raw, scaled } = Case.build({
   raw: (kase) => (x, y) => new kase(x, f => f(x, y)),
   scaled: (kase) => (x, y, factor) => new kase(x, f => f(x, y, factor))
 });
@@ -516,7 +516,7 @@ Using case classes involves defining sets (or using Janus default sets), instant
 instances, and using the matcher or the various manipulation tools to help process
 those instances:
 
-* `defcase('even', 'odd')` defines a set of cases. The `types` namespace within
+* `Case.build('even', 'odd')` defines a set of cases. The `types` namespace within
   the Janus export contains default Janus sets.
 * `even(x)` will put `x` in a case class of type `even`.
 * The resulting instance will have methods `getEven`, `getOdd`, `mapEven`, `mapOdd`,

@@ -5,7 +5,7 @@ const janus = require('janus');
 const { baseViews } = require('../base');
 const $ = require('janus-dollar');
 
-const cases = { success, fail, inert } = janus.defcase('success', 'fail', 'inert');
+const cases = { success, fail, inert } = janus.Case.build('success', 'fail', 'inert');
 
 // special method for success/fail cases which flatMaps successes/fails appropriately.
 // TODO: non-hack way to do this.
