@@ -79,6 +79,6 @@ Next Up
 =======
 
 That was perhaps all a bit abstract. How do all these things look in practice?
-In the [next article](/theory/rederiving-janus), we will start with the ideas laid
+In the [next chapter](/theory/rederiving-janus), we will start with the ideas laid
 out here, try to build an interface-rendering tool, and see what that looks like.
 

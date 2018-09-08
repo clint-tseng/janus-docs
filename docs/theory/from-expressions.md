@@ -451,7 +451,7 @@ That is, surprisingly, it. There isn't anything else to cover from a theoretical
 standpoint, though it's likely you don't feel _entirely_ comfortable with these
 things yet. Our advice is to just use them, in a variety of contexts, until you
 at least feel comfortable using `from` expressions to represent different computations,
-and then possibly to re-review this article to back that practical muscle with
+and then possibly to re-review this chapter to back that practical muscle with
 a stronger theoretical grounding.
 
 But some fancy tricks aside, there really isn't anything fundamentally more to

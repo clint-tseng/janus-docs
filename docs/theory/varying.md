@@ -16,12 +16,12 @@ nature. Don't worry if you don't&mdash;all that matters is that together, these
 three operations are quite powerful.
 
 Varying has a couple of other tricks up its sleeve. We will discuss the process
-of fusing multiple Varyings together later in this article. Later in this series,
+of fusing multiple Varyings together later in this chapter. Later in this series,
 we will cover ways to deal with resource management and garbage collection.
 
 Here, we're going to cover the usage details, then move on to the underlying
 mechanics; for more examples of usage, see the [practical guide](/hands-on/varying)
-article on this subject.
+chapter on this subject.
 
 For now, we will start with all the things you can do with a single Varying.
 
@@ -91,9 +91,9 @@ return results;
 ~~~
 
 So `react` is the Varying equivalent of Datum `onChange` from the pretend framework
-in [the previous article](/theory/rederiving-janus). In most cases, we prefer to
+in [the previous chapter](/theory/rederiving-janus). In most cases, we prefer to
 use `react` over `get`, because then we know that any time this value changes,
-we are dealing with it appropriately. Again going back to that previous article,
+we are dealing with it appropriately. Again going back to that previous chapter,
 if we are trying to apply some piece of data to the user interface in some way,
 using `react` instead of `get` ensures that the interface is _always_ up to date.
 
@@ -182,7 +182,7 @@ It's great that we can apply a result directly to some destination, but often
 we need to do some kind of transformation work in advance to prepare the value.
 We can just cram all of this work inside our callback to `react`, but what if we
 want to reuse some of that work? Or worse, what if we aren't the ones actually
-calling `react` (as you saw with our mutators in the previous article)?
+calling `react` (as you saw with our mutators in the previous chapter)?
 
 Then we'll have to `map` the value. Again, we already covered this when we rederived
 Janus, but there are some differences and additions that are worth discussing.

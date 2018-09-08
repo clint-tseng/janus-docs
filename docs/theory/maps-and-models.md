@@ -541,7 +541,7 @@ of a class deriving from some `attribute` type. The default types are:
 * `Model` and `List` expect their respective structure types, and are mostly used
   to simplify (de)serialization.
 * `Reference` manages a reference to a remote data resource. It gets its [own
-  entire article](/theory/references-requests-resolvers).
+  entire chapter](/theory/requests-resolvers-references).
 
 All attribute types share a few methods in common. One of these is `.default()`,
 which you see above. It doesn't show up in the inspector because default values

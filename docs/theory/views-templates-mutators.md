@@ -6,7 +6,7 @@ quite small, each manages a distinct handful of things, and they fit together
 composably and seamlessly. Here is a brief overview of each of them:
 
 * **Mutators** are a lot like what you saw in the [rederiving Janus](/theory/rederiving-janus)
-  article. They take some parameters specific to their purpose, then a `(dom, point, immediate)`
+  chapter. They take some parameters specific to their purpose, then a `(dom, point, immediate)`
   context, and they return an `Observation`, which as you'll recall is a cancellable
   ticket for a Varying reaction.
 * **Templates** group multiple Mutators together. They compose by inclusion (we'll

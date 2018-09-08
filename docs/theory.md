@@ -33,7 +33,7 @@ interesting as we can.
 Next Up
 =======
 
-The [first article](/theory/origins-and-goals) in this series defines some goals
-of the framework, which are then used in the subsequent article in the course of
+The [first chapter](/theory/origins-and-goals) in this series defines some goals
+of the framework, which are then used in the subsequent chapter in the course of
 rederiving the basics of Janus from scratch.
 
