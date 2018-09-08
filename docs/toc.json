@@ -33,17 +33,20 @@
     "title": "Views, Templates, Mutators",
     "path": "/theory/views-templates-mutators"
   }, {
+    "title": "Lists",
+    "path": "/theory/lists"
+  }, {
     "title": "Maps and Models",
     "path": "/theory/maps-and-models"
   }, {
-    "title": "Lists and Beyond",
-    "path": "/theory/lists"
-  }, {
-    "title": "Resource Management",
-    "path": "/theory/resource-management"
+    "title": "Requests, Resolvers, References",
+    "path": "/theory/requests-resolvers-references"
   }, {
     "title": "App and Applications",
     "path": "/theory/app-and-applications"
+  }, {
+    "title": "Resource Management",
+    "path": "/theory/resource-management"
   }]
 }, {
   "title": "Further Reading",

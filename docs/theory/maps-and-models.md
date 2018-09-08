@@ -7,51 +7,8 @@ a key/value data structure and some notion of continually watching what exists
 at some key over time makes a fair amount of sense.
 
 And, we're not going to beat that point any further here. Instead, we are going
-to explore some of the more powerful data transformations you can perform with
-Maps, and what Models add to the picture.
-
-We won't be fully exhaustive here&mdash;some of what we skip are straightforward
-methods you can find in the [API Reference](/api/map), and some of it we will
-cover after we talk about Lists next, as it will apply to both types of structure.
-
-Advanced Data Structures and Varying
-------------------------------------
-
-And as we get into Maps and Lists in particular, it's relevant to note that while
-we try to imbue the spirit of Varying into all of the primitives we offer (and
-indeed that spirit of time-invariance is _why_ we offer our own implementations
-of these common data structures at all), we will necessarily start to stray a
-little from resolutely using `Varying` for everything. After all, Varying is a
-box intrinsically built to represent a single value throughout time, and a box
-that associates multiple values together across all of time will necessarily
-require some other treatment.
-
-But seen from a different perspective, the same general rules will apply: when
-some transformation is defined on some Map or List, the resulting Map or List
-will apply that transformation across all of time. In fact, it will be relatively
-common that you end up mapping eg `Varying[List[x]]` to another `Varying[List[x]]`
-with code that looks something like this:
-
-~~~
-const v = new Varying(new List([ 1, 2, 3, 4, 5 ]));
-return v.map(l => l.map(x => x * 2));
-~~~
-
-This way, we retain our fundamental property that we account for all values for
-all of time: the mapped list will ensure that our `x * 2` rule always holds for
-the transformed list, and we wrap that in a Varying to ensure that if our reference
-changes&mdash;if we start talking about a different list altogether&mdash;that
-we are still computing the correct result.
-
-> There _is_ actually an important difference, at least in this early version of
-> Janus: Maps and Lists perform their transformations _eagerly_. Unlike Varying,
-> which doesn't do any work unless it has to, Map and List don't (yet) carry this
-> same property.
-
-So, bear that in mind as we dive in and start poking around Map and Model.
-
-Overview
---------
+to explore some (but not all) of the more powerful data transformations you can
+perform with Maps, and what Models add to the picture.
 
 In Janus, a Model is just a fancy Map. Where Maps are key/value stores and carry
 all the functionality associated with that data structure, including the useful

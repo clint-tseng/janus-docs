@@ -896,7 +896,14 @@ Next Up
 
 We're taking huge leaps now that we're past the `Varying`, `case`, and `from` core
 facilities. Here we covered all of the templating and view infrastructure, and
-in our next chapter we're going to [talk about Maps and Models](/theory/maps-and-models).
+in our next chapter we're going to [talk about Lists](/theory/lists).
+
+They won't be too surprising: a lot of the terminology and functionality you already
+know (`map`, `filter`, `concat`, and so on) but they are, of course, reimagined
+with Janus philosophy.
+
+We will dig a little bit into how Lists work behind the scenes, as this will
+become important if you wish to implement your own transformations or Views.
 
 See you there!
 
