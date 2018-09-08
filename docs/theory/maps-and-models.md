@@ -4,7 +4,7 @@ Maps and Models
 We've already seen quite a lot of `Map`s and `Model`s in our examples so far.
 They haven't gotten much explanation, because we've assumed that the notion of
 a key/value data structure and some notion of continually watching what exists
-at some key over time makes a fair amount of sense.
+at some key over time are sensible enough without much explanation.
 
 And, we're not going to beat that point any further here. Instead, we are going
 to explore some (but not all) of the more powerful data transformations you can
@@ -36,23 +36,23 @@ upon which serialization is actually implemented and in which can be found its
 full power.
 
 Likewise, we will not be covering the Reference attribute in depth here, which
-allows Model keys to reference some (remote, presumably networked) absent resource
-that should be fetched when the key is observed. That, too, gets its own [Further
-Reading chapter](/further-reading/references).
+allows Model keys to reference some (remote, typically networked) absent resource
+that should be fetched when the key is observed. We will get into Reference and
+its friends in the [next chapter](/theory/requests-resolvers-references).
 
 Maps
 ====
 
 You've already seen Maps used a lot, but we've tried to limit even the basic
 operations to some simple forms to avoid confusion. So let's start over and review
-the basics, complete with alternate forms.
+the basics, complete with alternate invocations.
 
 ~~~
 const data = new Map({ id: 42, initial: 'values', go: 'here' });
 data.set('but', 'more');
 data.set('can', { be: { provided: 'later' } });
 data.set('can.be.set', 'deeply');
-data.set({ even: 'without', a: 'key' });
+data.set({ or: 'without', a: 'key' });
 
 const setter = data.set('currying');
 setter('is supported!');
@@ -89,7 +89,8 @@ to only get individual values at a time if you can help it.
 > To expand on that, think about what it means to `.watch('nested')` here. Recall
 > that Varying will not react unless the value _actually changes_, and that comparison
 > is done with `===`. So unless the actual substructure object itself is replaced
-> with another one, trying to watch it isn't likely to be very useful.
+> with another one (eg the reference changes), `.watch`ing it isn't likely to be
+> very useful.
 >
 > In addition, when you `.get('nested')`, be very careful not to modify the structure
 > you get back, since it's the actual object the Map is using to maintain its own
@@ -131,8 +132,8 @@ still have the original laying around.
 
 In that case, your application would typically either serialize the edited shadow
 to the server, whereupon you'd get new canonical data back that you can use instead
-of the original set, or if the user aborts you can simply discard the shadow. But
-for other use cases, a handful of other methods are available:
+of the original set, or if the user aborts you can simply discard the shadow. For
+that and other use cases, a handful of other methods are available:
 
 ~~~
 const data = new Map({ name: 'Gadget', age: 8, owner: 'Jane' });
@@ -173,8 +174,8 @@ information.
 Enumeration
 -----------
 
-Like most Maps, you can get a List of the keys it contains. Like most structures
-in Janus, this List is kept up to date as the Map changes.
+Like most Maps, you can get a List of the keys a Janus Map contains. Like most
+structures in Janus, this List is kept up to date as the Map changes.
 
 ~~~
 const data = new Map({ name: 'Gadget', age: 8, owner: { name: 'Jane' } });
@@ -200,15 +201,50 @@ render all of them on the page, but you also need to be able to rapidly look one
 up by some identifier. You can formulate the data as a Map fundamentally, but get
 an enumeration when you need a List.
 
-~~~ noexec
-// TODO: a sample here when i finally come up with one that isn't two pages long.
 ~~~
+const people = new Map({
+  alice: new Map({ name: 'Alice Wonderlonious', bff: 'bob' }),
+  bob: new Map({ name: 'Bob Cat', bff: 'alice' }),
+  chelsea: new Map({ name: 'Chelsea Neuyok', bff: 'david' }),
+  david: new Map({ name: 'David Pelapi', bff: 'chelsea' })
+});
+
+const PersonView = DomView.build(
+  $('<div><span class="name"/> (BFF: <span class="bff"/>)</div>'),
+  template(
+    find('.name').text(from('name')),
+    find('.bff').text(from('bff').flatMap(bff =>
+      people.watch(bff).flatMap(person => person.watch('name'))))));
+
+return people.enumeration().mapPairs((_, person) => new PersonView(person));
+~~~
+
+Here, we need to be able to look up a person's full name from some identifier in
+order to display their BFF, so storing them by key/value pairs makes sense. But
+we also want to render all of the people we know about, so we get an `.enumeration()`
+of that Map.
+
+> # Aside
+> You may have noticed that we cheated a little bit in this example, and we
+> directly reference `people` as a closure scope variable from the template. There
+> are some ways around this, usually based around View Models or simply copying
+> parent references to child data, but this is actually an open, unsolved problem
+> in Janus at time of writing: how do we offer this kind of context in a sane,
+> safe way?
+
+This time around, rather than all the homework of `.enumeration().flatMap(key => data.watch(key).map(value =>  …))`
+we use `.enumeration().mapPairs((key, value) => …)`, which is a convenience
+shortcut offered by the Enumeration List. This is different from calling `.mapPairs`
+directly on Map, which you'll be seeing in the following section: calling `.enumeration`
+first gets you a List, and so when you chain `.mapPairs` onto that you'll get another
+List, which is what we want here. Calling `.mapPairs` directly on Map maps the Map
+over to another Map.
 
 Mapping
 -------
 
-You can also map Maps. The resulting Map will have exactly the same key structure,
-but will have values mapped by your given function.
+Yes, you can also map Maps. The resulting Map will have exactly the same key
+structure, but will have values mapped by your given function.
 
 ~~~
 const balances = new Map({ alice: 23.16, bob: 10.74, chelsea: 29.93 });
@@ -216,9 +252,12 @@ const doubled = balances.mapPairs((key, value) => value * 2);
 return inspect.panel(doubled);
 ~~~
 
-As usual, you can use `flatMapPairs` instead of `mapPairs` if your result might
-return a Varying, as it does in this innocent little scheme. (Nobody will notice,
-don't worry.)
+This mapped Map will stay up-to-date with its original whenever the original changes:
+additions, changes, and removals to data on the original will result in changes
+to the mapped Map. But as usual, you can use `flatMapPairs` instead of `mapPairs`
+if your mapping also needs to change in response to some other input and so it
+might return a Varying. That's the case in this innocent little scheme. (Nobody
+will notice, don't worry.)
 
 ~~~
 const balances = new Map({ alice: 23.16, bob: 10.74, chelsea: 29.93 });
@@ -236,8 +275,9 @@ return inspect.panel(adjusted);
 ~~~
 
 Remember, this is Javascript so we're pretty loose and flexible about exact types.
-You can return static values to a `flatMap` and it'll just go along with it. That
-way, we don't do the work of counting the number of accounts unless we must.
+You can return static values to a `flatMap` and it'll just go along with it. We
+take advantage of this above to avoid all the work of counting the number of accounts
+unless it actually matters.
 
 Models
 ======
@@ -254,15 +294,16 @@ You are free to use none or all of these facilities as best suits your purpose.
 You can always also define your own methods, for instance to codify particular
 data operations for use by other areas of your application.
 
-We'll start by covering the simplest, and the most familiar of these.
+We'll start by covering the simplest, and the most familiar of the three above.
 
 Model Bindings
 --------------
 
 Any Model key can be bound to some calculation based on other values available
-to that model. A simple example is when a server wants some foreign entity to be
-referenced by ID when data is persisted. The syntax should look extremely familiar
-if you recall the chapter on [Views](/theory/views-templates-mutators).
+to that model. Here is a simple example: our Model contains a reference to some
+nested Model, but what our server wants to see is actually the foreign key reference
+to that subentity, not the full data. The syntax to accomplish this should look
+extremely familiar if you recall the chapter on [Views](/theory/views-templates-mutators).
 
 ~~~
 const SubEntity = Model.build();
@@ -337,8 +378,8 @@ class SegmentedAxisView extends DomView.build(
 )) {
   _wireEvents() {
     const dom = this.artifact();
-    // a handy utility provided by the stdlib to form a Varying from events:
     this.reactTo(
+      // a handy utility provided by the stdlib to form a Varying from events:
       stdlib.varying.fromEvent($(window), 'resize', (() => dom.width()), true),
       this.subject.set('width'));
   }
@@ -443,27 +484,29 @@ complications we introduce into our application.
 The intermediate variables, then, each encapsulate some useful derived fact from
 that base truth, each of which is recomputed and updated only when it must be.
 Each fact is small, purely functional, and relatively easy to glance and verify.
-Stylistic concerns like line ordering become antiquated notions: there is some
+Line ordering is no longer a stylistic nor correctness concern: we only have to
+convince ourselves that each mapping function is correct, rather than having to
+worry about the ordering or invocation states of the whole assembly. There is some
 concept of computational order encoded in each `from` binding, but as a whole our
 set of `bind` statements are coequal facts, not sequential operations. They can
 be organized at will.
 
 And perhaps most importantly, we can see here how Models can represent data objects,
 yes, but they can also be used as _problem-solving spaces_, where related computations
-are performed and the results can be picked up by other parts of your application,
-like Views.
+are performed in a locally shared scope and the results can be picked up by other
+parts of your application, like Views.
 
 Binding, then, is very powerful indeed.
 
 Model Attributes
 ----------------
 
-But if we turn our attention back to pure data modeling for a moment, we are still
+But if we turn our attention back to pure data modelling for a moment, we are still
 missing some concept of an actual data schema. How, for example, do we know which
 data editors to render for which attributes, or which Model classes to inflate
 to when deserializing nested JSON data?
 
-This is what `attribute` is for, which is declared in `Model.build` much like
+This is what `attribute`s are for, which are declared in `Model.build` much like
 `bind`:
 
 ~~~
@@ -534,7 +577,7 @@ return [
 
 Spot didn't end up with a `status`, nor did Gadget end up with an owner named Jenny.
 This is because neither attribute set `.writeDefault` to true. In the case of `status`,
-this just means the value is ethereal each time it is fetch. In the case of `owner`,
+this just means the value is ethereal each time it is fetched. In the case of `owner`,
 it's even more confusing: because a new default `Person` is generated each time,
 the Person we name Jenny just disappears immediately.
 
@@ -542,7 +585,7 @@ When `.writeDefault` is set to true, the default value is persisted whenever it
 is fetched. (_Not_ when the Model is generated! It's still a lazy value.) Because
 forgetting this detail and neglecting to set `.writeDefault` can lead to especially
 confusing behavior for Models and Lists, `attribute.Model` and `attribute.List`
-actually default to `writeDefault` true&mdash;this is why we use the generic base
+actually default true for `.writeDefault`&mdash;this is why we use the generic base
 class `attribute.Attribute` in the sample above.
 
 Here's another sample with these issues fixed, and which demonstrates a little
@@ -593,7 +636,7 @@ at that key, and are straightforward:
 
 ~~~
 const Dog = Model.build(
-  // the server communicates numbers as strings:
+  // say the server communicates numbers as strings:
   attribute('age', class extends attribute.Number {
     serialize() { return this.getValue().toString(); }
     static deserialize(data) { return parseFloat(data); }
@@ -613,10 +656,10 @@ return [
 
 The default `Model` and `List` attribute deserializers just defer to the given
 `modelClass`'s `@deserialize` method, which you may also override. Marking an
-attribute as `transient` will, if the default `.serialize` is in use, omit that
+attribute as `.transient` will, if the default `.serialize` is in use, omit that
 property from the serialization.
 
-> As with defaults, there is a shortcut to invoke this: `transient('key')`.
+> As with `default`s, there is a shortcut to invoke this: `transient('key')`.
 
 Attribute Editors
 -----------------
@@ -751,19 +794,22 @@ Once again, we demonstrate several points in this sample. We show how attribute
 editors are rendered with the standard library, but we also illustrate some broader
 points about problem-solving in Janus.
 
-As far as `render`ing attributes, the only canonical element is the use of `from.attribute('key')`
-to pull up the Attribute object representing the behavior of that key, rather
-than the value residing at the key. Once that attribute class instance is resolved
-from the `from` chain, `render` will search for a matching view registration like
-it would for any other class instance. The particular `context` and `style` values
-you see are simply the convention applied throughout the standard library&mdash;they
-are not core to Janus itself.
+As far as `render`ing attributes is concerned, the only truly canonical aspect
+demonstrated here is the use of `from.attribute('key')` to pull up the Attribute
+object representing the behavior of that key, rather than the value residing at
+the key. Once that attribute class instance is resolved from the `from` chain,
+`render` will search for a matching view registration like it would for any other
+class instance.
+
+We register all the `stdlib` views so it'll find default views for our attributes.
+The particular `context` and `style` values you see are simply the convention
+applied throughout the standard library&mdash;they are not core to Janus itself.
 
 You can also see that the Enum attribute `values()` method is allowed to return
 a `from` expression instead of a `List` (or, for that matter, a `Varying` would
-work too). This fact is natural in the context of a framework where we strive to
-deal gracefully with changes, and it helps us solve the problem here of managing
-a set of tabbed views.
+work too, so we could have written `this.model.watch('documents')`). This fact
+is natural in the context of a framework where we strive to deal gracefully with
+changes, and it helps us solve the problem here of managing a set of tabbed views.
 
 As we've began to stress, problem solving in Janus often boils down to data modelling.
 It would be entirely possible to create some ad-hoc jQuery-driven method for
@@ -784,20 +830,23 @@ prebuilt standard library views to accomplish our task.
 
 The end result of this is that not only have we saved ourselves a lot of work,
 we've grounded the resulting implementation entirely in simple data operations.
-Notice how the _only_ custom event handler does nothing more than add a new Document
-to the list. There is almost no opportunity to make a coding error, once the data
-has been structured correctly.
+Notice how the _only_ custom event handler, the only imperative code we wrote,
+does nothing more than add a new Document to the list. There is almost no opportunity
+to make a coding error, once the data has been structured correctly.
 
 > Again, we will not be covering Reference attributes in this chapter, as they
-> get explain alongside Requests and Resolvers, which are the mechanisms wheerby
+> get explained alongside Requests and Resolvers, which are the mechanisms whereby
 > Reference attributes actually acquire values.
+>
+> There is also, by the way, no reason you can't define your own Attribute types
+> specific to your application.
 
 Model Validation
 ----------------
 
 The very last topic to overview about Models is that of validation. Janus provides
 a relatively lean interface for model validation: you may define one or more validation
-rules which are just `from` expressions that result in one of the `janus.types.validity`
+rules. Each of these are just `from` expressions that result in one of the `janus.types.validity`
 case classes: `valid` or `invalid`. There are standard methods to get the outstanding
 failing issues, or all the validation bindings, or just whether the Model is passing
 validation or not.
@@ -808,8 +857,8 @@ the first place: to give a basic common language for this process within Janus,
 to promote interoperability and reusability with minimal glue and configuration.
 The [Manifest](/theory/app-and-applications), for instance, which helps manage
 server-side render lifecycles, uses Model validation to determine whether it
-should return your rendered view as a successful result or fault over to some
-error page instead.
+should return your rendered view/page as a successful result or fault over to
+some error page instead.
 
 On the other hand, we want to provide the smallest interface possible, to enable
 a broad range of approaches to the problem space. Do you want to encode information
@@ -818,10 +867,10 @@ perhaps?) within the `valid`/`invalid` class. Do you want to declare validation
 rules in some way other than the Janus default? You have exactly one method to
 implement to make the standard machinery work.
 
-> The one method you'd need to implement, by the way, is `.validations()`, which
+> That one method you'd need to implement, by the way, is `.validations()`, which
 > ought to return a `List[types.validity]`.
 
-Here, we stick to the Janus default. You will not be surprised to learn that they
+Here, we stick to the Janus default. You will not be surprised to learn that
 validation rules are specified alongside `bind`s and `attribute`s as a part of
 `Model.build`. We also demonstrate `.valid`, which returns a `Varying[boolean]`
 indicating whether all validation rules are passing, and `.issues`, which returns
@@ -862,8 +911,9 @@ to work out. Here is one example of how it may be done:
 ~~~
 const { valid, invalid } = types.validity;
 const Issue = Model.build();
+const isBlank = (x => (x == null) || (x === ''));
 
-// reduce some boilerplate:
+// model helpers to reduce some boilerplate:
 const check = (condition, message, fields) => (...args) => condition(...args)
   ? invalid(new Issue({ message, fields })) : valid();
 
@@ -878,21 +928,22 @@ const Dog = Model.build(
   // note that we just use Text for owner for this one to keep things simple.
   attribute('owner', attribute.Text),
 
-  validate(from('name').map(check((name => (name == null) || (name === '')),
+  validate(from('name').map(check(isBlank,
     'All pets must have names.', [ 'name' ]))),
 
   validate(from('status').and('owner').all.map(check(
-    ((status, owner) => ((owner != null) && (status !== 'adopted'))),
+    ((status, owner) => !isBlank(owner) && (status !== 'adopted')),
     'Only adopted pets may have owners assigned.', [ 'owner', 'status' ])))
 );
 
-const IssueView = DomView.build($('<span/>'),
-  find('span').text(from('message')));
-
+// view helpers, again to reduce boilerplate:
 const applyValidationClass = (field) => find(`.${field}`).classed('invalid',
   from.self(view => view.subject.issues()).flatMap(issues =>
-    issues.filter(issue => issue.get('fields').includes(field))
-      .watchLength().map(l => l > 0)));
+    issues.any(issue => issue.get('fields').includes(field))));
+
+const renderField = (field) => template(
+  applyValidationClass(field),
+  find(`.${field} .input`).render(from.attribute(field)).context('edit'));
 
 const DogEditor = DomView.build($(`
   <div class="dog-editor">
@@ -902,16 +953,12 @@ const DogEditor = DomView.build($(`
     <label class="line owner">Owner <span class="input"/></label>
   </div>`), template(
   find('.issues').render(from.self(view => view.subject.issues())),
+  renderField('name'),
+  renderField('status'),
+  renderField('owner')));
 
-  find('.name .input').render(from.attribute('name')).context('edit'),
-  applyValidationClass('name'),
-
-  find('.status .input').render(from.attribute('status')).context('edit'),
-  applyValidationClass('status'),
-
-  find('.owner .input').render(from.attribute('owner')).context('edit'),
-  applyValidationClass('owner')
-));
+const IssueView = DomView.build($('<span/>'),
+  find('span').text(from('message')));
 
 const app = new App();
 stdlib.view.registerWith(app.get('views'));
@@ -943,15 +990,14 @@ return app.view(new Dog());
 
 Here we define our own `Issue` class that we use to represent information about
 the validation failure: the message text to display and the fields involved in
-the problem. We don't bother making `fields` a List, just an array, since in our
-application the related fields never change. The `check` function helps us encapsulate
-this structure in a succinct declaration.
+the problem. We don't bother making `fields` a List&mdash;it's just an array&mdash;since
+in our application the related fields never change. The `check` function helps us
+encapsulate this structure in a succinct declaration.
 
 Similarly, we create a helper for our editor view (which you could imagine using
-across all the different views in your application) which uses some List features
-you haven't yet seen, but you can probably guess that it counts the number of outstanding
-issues matching the field in question, and applies an `invalid` class if it finds
-any.
+across all the different views in your application) which, for some field, checks
+whether any of the subject Model's `.issues` relates to that field, and applies
+an `invalid` class if so.
 
 Recap
 =====
@@ -972,17 +1018,18 @@ Maps are the pure data structure essence behind Models:
 * They are enumerable and mappable.
   * `.enumeration` gets you the keys of a Map, which is useful when dealing with
     unknown schemas or solving problems where data must be listable (for instance
-    to render) but also quick to reference by some key.
+    to render) but also quick to lookup by some key.
   * The `.serialize` and `.diff` features supported by Map are enabled by Traversals,
     which you don't need to understand to leverage these features but which add
     great flexibility and power [if you do](/further-reading/traversal).
   * Maps can map (`.mapPairs`) to other Maps, with the same key structure. If
-    you use `flatMapPairs` instead, you can use a Varying to define that mapping.
+    you use `.flatMapPairs` instead, you can use a Varying to define that mapping.
 
 Models extend Maps to provide behavioral definition on top of the pure data.
 
 * Data `bind`ing of keys can help compute derived values that, for instance, the
   server API requires.
+  * They're also very useful when used on View Models.
   * But perhaps more importantly, they help sequence complex computations based
     off of ground truth, turning Models into potent problem-solving spaces.
 * Named `attribute`s define a whole set of available behaviors for particular
@@ -1006,10 +1053,12 @@ what problem solving looks like in Janus.
 * Complex interaction patterns become tractable when time and care is taken to
   boil the problem down to its minimal set of ground truth values.
   * Each piece of ground truth can usually be fed information simply and directly,
-    with no cognitive overhead on object state or corner cases.
+    with no cognitive overhead on object state or corner cases. This works best
+    when each truth element is set directly an unconditionally from a single source.
   * Derived values based on that ground truth can then be bound in the same Model,
     and they will be recomputed only as necessary.
-  * This essentially turns Model into a problem-solving space.
+  * This essentially turns Model into a problem-solving space, one in which classical
+    concerns like line ordering and object state becomes irrelevant.
   * You saw this when we created a modestly complicated dragging example. Ultimately,
     the entire interaction was driven off of four values.
 * Many, many problems can be solved by thinking of the problem in terms of data
@@ -1021,20 +1070,20 @@ what problem solving looks like in Janus.
     one of many tabs.
 * The open-endedness in Janus is carefully structured to ground everybody in the
   same common language while leaving a lot of room for interpretation and creativity.
+  * Model validation is a great example.
   * The case class encapsulates the most important fact (valid or not?) while
     carrying any arbitrary value most suited for your application.
   * You saw this when we created a rich representation of validation failures
-    which could then drive a rich user feedback experience.
+    which could then drive an advanced user feedback experience.
 
 Next Up
 =======
 
-Lists are arguably more straightforward than Maps and Models: a lot of the terminology
-and functionality you already know (`map`, `filter`, `concat`, and so on) but
-they are, of course, reimagined with Janus philosophy.
+We're not exactly done with Models and attributes yet; our [next chapter](/theory/requests-resolvers-references)
+will dive into one particular type of attribute, Reference, which allows you to
+reference data that should be fetched and inserted when needed.
 
-We will dig a little bit into how Lists work behind the scenes, as this will
-become important if you wish to implement your own transformations or Views.
-
-[Let's go](/theory/lists).
+Along with Request, which describes the remote data, and Resolvers, which actually
+go and get the data, this subsystem equips Janus with a data-driven, Varying-based
+solution to networking.
 
