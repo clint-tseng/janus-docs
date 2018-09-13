@@ -153,6 +153,11 @@ rather than a shadow it'll give itself back.
 `.revert(key)` will undo a shadow override at a given location (unlike `.unset(key)`,
 which explicitly overrides a location with empty data).
 
+A shadowed Map will automatically `.shadow` any nested Maps or Lists it contains
+when `.get`ting or `.watch`ing them. (Lists also implement `.shadow`, but really
+it's more of a cloning operation and it is done mostly so that this property, that
+shadowed structures automatically shadow their entire nested tree, stays true.)
+
 Lastly, the `.watchModified()` operation tells you whether the Map has changed
 compared with its original. It's actually just a shortcut to `shadow.watchDiff(shadow.original())`,
 which compares any two collections, and actually does so quite intelligently;
