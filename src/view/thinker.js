@@ -15,7 +15,6 @@ const think = (thought) => {
   });
 };
 
-// we do a little bit of weird cheatwork here so that we fully display: none
 thoughts.watchLength().map((active) => active > 0).react((thinking) => {
   thinker.toggleClass('thinking', thinking);
 });
