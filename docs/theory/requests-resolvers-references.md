@@ -523,7 +523,7 @@ const SiteView = DomView.withOptions({ resolve: [ 'article' ] }).build(
   template(
     find('.path').text(from('path')),
     find('button').on('click', (event, subject, view, dom) => {
-      const article = this.subject.get('article');
+      const article = subject.get('article');
       if (article == null) return;
       dom.find('.sample-count').text(article.get('samples').length + ' samples');
     })));
