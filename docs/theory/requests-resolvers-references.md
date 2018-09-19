@@ -1,13 +1,13 @@
 Requests, Resolvers, and References
 ===================================
 
-*Requests* describe remote resources, which *Resolvers* know how to go and fetch.
+**Requests** describe remote resources, which **Resolvers** know how to go and fetch.
 In keeping with the type-oriented approach to matching needs with solutions (recall
 how `.render` uses the type-driven `app` Library to automatically find an appropriate
 view for any object), Resolvers are registered against Requests they know how to
 handle&mdash;fancy this, via a Library on the `app`.
 
-Relatedly, *References* are a Model `attribute` type which tie their data value
+Relatedly, **References** are a Model `attribute` type which tie their data value
 to some `Request`. If the data value is missing and some part of the application
 (say, a View template binding) needs it, that Request can be used to automatically
 populate the data.
@@ -279,6 +279,10 @@ to make use of the `.type` and `.expires` semantics listed above, but for now le
 just see a basic example of a whole Resolver system wired up, with a cache and
 Library and everything.
 
+> We will not cover every aspect of the Memory Cache Resolver here. In particular,
+> we won't discuss its various behaviours given different Request types. For more
+> information on that, please check the [API Reference](/api/TODO).
+
 We'll once again use Article as our basis, as we did above.
 
 ~~~
@@ -396,11 +400,49 @@ and `Resolver.caching`.
 
 All that really matters is that Resolvers return a `Varying[types.result[x]]`.
 
-Should you decide to walk the default path, there is more to `MemoryCache` than
-we have covered here, in particular around the semantics of the different `types`,
-but you can check the [API Reference](/api/TODO) to find that information.
+But in a real application, you won't typically be creating and calling Resolvers
+directly like this. For one, a lot of your Requests will be resolved automatically
+and implicitly through Reference Attributes, which we will cover in the following
+section. But as well, even for manual Requests (for instance, for write or delete
+Requests) much like we've had App managing our Views in all our samples so far,
+we usually have App manage our Resolvers as well.
 
-Rather, we are going to move on to References.
+~~~
+// this is all the same:
+const Article = Model.build(attribute('samples', attribute.List));
+
+class ArticleRequest extends Request {
+  constructor(path) { super(); this.path = path; }
+  signature() { return this.path; }
+}
+
+const articleResolver = (request) => {
+  const result = new Varying(types.result.pending());
+  const path = (request.path === '/') ? '/index.json' : `${request.path}.json`;
+  $.getJSON(path)
+    .done((data) => { result.set(types.result.success(Article.deserialize(data))) })
+    .fail((error) => { result.set(types.result.failure(error)) });
+  return result;
+};
+
+// but this is different:
+const app = new App();
+app.resolvers.register(ArticleRequest, articleResolver);
+
+const result = app.resolve(new ArticleRequest('/theory/requests-resolvers-references'));
+return inspect(result);
+~~~
+
+For now, the main difference is that we are using the Resolver library built in
+to App, and calling `app.resolve(request)` instead of directly invoking our assembled
+Resolver. We have temporarily lost our caching stack, but we will bring that back
+in the [next Chapter](/theory/app-and-applications), which covers App in detail.
+
+The important information for now is that `app.resolve` exists to handle Request
+resolution just as `app.view` exists to handle View instantiation, and that although
+we are going to spend the rest of this article discussing automatic Request resolution
+through the Reference Attribute, you can always use `app.resolve(request)` to
+manually resolve any Request.
 
 The Reference Attribute
 =======================
@@ -609,10 +651,8 @@ will not do the work unless it must.
 
 But where does `.resolveWith` get called from, and why have all our examples so
 far involved an observation from a View? What happens if we want a Reference attribute
-to resolve from some other context? And, hey, nothing has been said about how to
-actually _make_ mutating-type requests&mdash;what gives? These questions, and more,
-are the reason `App` exists, and we will explore them and several others in the next
-chapter.
+to resolve from some other context? These questions, and more, are the reason `App`
+exists, and we will explore them and several others in the next chapter.
 
 Recap
 =====
@@ -643,6 +683,9 @@ In the meantime, here's what we learned:
   * Janus defines a standard interface for caching (the `.resolve` and `.cache`
     methods) and bundles a `MemoryCacheResolver`. But these can be ignored entirely
     if they are not to your liking.
+  * App has a `.resolvers` library built into it, as well as a method `app.resolve(request)`
+    which handles Request resolution. You'll learn more about this in the next
+    chapter.
 * References are attributes that point at some remote data resource.
   * Once they get the context (`app`) needed to actually fulfill the Request they
     carry, and they sense that there is an observer that cares about the value,
