@@ -62,5 +62,15 @@
   "path": "/reference"
 }, {
   "title": "Community",
-  "path": "/community"
+  "path": "/community",
+  "children": [{
+    "title": "Resources",
+    "path": "/community/resources"
+  }, {
+    "title": "Contributor Guide",
+    "path": "/community/contributors"
+  }, {
+    "title": "Code of Conduct",
+    "path": "/community/code-of-conduct"
+  }]
 }]
