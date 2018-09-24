@@ -163,7 +163,7 @@ Model, View and DomView, App and Manifest, and quite a few others.
 Base provides three primary facilities:
 
 * Basic event emitting in conformance with the standard `.on`, `.off`, `.emit`
-  protocol via EventEmitter2 (Janus's only dependency).
+  protocol via `EventEmitter2` (Janus's only dependency).
 * Managed event listening `.listenTo` and Varying reaction `.reactTo` methods
   which automatically terminate when the Base object is destroyed.
 * `Base.managed`, which works somewhat like `Varying.managed`.
@@ -175,7 +175,8 @@ will:
   proceed with destruction (we'll get to this).
 * Terminate all inbound event listeners (other objects listening to its events).
 * Terminate all outbound event listeners created with `.listenTo` and outbound
-  Varying observations created with `.reactTo`.
+  Varying observations created with `.reactTo` (this object listening to other
+  things).
 
 The terminations are easy to describe and explain: any time you directly write
 `.on` or `.react`, you should strongly consider using `.listenTo` or `.reactTo`
@@ -213,8 +214,8 @@ app.resolve(new Request({ result: types.result.failure("No response.") }));
 return inspect(log.get('errors'));
 ~~~
 
-You can see that once `.destroy` is called, the listener and reaction are unbound
-and so further changes do not make it to the log.
+You can see that once `log.destroy` is called, the listener and reaction are unbound
+and so further events and reactions do not make it to the log.
 
 Of course, this means that you need to ensure that `.destroy` is actually called
 on objects that are no longer needed, to actually make use of these managed methods.
@@ -235,6 +236,8 @@ no access to the filtered list or even the Varying that carries the length. So,
 when the Varying is no longer being observed and the Varying internals relinquish
 their references to the mapping results, these intermediate objects will automatically
 be cleaned up by the garbage collector.
+
+<!-- TODO: is this true? how about the outbound event listeners to the parent list? -->
 
 But when you are working in a more object-oriented fashion, for instance when
 implementing a List transformation of your own and instantiating tracking objects,
@@ -360,10 +363,10 @@ case is the manage facility itself.
 
 We can see from the final result checks that our two calls to `.enumeration()`
 resulted in exactly the same List instance (if you perform this check on the previous
-sample, it will not be true). We can also see that while the addition of `24` to
-the parent List, after one `enumeration` was already destroyed, did result in an
-update to the enumeration List, the addition of `48` after both requested enumerations
-were `.destroy`ed is not reflected.
+sample, it will not be true). We can also see that after one `enumeration` was
+already destroyed the addition of `24` still resulted in an update to the enumeration
+List, while the addition of `48` after both requested enumerations were `.destroy`ed
+is not reflected.
 
 > You will also notice that we instantiate the result List, and call `list.listenTo`
 > rather than `this.listenTo`. After all, it is the result List whose lifespan

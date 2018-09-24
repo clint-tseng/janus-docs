@@ -9,8 +9,8 @@ easy to override, as we have attempted to demonstrate repeatedly.
 But this approach also has some intrinsic drawbacks that we must work to overcome.
 It is difficult to inject global context across different components in your application
 without a lot of manual, explicit `require` statements and cross-referencing&mdash;and
-in such an explicit system it is difficult to define, when you need to, separate
-behavior in different contexts, primarily server-side versus client-side. There
+with that sort of explicitness it is difficult to define, when you need to, separate
+behavior in different contexts, especially server-side versus client-side. There
 is also no natural candidate in those cases when you _do_ need a management
 authority: for instance, when overseeing the lifecycle of a server-side page render
 request.
@@ -42,9 +42,9 @@ subviews.
 
 It should make some amount of sense that App is involved with subview rendering,
 since we always use `app.views.register(SubjectType, ViewType)` to indicate which
-Views render which subjects in these examples, which creates a record in the view
-Library held by the App. But we have avoided so far explaining how exactly `.render`
-and App relate to each other, or how subviews gain the same App context.
+Views render which subjects in these examples. But we have avoided so far explaining
+how exactly `.render` and App relate to each other, or how subviews gain the same
+App context.
 
 All Views take an `options` hash as their second argument; this is primarily for
 your use as you see fit, but one framework-canonical property is `app`, which as
@@ -54,44 +54,43 @@ your own&mdash;it wants `from.app()`, which when pointed by the View gets a refe
 to its `options.app` if it has one.
 
 Once `.render` has an App, it itself uses the same interface you would to actually
-generate the View instance: `app.view(subject)`. The `.view` performs does a number
-of steps:
+generate the View instance: `app.view(subject)`. You may also recall that `.render`
+can be chained, with `.criteria` and `.options`. It turns out that `app.view` takes
+three arguments: `(subject, criteria, options)`. All `.render` does is pass these
+inputs right along to `app.view()`, which then performs a number of steps:
 
-1. It attempts to get a View for your subject from its `.view` Library. If none
-   is found, it bails out with no return value.
-2. Now that it has a View classtype, it instantiates an instance of it. Here's
-   one of its tricks, though: it injects itself as `options.app` on the new View
-   instance. This is how subviews get access to App context.
+1. It attempts to get a View for your subject from its `.view` Library. It passes
+   along the `criteria` you specify&mdash; more on this when we discuss Library,
+   below. If the Library fails to find a matching View resource, `app.view` bails
+   out with no return value.
+2. Otherwise, now that it has a View classtype, it instantiates an instance of it,
+   passing the subject as the first argument and the `options` you hand it as the
+   second. Here's one of its tricks, though: it injects itself as `options.app`
+   as it does so. This is how subviews get access to App context.
 3. It then performs auto-resolution and manual resolution, which we will cover
    later.
 
-As usual, you can override this behaviour&mdash;you can, of course, skip using
-App entirely, and create some other possibly more explicit version of `.render`
-which avoids the use of Libraries and self-injecting contexts. But you don't have
-to go quite this far: `app.view(…)` actually takes three parameters, `(subject, criteria, options)`,
-the latter two of which are optional.
+So in some sense, the machine is simple: you provide, either directly to `app.view`
+or via `.render`, a subject, some optional Library search criteria, and an optional
+options hash to instantiate the View with. But App performs two tricks: it sneaks
+_itself_ in as `options.app`, and it does some resolution magic to make References
+work (again, we'll cover this in a moment).
 
-When you chain onto the `.render` mutator with `.criteria(from(…))` or `.options(from(…))`,
-all the mutator does is resolve the `from` expression, and pass the resulting
-concrete values as these two parameters. The first, `.criteria`, is given to the
-Library as additional search conditions (more on that later), while the second,
-`.options`, are passed to the View constructor as the second argument.
+> As with everything in Janus, though, you can disable this magic. If you provide
+> your _own_ value for `options.app`, that value is respected and used. This will
+> most likely make your application context much more difficult to reason about,
+> but we are allergic to magic and especially to magic you can't override.
 
-> If you don't want App automatically injecting itself to subviews, all you have
-> to do is provide an `options`, either on the `.render` mutator chain or directly
-> on `app.view(…)`, which has an explicit App. This will undoubtedly make your
-> application context more difficult to reason about, but the option is there
-> should you wish to take it.
+So together, App and the `.views` Library it carries alleviate the need to manually
+reference every rendered subview (and to solve the related circular dependency
+and tight coupling problems), and App auto-injects itself into each new View in
+the tree so that this context is available everywhere, without the need of some
+central overseer.
 
-So App alleviates the need to manually reference every rendered View (and solve
-related circular dependency and tight coupling problems) by carrying a `.view`
-Library, and it auto-injects itself into each new View in the tree so that this
-context is available everywhere, without the need of some central overseer. In
-addition, this layer of indirection by way of the Library allows easy behavior
-swappability between different contexts: just register a different set of Views
-for subjects when you create your central App.
-
-You can also register a different set of Resolvers against the same Requests&mdash;so
+In addition, though we did not demonstrate it here, this layer of indirection by
+way of the Library allows easy behavior swappability between different contexts:
+just register a different set of Views for subjects when you create your central
+App. You can also register a different set of Resolvers against the same Requests&mdash;so
  let's take a look at Resolvers and resolution, and make sure we have a firm grasp
  of how _that_ system works.
 
@@ -108,22 +107,26 @@ to Request resolution:
 1. As mentioned above, the last thing `app.view(subject)` does is perform auto-
    and manual-resolution on the subject.
    * Auto-resolution is done by calling `.autoResolveWith` on the subject if that
-     method exists, which on Model results in a `.resolveWith` call on all known
-     Reference attributes on the Model which have `.autoResolve` set to true,
-     which is the default.
-   * Manual resolution is mostly only useful when you have disabled auto-resolution:
-     any attribute flagged in your [`resolve` View option](/theory/requests-resolvers-references#the-reference-attribute)
-     will have `.resolveWith` called on it, same as with auto-resolution.
+     method exists.
+   * Model `.autoResolveWith` results in a `.resolveWith` call on all known Reference
+     attributes on the Model. You can have it skip this call on attributes by
+     setting `.autoResolve = false` on those attributes.
+   * In these cases, you can still trigger resolution manually, by flagging the
+     desired attributes in your [`resolve` View option](/theory/requests-resolvers-references#the-reference-attribute).
+     This manually-selected resolution happens at the same time as auto-resolution.
 2. As you'll [recall from the previous chapter](/theory/requests-resolvers-references#reference-internals),
-   `.resolveWith` merely provides a context by which resolution can occur if needed.
+   `.resolveWith` merely provides an `app` context by which resolution can occur
+   if needed.
 3. When the Reference attribute decides that resolution must occur, it calls
    `app.resolve(request)` to obtain a `Varying[types.result[x]]`. This is why it
    needs a reference to App.
 4. App, in turn, passes the Request to its Resolver, and returns the result.
-   * The App's Resolver is obtained by a call to `app.resolver()`, whose result
-     is cached for the lifetime of the App upon the first call.
-   * The default implementation of `.resolver()` simply uses `Resolver.fromLibrary(app.resolvers)`,
-     but the method can be overridden to insert higher-order Resolvers like caches,
+   * App gets its Resolver from its own `.resolver()` method, which you can (and
+     probably should) override.
+   * `.resolver()` is only ever called once; its return value is cached and used
+     from that point forward.
+   * The default implementation of `.resolver()` simply uses `Resolver.fromLibrary(app.resolvers)`.
+     It is common to override this to insert higher-order Resolvers like caches,
      as detailed in the previous chapter.
 
 It's worth explaining auto-resolution a second time. First, all `.resolveWith`
@@ -132,15 +135,18 @@ It does _not_ immediately cause Request resolution. But because `.resolveWith`
 will only ever take one App context, you may wish to maintain fine control over
 when it is called.
 
-This is especially true given that App will call `.autoResolveWith` on any subject
-it generates a View for, which in turn will search all its known attributes for
-Reference attributes with `.autoResolve` turned on (which by default inheritance
-it is) and immediately calls `.resolveWith(app)` on them.
+It is rare that this automatic App propagation is undesirable. But it _is_ important
+to offer an escape route given its virulence: App will call `.autoResolveWith`
+on any subject it generates a View for, which in turn will search all its known
+attributes for Reference attributes with `.autoResolve` turned on (which by default
+inheritance it is) and immediately call `.resolveWith(app)` in turn on them.
 
 If you disable `.autoResolveWith` on the Model, or flag Reference attributes with
 `.autoResolve = false`, then you can still have App plumb `.resolveWith` for you
-in particular cases by setting the View option `resolve` to the key or keys upon
-which you wish to have `.resolveWith` directly, unconditionally called.
+in particular cases: use `.withOptions({ resolve: [ keys ] }).build(` and the
+key or keys you specify will undergo `.resolveWith` even if `autoResolve` is false.
+
+> You can also use `.render(…).options({ resolve: [ keys ] })`.
 
 It's also worth providing a concrete example of `.resolver()`; it should look
 quite familiar from the previous chapter:
@@ -168,8 +174,8 @@ As a whole, this Request resolution process is strikingly similar to the View
 handling procedure we just covered.  First, there is some optional procedure by
 which App context is injected into a dependent component: `options.app` in the
 case of View, and `.autoResolveWith` in the case of Model Reference attributes
-(all Model does, you'll note, is pass the App reference along to the Reference
-attributes that actually need it).
+(all Model does with `app`, you'll note, is pass it along to the Reference attributes
+that actually need it).
 
 In either case, the controlling element is a local authority (the `.render`
 mutator managing its own spot in the DOM tree based on some piece of data; the
@@ -178,16 +184,12 @@ notion of need), and these controlling elements sit on the App context until a
 contextual action must occur (subview rendering, or Request resolution).
 
 And when that contextual action needs to occur, the appropriate App method is
-called (`app.view`, `app.resolve`), a Library is checked, and thereby a process
-occurs.
+called (`app.view`, `app.resolve`), an App configuration is consulted (the
+`app.views` Library, or the `app.resolver` method, which by default checks the
+`app.resolvers` Library).
 
-The main difference is that in the case of Views, App always directly checks its
-`view` Library to work out what View deals with a subject, while in the case of
-Request resolution, you have one additional influence in the form of the `.resolver`
-method.
-
-Differences aside, we do our best to sequester all our magic within App. Allowing
-App to autoinject itself into View children and Reference attributes is the closest
+In general, we do our best to sequester all our magic within App. Allowing App
+to autoinject itself into View children and Reference attributes is the closest
 we come to magic in Janus. But we have taken pains to ensure that this behavior
 is customizable or ignorable in individual cases or in general. We've also managed
 to keep the footprint fairly small&mdash;App is only around 50 lines of code.
@@ -225,6 +227,7 @@ class AppViewModel extends Model.build(
   }
 }
 
+// Application view:
 const AppView = DomView.withOptions({ viewModelClass: AppViewModel }).build($(`
   <div>
     <div id="demo-main">Content! <button>Load more.</button></div>
@@ -251,10 +254,11 @@ return app.view(app);
 ~~~
 
 Every time our App resolves a Request, we keep track of it. If any Request is still
-pending, we show a spinner. You could also take a different approach, reacting
-to the request when it's added to the list and removing it when the Request is
-complete. This would save the `.filter` in the View and reduce memory leakage,
-but also results in a longer, noisier code sample.
+pending, we show a spinner. You could also take a different approach in the
+`resolvedRequest` event handler, reacting to the request when it's added to the
+list and removing it when the Request is complete. This would obviate the `.filter`
+in the View and reduce memory leakage, but also result in a longer, noisier code
+sample.
 
 Through these events, App is our gateway into contextual actions happening all
 over our application. This loading indicator is one example; another is Manifest,
@@ -404,7 +408,7 @@ Manifest answers these questions:
   it is satisfied that your application is done with Requests, it flags a completion
   via a `Varying[types.result[x]]` property.
 * In order to understand what sort of completion to flag, Manifest looks at validations
-  on the Model. If any fail, the overall result is a failure. Otherwise, `success`.
+  on the Model. If any fail, the overall result is a `failure`. Otherwise, `success`.
 
 Let's see an example of these facilities in action.
 
@@ -504,31 +508,32 @@ Recap
 =====
 
 App and Library serve as contextual backbones for your application. They are both
-the repository of and executors of View rendering and Request resolution. In the
+the repository for and executors of View rendering and Request resolution. In the
 highly decentralized world that is Janus, App is the only component that glues
 your application together at a higher level.
 
 * `app.view(subject)` uses Library to determine a View class to render for your
-  subject, passing along search criteria and instatiation options.
+  subject, passing along search criteria and instantiation options.
   * As it does so, it injects itself as the `app` resource for the new subview,
     thus becoming common context for your entire view tree.
-  * It also inject itself into the subject being targeted as Request resolution
-    context for Reference attributes. Those References won't actually attempt
+  * It also injects itself into the View subject being rendered as Request resolution
+    context for its Reference attributes. Those References won't actually attempt
     Request resolution unless their data is observed and thus required, but the
     automatic injection ensures that resolution can occur when it must.
   * Each view that is instantiated causes a `createdView` event on the App.
 * `app.resolve(request)` uses the internal `app.resolver()` method to resolve the
   given Request.
-  * The default `.resolver()` also uses the Library, to find a registered resolver
-    for the Request.
+  * The default `.resolver()` also uses a Library, `app.resolvers`, to find a
+    registered resolver for the Request.
   * But `.resolver()` may be overriden to, for instance, add caching layers.
   * Each Request that is resolved causes a `resolvedRequest` event on the App.
 
 Manifest uses App's relative omniscience and Model validation to offer one method
 of managing server-side request rendering lifecycles.
 
-* Manifest takes a Model whose registered View is the desired artifact to return
-  as the page response. It instantiates that View for you.
+* Manifest takes an App, and a Model whose Library-registered View in that App is
+  the desired artifact to return as the page response. It instantiates that View
+  for you.
 * Manifest uses App events to determine when Requests have been made, and therefore
   when they have been resolved.
   * It waits a tick after all resolutions to ensure cascading Requests are allowed

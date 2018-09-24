@@ -3,9 +3,9 @@ Requests, Resolvers, and References
 
 **Requests** describe remote resources, which **Resolvers** know how to go and fetch.
 In keeping with the type-oriented approach to matching needs with solutions (recall
-how `.render` uses the type-driven `app` Library to automatically find an appropriate
-view for any object), Resolvers are registered against Requests they know how to
-handle&mdash;fancy this, via a Library on the `app`.
+how `.render` uses the type-driven `app.views` Library to automatically find an
+appropriate view for any object), Resolvers are registered against Requests they
+know how to handle&mdash;fancy this, via a Library on the `app`.
 
 Relatedly, **References** are a Model `attribute` type which tie their data value
 to some `Request`. If the data value is missing and some part of the application
@@ -102,11 +102,11 @@ return [
 
 Here we already see a deviation from what the vanilla `Request` purports to want:
 our Article requests are fully defined just by the path they represent. So rather
-than faff about with a `.options` hash, we just ignore it entirely and define a
+than faff about with an `.options` hash, we just ignore it entirely and define a
 constructor that takes an Article `path` and saves it off. Requests are always
-created by application code, so changing the constructor isn't a big deal. Later,
-in the Resolver itself, we directly references `request.path` to figure out what
-URL we ought to be fetching.
+created by application code, never the framework, so changing the constructor
+isn't a big deal. Later, in the Resolver itself, we directly references `request.path`
+to figure out what URL we ought to be fetching.
 
 That Resolver just does some really standard AJAX-type things, leaning on jQuery
 to do most of the work. It does some munging to make the site's root path work,
@@ -131,7 +131,8 @@ The great thing about functions is that they are contracts with an extraordinary
 amount of wiggle room. These things go in and those things come out, and anything
 that happens before or after or in between is somebody else's problem.
 
-We take advantage of this all over in Janus, but here with Resolvers we answer
+We take advantage of this all over in Janus (recall how mutators work, and how
+their call signatures merge with `template`), and here with Resolvers we answer
 almost every open question by using higher-order functions:
 
 * What if we have different types of requests that need to be resolved in
@@ -204,19 +205,14 @@ might wonder why Janus bothers to offer a canonical solution to this problem at
 all. The first answer you will find in the next section, as there is a careful
 thread woven through several Janus components to make `Reference` Model attributes
 work seamlessly. The second answer is caching, which we discuss here. Both of
-these problem areas would be difficult to solve purely in application code, and
-both are essential aspects without which the framework would not feel complete.
+these problem areas would be annoying to have to solve purely in application code,
+and both are essential aspects without which the framework would not feel complete.
 
 Why is caching _that_ important? We'll get more into in the following section,
 but the on-demand nature of how References are reified (and thus Requests are made
 and Resolvers tasked with handling them) and the extremely decentralized nature
 of Janus together mean that it is not uncommon for more than one corner of your
 application to request the same data, independently and in parallel.
-
-> Given that we have describe Reference attributes as being transparent remote
-> references on Models, you might see how a View with mulitple bindings through
-> that reference attribute (`from('some_ref').watch('some_property')`,
-> `from('some_ref').watch('other_property')` would result in this scenario.
 
 This would be a critical and fundamental flaw in our approach were we not to offer
 some kind of canonical answer, and our answer is a caching layer that understands
@@ -268,16 +264,16 @@ relies on those extra methods and properties you saw on Request earlier:
   result should be cached for.
 
 Again: all of these are _just conventions_, ones that are followed by the bundled
-solutions Janus offers, and which can be ignored at will. We will expand on this
+solution Janus offers, and which can be ignored at will. We will expand on this
 in a moment, but it was important to emphasize it again in the meantime: these
 are not handcuffs to be bound by.
 
-There is only one actual cache implementation bundled with Janus: the `MemoryCacheResolver`.
-It simply checks for signatured requests and when it sees a match it returns whatever
-Varying instance was last offered up for that signature. It also does some work
-to make use of the `.type` and `.expires` semantics listed above, but for now let's
-just see a basic example of a whole Resolver system wired up, with a cache and
-Library and everything.
+In fact, there is only one actual cache implementation bundled with Janus: the
+`MemoryCacheResolver`. It simply checks for signatured requests and when it sees
+a match it returns whatever Varying instance was last offered up for that signature.
+It also does some work to make use of the `.type` and `.expires` semantics listed
+above, but for now let's just see a basic example of a whole Resolver system wired
+up, with a cache and Library and everything.
 
 > We will not cover every aspect of the Memory Cache Resolver here. In particular,
 > we won't discuss its various behaviours given different Request types. For more
@@ -334,7 +330,8 @@ if you are using View `.attach`.)
 
 In these cases, the cache never needs to be updated; these caches are initialized
 with all the data they will ever understand, and will never learn the results of
-additional Requests. Here, finally, is where `Resolver.oneOf` becomes useful:
+additional Requests. We provide one simple implementation in the form of `Resolver.fromDom`.
+Here, finally, is where `Resolver.oneOf` becomes useful:
 
 ~~~ noexec
 const library = new Library();
@@ -343,11 +340,11 @@ const resolver = Resolver.caching(new Resolver.MemoryCache(),
 ~~~
 
 (We don't provide a full working sample here as demonstrating all three layers
-of this assembled system working, but) you can see that we still initialize a
-full MemoryCache as appropriate, but instead of immediately delegating to `Resolver.fromLibrary`
-should the cache fail, we first try our DOM-based cache with `Resolver.fromDom`.
-In this way, we can layer together many different resolution strategies into a
-coherent system.
+of this assembled system working would take a lot of wrangling, but) you can see
+that we still initialize a full Memory Cache as appropriate, but instead of immediately
+delegating to `Resolver.fromLibrary` should the cache fail, we first try our DOM-based
+cache with `Resolver.fromDom`.  In this way, we can layer together many different
+resolution strategies into a coherent system.
 
 But as promised, you can ignore `MemoryCacheResolver` and write your own, or ignore
 the entire set of default conventions entirely and create your own. In fact, our
@@ -362,7 +359,7 @@ const Article = Model.build(attribute('samples', attribute.List));
 class ArticleRequest { constructor(path) { this.path = path; } }
 
 const articleCache = {};
-const articleResolver = (request) => {
+const resolver = (request) => {
   const path = (request.path === '/') ? '/index.json' : `${request.path}.json`;
 
   if (articleCache[path] == null) {
@@ -375,12 +372,6 @@ const articleResolver = (request) => {
 };
 
 // but this is the same:
-const resolvers = new Library();
-resolvers.register(ArticleRequest, articleResolver);
-
-const resolver = Resolver.caching(
-  new Resolver.MemoryCache(), Resolver.fromLibrary(resolvers));
-
 const x = resolver(new ArticleRequest('/theory'));
 const y = resolver(new ArticleRequest('/theory'));
 const z = resolver(new ArticleRequest('/theory/requests-resolvers-references'));
@@ -395,10 +386,11 @@ return [
 We have such a limited problem space here that we save ourselves a lot of work
 by limiting our solution capability. Our system will never be able to effectively
 handle anything more complex than requests to Articles by `path`, but in return
-we save ourselves the overhead of understanding `signature` and `type` and `MemoryCache`
-and `Resolver.caching`.
+we save ourselves the overhead of understanding and implementing `signature` and
+`type` and `MemoryCache` and `Resolver.caching`.
 
 All that really matters is that Resolvers return a `Varying[types.result[x]]`.
+So long as this is true, they will plug into the rest of the Janus machine perfectly.
 
 But in a real application, you won't typically be creating and calling Resolvers
 directly like this. For one, a lot of your Requests will be resolved automatically
@@ -447,9 +439,10 @@ manually resolve any Request.
 The Reference Attribute
 =======================
 
-The goal of References, as we've now stated many times, is to allow networked data
-to be bound against as if it were any other, and for it to be seamlessly retrieved
-and inserted. Let's see an example of this working in the context of Article.
+The goal of References, as we've now stated many times, is to seamlessly integrate
+networked, nonpresent data into Models alongside normal data. Often, these references
+will even depend on concrete Model data. Let's see an example of this working in
+the context of Article.
 
 ~~~
 // this is all the same:
@@ -493,14 +486,13 @@ const site = new Site({ path: '/theory/requests-resolvers-references' });
 return app.view(site);
 ~~~
 
-Here, we register our `articleResolver` against `ArticleRequest` just as with our
-previous example, but rather than create our own Library we use the `resolvers`
-Library that is a part of our `app`. As with views, we use `app` in this way to
-provide context to our entire application.
+As with the last sample you saw, here we use the `.resolvers` Library built into
+App to register our `articleResolver` against. But we never directly call `app.resolve`;
+that happens as a part of resolving the Reference.
 
 The first key here is the `Site` Model definition, which declares an `article`
-attribute (remember, that just means "here is some special behaviour to go along
-with the data that lives at the `article` key on this Model) of type `Reference`,
+attribute (remember, `attribute`s indicate "here is some special behaviour to go
+along with the data that lives at the `article` key on this Model") of type `Reference`,
 whose only definition is a method `request`. That method returns a `from` expression
 which reads up the `path` value on Site, and maps it to an `ArticleRequest` for
 that path.
@@ -522,16 +514,17 @@ know that `article` is anything besides another data property (though of course
 you probably should).
 
 This implicit statement ("I care about this value"), combined with the Reference
-attribute, together cause the Request to be formulated and resolved, and an `Article`
-Model populated at `article` on the Site once it comes in. You can verify this
-by removing the `find('.sample-count')` block from the `SiteView` above, and firing
-up your Network Inspector pane on your browser. With that `from` binding, every
-time you tweak the code sample a new network request will be issue. Without, nothing.
+attribute, together cause the Request to be formulated and resolved. Once the data
+comes in, the new `Article` Model is saved onto Site at the `article` key. You
+can verify this by removing the `find('.sample-count').text(…)` block from the
+`SiteView` above, and firing up your Network Inspector pane on your browser. With
+that `from` binding, every time you tweak the code sample a new network request
+will be issued. Without, nothing.
 
 > Because Reference attributes typically point at somewhat more auxiliary data
 > not intrinsic to the Model itself, they are by default marked as `transient`,
 > which means the populated data value will _not_ be included in any serialization
-> of the Model.
+> of the Model. You can override this on the `attribute` you declare.
 
 There is another way to say that you care about some value, in case you do need
 a Reference to resolve but for whatever reason `from` doesn't fit the bill:
@@ -554,12 +547,12 @@ const articleResolver = (request) => {
   return result;
 };
 
-// but this is different:
 const Site = Model.build(
   attribute('article', class extends attribute.Reference {
     request() { return from('path').map(path => new ArticleRequest(path)); }
   }));
 
+// but this is different:
 const SiteView = DomView.withOptions({ resolve: [ 'article' ] }).build(
   $('<div><div class="path"/><div class="sample-count"/><button>Check</button></div>'),
   template(
@@ -582,9 +575,10 @@ What we are trying to show here is the `DomView.withOptions` option of `resolve`
 which indicates some set of Model keys you wish to resolve.
 
 But as you can see, we had to go to some rather evil lengths to concoct a sample
-here: you'll learn in the following section and chapter that even avoiding the
-typical `from` templating syntax, writing `this.subject.watch('article')` within
-the context of the View is enough to obviate the need for the `resolve` option.
+here: you'll learn in the following section and chapter that even if you avoid
+the typical `from` templating syntax and write `this.subject.watch('article')`,
+the Reference will still end up getting automatically resolved. (The `.watch` is
+the key.)
 
 Either way, the bottom line is that given the two keys we mentioned above: a
 Reference attribute that defines some Request whose resulting data should reside
@@ -600,9 +594,10 @@ a little bit more about how it works.
 Reference Internals
 -------------------
 
-The Reference attribute is like any other in that it just sits there. Any kind of
-additional context it provides (default values, serialization behavior, etc) only
-work because something else in Janus or in your application knows to look there.
+The Reference attribute is like any other in that it's entirely passive: it just
+sits there. Default values, serialization behavior, etc&mdash;all of these attribute
+behaviors only work because something else in Janus or in your application knows
+to look for it. The same is true of Reference requests and resolution.
 
 Where Reference is a little special is that it will actively manipulate the data
 on the Model when it needs to&mdash;no other bundled attribute does this. We've
@@ -630,8 +625,8 @@ should occur.
 Once Reference has that `app` context, however, it wakes up. If it senses, by
 way of an observation on its Model key, that somebody cares about the data it could
 provide, it will kick off that Request and write any successes it sees into the
-Model. If suddenly nobody cares anymore, it terminates the Request by stopping
-its own observation on the result.
+Model. If eventually nobody cares anymore, it terminates the Request by stopping
+its own observation on the result, and goes back to waiting for somebody to care.
 
 > Notice how it writes "any successes it sees" into the Model. If you have some
 > sort of procedure whereby a remote resource might change, and that change might
@@ -640,10 +635,11 @@ its own observation on the result.
 > be written into the Model.
 
 Notice that this dependence on `.watch` observation means a `.get('article')` call
-will _not_ trigger any Request resolution. Beacuse `.get` returns a static value,
-we can't give back a Varying pointing at some future value, and we have no idea
-given a single `.get` whether that value will be checked again, so we don't know
-if anybody cares. Ergo, Reference does nothing in this case.
+will _not_ trigger any Request resolution. Beacuse `.get` returns synchronously
+a static value, we can't give back a Varying pointing at some future value, and
+we have no idea given a single `.get` whether that value will be checked again,
+so we don't know if anybody actually cares. Ergo, Reference does nothing in this
+case.
 
 In this way, we set up a remote resource system that operates like the rest of
 Janus: it is declarative, it is resilient to changes over time, and it is lazy&mdash;it
@@ -668,11 +664,11 @@ more about App, which we will cover in our next chapter.
 
 In the meantime, here's what we learned:
 
-* Requests describe some sort of remote resource in a way that a Resolver will
-  know how to fetch that resource.
+* Requests describe some sort of remote resource in such a way that a Resolver
+  will know how to fetch that resource. You get to decide what this means.
   * It has a default implementation and some default properties, but really a
     Request can be anything you'd like&mdash;you don't even have to subclass
-    `Request` itself.
+    `Request` itself. (Janus's own unit tests don't.)
   * The properties that do exist largely describe caching-relevant information.
 * Resolvers are functions that take Requests and return `Varying[types.result[x]] | null`.
   * Typically, this is done by initializing a return value of `new Varying(types.result.pending())`,
@@ -693,8 +689,8 @@ In the meantime, here's what we learned:
   * Any success surfaced in that resulting Varying will be written directly onto
     the Model as a data value.
   * By default, Reference attributes are marked as `transient`, so the data they
-    reference will not serialize with the Model. This may be overridden if you
-    so choose.
+    reference will not serialize with the Model. This may be overridden in your
+    `attribute` class definition if you so choose.
 
 Next Up
 =======
@@ -708,9 +704,9 @@ We will also take a deeper look at the Library facility we have been using this
 entire time, and introduce Manifest, which ties together many of the concepts you
 have been learning about to help you manage server-side rendering lifecycles.
 
-If you're feeling iffy about our description so far of exactly References and Apps
-and Views and Models glue together, it'll probably be more productive to move on
-to the next chapter and come back to this one once you have a little more context.
+If you're feeling iffy about our description so far of how exactly References and
+Apps and Views and Models glue together, it'll probably be more productive to move
+on to the next chapter and come back to this one once you have a little more context.
 
 In either case, grab one last coffee and hop on over to our [penultimate chapter](/theory/app-and-applications)
 in this theory-oriented overview of Janus.

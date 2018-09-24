@@ -22,7 +22,7 @@ with code that looks something like this:
 
 ~~~
 const v = new Varying(new List([ 1, 2, 3, 4, 5 ]));
-return v.map(l => l.map(x => x * 2));
+return inspect(v.map(l => l.map(x => x * 2)));
 ~~~
 
 This way, we retain our fundamental property that we account for all values for
@@ -31,17 +31,17 @@ the transformed list, and we wrap that in a Varying to ensure that if our refere
 changes&mdash;if we start talking about a different list altogether&mdash;that
 we are still computing the correct result.
 
-> There _is_ actually an important difference, at least in this early version of
-> Janus: Maps and Lists perform their transformations _eagerly_. Unlike Varying,
-> which doesn't do any work unless it has to, Map and List don't (yet) carry this
-> same property.
+> There _is_ actually an important practical difference between Varying and these
+> data structures, at least in this early version of Janus: Maps and Lists perform
+> their transformations _eagerly_. Unlike Varying, which doesn't do any work unless
+> it has to, Map and List don't (yet) know how to do this.
 
 So, bear that in mind as we dive in and start poking around Lists, Maps, and Models.
 
 First, we'll talk about some (but not all) of the basic manipulation operations
 on Lists. You can find a full listing in the [API Reference](/api/list). Then,
 we'll briefly overview some of the transformation options available for Lists
-before diving into how they actually work behind the scenes. We'll then close
+before diving into how they actually work behind the scenes. We will then close
 on `Enumerable`, `Traversal`, and how Lists and Maps relate to each other.
 
 List Basics
@@ -58,11 +58,11 @@ return [
 ~~~
 
 You can also `@deserialize` a List from plain data. The `@modelClass` class property
-can be defined to instantiate all elements as some classtype. The Model class must
+can be defined to instantiate all elements as some classtype. The `modelClass` must
 also have a `@deserialize` (`Model` does).
 
 ~~~
-const Person = Model.build();
+class Person extends Model {}
 class People extends List {
   static get modelClass() { return Person; }
 }
@@ -76,7 +76,7 @@ return [
 There's a shortcut for this lengthy definition:
 
 ~~~
-const Person = Model.build();
+class Person extends Model {}
 const People = List.of(Person);
 
 return inspect(People.deserialize([ { name: 'Gertrude' }, { name: 'Alice' } ]));
@@ -221,7 +221,7 @@ in multi-element `.add`) of bulk-updating lists an element at a time, left-to-ri
 and innocuous-looking list manipulation code can cause major performance problems.
 
 In general, performant List folding is the last major unsolved problem in Janus
-at the time of writing. There are many issues to be solved and optimizations to
+at the time of writing. There are many processes to be improved and optimizations to
 be made throughout the framework, but in this area lie the only questions to which
 we have no satisfactory answers. Laziness and transducers can improve the performance
 of List transformations in general, and there are plans to pursue these approaches.
@@ -252,14 +252,15 @@ of List transformations. There are three events total.
   are provided with the event: `elem` is the element itself, and `idx` is its new
   index.
 * `moved` indicates that some element has just moved within the list. Any elements
-  between its old and the new indices shift accordingly, and all other elements
-  remain in place. Three arguments are given: `elem`, `newIdx`, and `oldIdx`.
+  between its old and new index shift accordingly, and all other elements remain
+  in place. Three arguments are given: `elem`, `newIdx`, and `oldIdx`.
 * `removed` indicates that some element was just removed from the list. Two arguments
   are given, `elem` and `oldIdx`.
 
 Behind the scenes, all Lists have a `.list` property, which is an array backing
 the structure. The `.list` has, at all times, an accurate representation of the
-List data.
+List data, so you can use it to efficiently compute your initial values. Alternatively,
+you can use `for..of` via ES6 iterators.
 
 Let's put all of this in practice and, in continuation of the previous section,
 implement our own fold which sums all the numbers in a list. Janus provides one
@@ -306,9 +307,38 @@ would lead to the entire list being recomputed were the first element to change.
 > as we will cover in the [resource management](/theory/resource-management)
 > chapter, and as done in the [actual implementation of sum](https://github.com/clint-tseng/janus/blob/master/src/collection/derived/sum-fold.coffee).
 
-~~~ noexec
-// TODO: do we want to include a crazier example?
+We'll try something a bit more advanced here, so you get more of a taste of how
+these things tend to go. Let's trying implementing `.reverse()`, which unlike
+sum is not provided by default.
+
 ~~~
+const reverse = (list) => {
+  const result = new List(list.list.slice().reverse());
+
+  list.on('added', (elem, idx) => { result.add(elem, result.length - idx); });
+  list.on('removed', (_, idx) => { result.removeAt(result.length - 1 - idx); });
+  list.on('moved', (_, to, from) =>
+    { result.moveAt(result.length - 1 - from, result.length - 1 - to); });
+
+  return result;
+};
+
+const list = new List([ 2, 4, 6, 8 ]);
+const reversed = reverse(list);
+
+list.add(10);
+list.remove(4);
+list.move(2, -1);
+
+return [ list, reversed ].map(inspect);
+~~~
+
+Here, we do actually race about the order of our elements, and so we have to pay
+attention to `moved` events as well. Note how when writing internal code like this,
+we tend to use the `…At` methods rather than the reference-based methods. We don't
+know what the structures might contain, and whether duplicates might exist, so
+since we have index information from our source list, we can apply that information
+when manipulating our transformed list.
 
 A Broader Perspective: Enumerable, Traversal
 ============================================
@@ -329,8 +359,8 @@ Map-like structures with little to no discrimination between the two.
 
 One of the most powerful applications of this property is Traversal, which provides
 a purely functional, descriptive interface for traversing any arbitrary structure
-of Lists and Maps. We won't do much explanation here; more information on Traversals
-may be found in its own [Further Reading chapter](/further-reading/traversal), but
+of Lists and Maps. We won't do much explanation here&mdash;more information on Traversal
+may be found in its own [Further Reading chapter](/further-reading/traversal)&mdash;but
 here are some simple examples to give you a sense for them:
 
 ~~~
@@ -360,6 +390,9 @@ may change if it's a Varying) at any depth in a structure. Our test data is a
 complete mess of Maps and Lists, but because we can just treat the entire problem
 as a per-key/value-pair decision on what to do, we never have to worry about that
 detail.
+
+Importantly, just like our various List and Map transformations, this Traversal
+results in a Varying that will update its answer as our data structures change.
 
 Here's another example, perhaps more directly practical&mdash;it can sometimes
 arise that some data structure wants to be serialized one way in some scenarios,
@@ -419,8 +452,8 @@ return [
 
 In this example, we have two different serialization processes. By default, we
 just use Janus's built-in process, which outputs all its data to plain Javascript
-structures in a very directly translation. And perhaps this is useful in some
-spots in our application.
+structures in a very direct translation. And perhaps this is useful in some spots
+in our application.
 
 But in other cases, some API doesn't want to know about the full Person data, it
 only wants the integer `id` value. So we build a new serializer that delegates
@@ -464,7 +497,7 @@ the same functionality, just with some Janus philosophy incorporated.
     chapter before you do this.
 * Lists and Maps are both Enumerable, which guarantees some basic get/set methods,
   but more importantly guarantees the ability to enumerate their keys as a List.
-  * For Lists, this enumeration is just the numeric array indices it has.
+  * For Lists, this enumeration is just a List of numeric array indices.
   * But by unifying Lists and Maps in this way, we gain access to powerful
     transformations like Traversal.
 

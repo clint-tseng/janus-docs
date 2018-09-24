@@ -89,7 +89,7 @@ to only get individual values at a time if you can help it.
 > To expand on that, think about what it means to `.watch('nested')` here. Recall
 > that Varying will not react unless the value _actually changes_, and that comparison
 > is done with `===`. So unless the actual substructure object itself is replaced
-> with another one (eg the reference changes), `.watch`ing it isn't likely to be
+> with another one (ie the reference changes), `.watch`ing it isn't likely to be
 > very useful.
 >
 > In addition, when you `.get('nested')`, be very careful not to modify the structure
@@ -234,8 +234,8 @@ of that Map.
 > directly reference `people` as a closure scope variable from the template. There
 > are some ways around this, usually based around View Models or simply copying
 > parent references to child data, but this is actually an open, unsolved problem
-> in Janus at time of writing: how do we offer this kind of context in a sane,
-> safe way?
+> in Janus at time of writing: how do we offer this kind of parent/child context
+> in a sane, safe way?
 
 This time around, rather than all the homework of `.enumeration().flatMap(key => data.watch(key).map(value =>  …))`
 we use `.enumeration().mapPairs((key, value) => …)`, which is a convenience
@@ -1003,6 +1003,44 @@ Similarly, we create a helper for our editor view (which you could imagine using
 across all the different views in your application) which, for some field, checks
 whether any of the subject Model's `.issues` relates to that field, and applies
 an `invalid` class if so.
+
+Traits
+======
+
+One final note before we close here: much like you can bundle mutators together
+with `template()`, and you can nest `template`s within `template`s, there is a
+similar bundling mechanism for Models: `Trait`.
+
+~~~
+const { floor } = Math;
+const BioDates = Trait(
+  attribute('birth', attribute.Date),
+  attribute('death', attribute.Date),
+  bind('age_at_death', from('birth').and('death').all.map((b, d) =>
+    floor((d.getTime() - b.getTime()) / 1000 / 3600 / 24 / 365))),
+  validate(from('birth').and('death').all.map((b, d) => (d > b)
+    ? types.validity.valid() : types.validity.invalid()))
+);
+
+const BioDetails = Trait(
+  BioDates,
+  attribute('name', attribute.Text)
+);
+
+const Person = Model.build(
+  BioDetails,
+  attribute('hometown', attribute.Text)
+);
+
+const ada = new Person({
+  name: 'Ada',
+  birth: new Date('1815-12-10'),
+  death: new Date('1852-11-27'),
+  hometown: 'London'
+});
+
+return inspect.panel(ada);
+~~~
 
 Recap
 =====
