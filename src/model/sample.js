@@ -95,9 +95,11 @@ const Sample = Model.build(
   bind('result.raw', from('compiled.main').and('compiled.postprocess')
     .all.flatMap((main, post) => main.flatMap((f) => f().flatMap(post)))),
 
-  // TODO: perhaps don't bother with any of this at all if noexec.
-  bind('result.final', from('result.raw').and('noexec').all.flatMap((result, noexec) =>
-    (noexec === true) ? inert() : result))
+  // apply noexec and inspect flags.
+  bind('result.final', from('result.raw').and('noexec').and('inspect')
+    .all.flatMap((result, noexec, shouldInspect) => (noexec === true)
+      ? inert()
+      : ((shouldInspect === true) ? result.flatMap((x) => success(inspect(x))) : result)))
 );
 
 const Samples = List.of(Sample);

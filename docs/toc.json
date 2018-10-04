@@ -59,7 +59,35 @@
   "path": "/cookbook"
 }, {
   "title": "API Reference",
-  "path": "/reference"
+  "path": "/api",
+  "children": [{
+    "title": "Varying",
+    "path": "/api/varying"
+  }, {
+    "title": "Case Classes",
+    "path": "/api/case"
+  }, {
+    "title": "from Expressions",
+    "path": "/api/from"
+  }, {
+    "title": "Base",
+    "path": "/api/base"
+  }, {
+    "title": "Collections: Map, List, Set",
+    "path": "/api/collections"
+  }, {
+    "title": "Models: Model, Attribute, Trait",
+    "path": "/api/models"
+  }, {
+    "title": "Resolver: and Request",
+    "path": "/api/resolver"
+  }, {
+    "title": "Views: DomView, template, find",
+    "path": "/api/views"
+  }, {
+    "title": "App, Library, and Manifest",
+    "path": "/api/app-library-manifest"
+  }]
 }, {
   "title": "Community",
   "path": "/community",
