@@ -852,9 +852,9 @@ Model Validation
 The very last topic to overview about Models is that of validation. Janus provides
 a relatively lean interface for model validation: you may define one or more validation
 rules. Each of these are just `from` expressions that result in one of the `janus.types.validity`
-case classes: `valid` or `invalid`. There are standard methods to get the outstanding
-failing issues, or all the validation bindings, or just whether the Model is passing
-validation or not.
+case classes: `valid`, `warning`, or `error`. There are standard methods to get
+the outstanding failing issues, or all the validation bindings, or just whether
+the Model is passing validation or not.
 
 We want to provide a standard interface at all here, for reasons much like our
 motivations behind [case classes](/theory/case-classes#a-practical-example) in
@@ -868,9 +868,9 @@ some error page instead.
 On the other hand, we want to provide the smallest interface possible, to enable
 a broad range of approaches to the problem space. Do you want to encode information
 about which fields are failing the validation? Nest it (as another case class,
-perhaps?) within the `valid`/`invalid` class. Do you want to declare validation
-rules in some way other than the Janus default? You have exactly one method to
-implement to make the standard machinery work.
+perhaps?) within the `valid`/`warning`/`error` class. Do you want to declare
+validation rules in some way other than the Janus default? You have exactly one
+method to implement to make the standard machinery work.
 
 > That one method you'd need to implement, by the way, is `.validations()`, which
 > ought to return a `List[types.validity]`.
@@ -890,12 +890,12 @@ const Dog = Model.build(
   }),
 
   validate(from('name').map(name => (name == null)
-    ? types.validity.invalid('All pets must have names.')
+    ? types.validity.error('All pets must have names.')
     : types.validity.valid())),
 
   validate(from('status').and('owner').all.map((status, owner) =>
     ((owner != null) && (status !== 'adopted'))
-      ? types.validity.invalid('Only adopted pets may have owners assigned.')
+      ? types.validity.error('Only adopted pets may have owners assigned.')
       : types.validity.valid()))
 );
 
@@ -914,13 +914,13 @@ Translating this information into feedback for the user is left to applications
 to work out. Here is one example of how it may be done:
 
 ~~~
-const { valid, invalid } = types.validity;
+const { valid, error } = types.validity;
 const Issue = Model.build();
 const isBlank = (x => (x == null) || (x === ''));
 
 // model helpers to reduce some boilerplate:
 const check = (condition, message, fields) => (...args) => condition(...args)
-  ? invalid(new Issue({ message, fields })) : valid();
+  ? error(new Issue({ message, fields })) : valid();
 
 const Dog = Model.build(
   attribute('name', attribute.Text),
@@ -1019,7 +1019,7 @@ const BioDates = Trait(
   bind('age_at_death', from('birth').and('death').all.map((b, d) =>
     floor((d.getTime() - b.getTime()) / 1000 / 3600 / 24 / 365))),
   validate(from('birth').and('death').all.map((b, d) => (d > b)
-    ? types.validity.valid() : types.validity.invalid()))
+    ? types.validity.valid() : types.validity.error()))
 );
 
 const BioDetails = Trait(
