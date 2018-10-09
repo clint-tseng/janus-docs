@@ -7,14 +7,14 @@ const { Article } = require('./model/article');
 
 const { think } = require('./view/thinker');
 
-window.init = (tocData, articleData) => {
+window.init = (tocData, apiData, articleData) => {
   const path = window.location.pathname;
-  const app = baseApp(path);
+  const app = baseApp(path, apiData);
 
-  app.set('toc', Tocs.deserialize(tocData))
+  app.set('toc', Tocs.deserialize(tocData));
   app.cacheArticle(path, Article.deserialize(articleData));
 
-  const appView = app.view(app)
+  const appView = app.view(app);
   appView.attach($('body'));
   appView.wireEvents();
 

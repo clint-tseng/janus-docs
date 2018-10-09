@@ -7,8 +7,10 @@ $color-accent2: #057d7d
 $color-background: #f7f7f7
 $color-header-background-left: $color-accent
 $color-header-background-right: $color-accent2
-$color-sidebar-background: #33333b
 $color-sidebar-background-active: #44444b
+$color-sidebar-background: #33333b
+$color-sidebar-background2: #2d2d31
+$color-sidebar-background3: #1c1c22
 $color-splash: #085b5b
 $color-heading: #000
 $color-success: #4c4
@@ -212,10 +214,19 @@ header
   box-shadow: 0 -0.6em 0.6em rgba(0, 0, 0, 0.45)
   overflow-x: hidden
   overflow-y: auto
-  padding-top: $header-height + $main-padding
+  padding-top: $main-padding
   position: fixed
   right: auto
+  top: $header-height - 1rem
   width: $sidebar-width
+
+  $scrollbar-width: 0.9em
+  &::-webkit-scrollbar
+    background: rgba(0, 0, 10, 0.8)
+    width: $scrollbar-width
+
+  &::-webkit-scrollbar-thumb
+    background: $color-accent
 
   .toc-entry
     $vpadding: 0.8rem
@@ -226,7 +237,7 @@ header
         background: $color-accent
 
     a
-      border-bottom: 1px solid #2d2d31
+      border-bottom: 1px solid $color-sidebar-background2
       color: #fff
       display: block
       font-family: $font-title
@@ -266,6 +277,113 @@ header
       display: none
     &.prefix .toc-children
       display: block
+
+  .api-browser
+    background: $color-sidebar-background3
+    color: #fff
+
+    .api-find input
+      background: $color-sidebar-background2
+      border: none
+        bottom: 1px solid $color-accent2
+      color: #fff
+      font-family: $font-body
+      font-size: 1.3em
+      outline: none
+      padding: 0.8em 1em
+        left: $sidebar-padding
+      width: 100%
+
+    .api-sections
+      padding-top: 1em
+
+    .api-section
+      .api-section-header
+        background: none
+        border: none
+        color: #fff
+        outline: none
+        padding: 0.9em 0 0.3em $sidebar-padding
+        position: relative
+        text-align: left
+        width: 100%
+
+        &:before
+          $tri-size: 0.4em
+          content: ''
+          border: $tri-size solid transparent
+            bottom: none
+            top-color: #fff
+          left: 1em
+          position: absolute
+          top: 1.4em
+          transform: rotate(-90deg)
+
+        h2
+          font-family: $font-heading
+          font-size: 1.2em
+          font-weight: bold
+
+        .api-section-objects
+          display: none
+
+      &.expanded
+        .api-section-header:before
+          transform: rotate(0deg)
+        .api-section-objects
+          display: block
+
+    .api-object
+      padding-top: 0.7em
+
+      .api-object-name
+        border-bottom: 0
+        border-top: 2px solid #ddd
+        font-family: $font-monospace
+        font-size: 1.6em
+        font-weight: normal
+        padding-left: $sidebar-padding
+
+      ul
+        padding-bottom: 0
+
+    .api-objsection
+      padding-bottom: 0.8em
+
+      .api-objsection-name
+        color: #aaa
+        font-family: $font-body
+        font-size: 1.2em
+        padding-left: $sidebar-padding
+        padding-top: 0.5em
+
+    .api-objsection-members li:last-child .api-member-name
+      border-bottom: none
+
+    .api-member
+      position: relative
+
+      .api-member-name
+        font-family: $font-monospace
+        font-size: 1.2em
+        padding: 0.5em
+          left: $sidebar-padding
+
+      .api-member-return-type
+        background: #111
+        border-radius: 0.15em
+        font-family: $font-monospace
+        padding: 0.3em 0.4em 0.2em
+        pointer-events: none
+        position: absolute
+        right: 0.8em
+        top: 0.5em
+
+    &.finding
+      .api-object, .api-objsection, .api-member
+        display: none
+        &.match
+          display: block
 
 #main
   background: $color-background
@@ -516,7 +634,7 @@ footer
 
   h4
     background-color: #eee
-    border-top: 1px solid #ddd
+    border-top: 1px solid #e4e4e4
     font-family: $font-monospace
     font-size: 1.3em
     margin: 0 #{-$main-padding} 1.5em

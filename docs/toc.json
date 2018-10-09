@@ -60,33 +60,53 @@
 }, {
   "title": "API Reference",
   "path": "/api",
-  "children": [{
-    "title": "Varying",
-    "path": "/api/varying"
+  "sections": [{
+    "title": "Core",
+    "children": [
+      "Varying",
+      "Case",
+      "match",
+      "otherwise",
+      "from",
+      "Base"
+    ]
   }, {
-    "title": "Case Classes",
-    "path": "/api/case"
+    "title": "Collections",
+    "children": [
+      "List",
+      "Set",
+      "Map",
+      "Traversal"
+    ]
   }, {
-    "title": "from Expressions",
-    "path": "/api/from"
+    "title": "Models",
+    "children": [
+      "Model",
+      "Trait",
+      "attribute",
+      "bind",
+      "validate",
+      "transient",
+      "dēfault",
+      "Request",
+      "Resolver"
+    ]
   }, {
-    "title": "Base",
-    "path": "/api/base"
+    "title": "Views",
+    "children": [
+      "View",
+      "DomView",
+      "find",
+      "template",
+      "mutators"
+    ]
   }, {
-    "title": "Collections: Map, List, Set",
-    "path": "/api/collections"
-  }, {
-    "title": "Models: Model, Attribute, Trait",
-    "path": "/api/models"
-  }, {
-    "title": "Resolver: and Request",
-    "path": "/api/resolver"
-  }, {
-    "title": "Views: DomView, template, find",
-    "path": "/api/views"
-  }, {
-    "title": "App, Library, and Manifest",
-    "path": "/api/app-library-manifest"
+    "title": "Application",
+    "children": [
+      "App",
+      "Library",
+      "Manifest"
+    ]
   }]
 }, {
   "title": "Community",

@@ -32,15 +32,16 @@ if (isApiRef === true) {
   // API REFERENCE
   // set some things up for api mode.
   dom.addClass('apiref');
-  article.exports = {};
+  article.exports = [];
+  const apiPath = '/api/' + /docs\/api\/([a-z]+).md$/.exec(infile)[1];
 
   // run linearly through the document and build an API model.
   let ptr = dom.children(':first');
   let obj, section, member;
   do {
     if (ptr.is('h1')) {
-      obj = { name: ptr.text(), sections: [], members: [] };
-      article.exports[obj.name] = obj;
+      obj = { name: ptr.text(), path: apiPath, sections: [], members: [] };
+      article.exports.push(obj);
       reanchor(ptr);
     } else if (ptr.is('h2')) {
       const name = ptr.text();
@@ -65,6 +66,12 @@ if (isApiRef === true) {
         .replace(/->/g, '→');
       ptr.text(invocation);
       member.invocations.push(invocation);
+
+      // TODO: what if different invocations have different types? doesn't exist yet though.
+      if (member.return_type == null) {
+        const returnType = /: ([^:]+)$/.exec(invocation);
+        if (returnType != null) member.return_type = returnType[1];
+      }
 
       ptr.prop('id', '');
     } else if (ptr.is('ul')) {
