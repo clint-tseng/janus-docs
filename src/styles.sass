@@ -233,7 +233,7 @@ header
     $indent: 1.5rem
 
     &.active
-      a, a:hover
+      > a, > a:hover
         background: $color-accent
 
     a
@@ -350,6 +350,9 @@ header
       .api-object-sections
         display: none
 
+      &.navigated .api-object-name
+        background: $color-accent
+
       &.navigated, &.match
         .api-object-sections
           display: block
@@ -359,6 +362,7 @@ header
 
       .api-objsection-name
         color: #aaa
+        cursor: default
         font-family: $font-body
         font-size: 1.2em
         padding-left: $sidebar-padding
