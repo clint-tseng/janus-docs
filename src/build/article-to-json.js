@@ -27,7 +27,7 @@ const levelTypes = { '@': 'class', '::': 'class', '#': 'instance', '.': 'instanc
 const typeTypes = { '@': 'method', '#': 'method', '::': 'property', '.': 'property' };
 
 // separate paths for apirefs, articles.
-const isApiRef = infile.includes('docs/api');
+const isApiRef = infile.includes('docs/api/');
 if (isApiRef === true) {
   // API REFERENCE
   // set some things up for api mode.
@@ -99,7 +99,7 @@ if (isApiRef === true) {
 } else {
   // ARTICLE
   // move around some of the markup.
-  dom.find('h2').each((_, h2) => { reanchor($(h2)); });
+  dom.find('h1, h2').each((_, h) => { reanchor($(h)); });
 }
 
 // extract code samples as long as they exist in the document.
