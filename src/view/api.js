@@ -110,7 +110,9 @@ const ApiBrowserObjectView = DomView.build($(`
     <div class="api-object-sections"/>
   </div>`), template(
 
-  find('.api-object').classed('match', from('match')),
+  find('.api-object')
+    .classed('match', from('match'))
+    .classed('navigated', from('navigated')),
   find('.api-object-name')
     .text(from('object').watch('name'))
     .attr('href', from('object').watch('path')),
@@ -122,13 +124,13 @@ const ApiBrowserObjectView = DomView.build($(`
 // TOC API SECTION
 
 class ApiBrowserSection extends Model.build(
-  dēfault('expanded.explicit', false),
+  dēfault('expanded.explicit', null),
   bind('expanded.match', from('objects').flatMap(anyMatch)),
   bind('expanded.navigated', from('objects').flatMap(anyByAttr('navigated'))),
   bind('expanded.final', from('expanded.explicit')
     .and('expanded.match')
     .and('expanded.navigated')
-    .all.map((explicit, match, navigated) => explicit || match || navigated))
+    .all.map((explicit, match, navigated) => match || ((explicit !== null) ? explicit : navigated)))
 ) {
   _initialize() {
     // ditto; we do this in this ugly way to soften missing objects.
@@ -156,7 +158,14 @@ const ApiBrowserSectionView = DomView.build($(`
     .classed('match', from('match'))
     .classed('expanded', from('expanded.final')),
   find('.api-section-title').text(from('section.title')),
-  find('.api-section-objects').render(from('objects'))
+  find('.api-section-objects').render(from('objects')),
+
+  find('button').on('click', (_, subject) => {
+    // do nothing if a find operation is in progress:
+    if (subject.get('browser').get('finding') === true) return;
+    // otherwise, do the needful:
+    subject.set('expanded.explicit', !subject.get('expanded.final'));
+  })
 ));
 
 
@@ -165,6 +174,7 @@ const ApiBrowserSectionView = DomView.build($(`
 
 class ApiBrowser extends Model.build(
   attribute('find', attribute.Text),
+  bind('finding', from('find').map(nonblank)),
   bind('path', from('app').watch('path'))
 ) {
   _initialize() {
