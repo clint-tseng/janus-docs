@@ -1,6 +1,6 @@
 const { Model, attribute, bind, dēfault, List, DomView, template, find, from } = require('janus');
 const $ = require('janus-dollar');
-const { nonblank } = require('../util/util');
+const { nonblank, not } = require('../util/util');
 
 // TODO: there's probably a better way to do this but my brain is mush at this
 // point and i just gotta power through this nightmare gigantoproject.
@@ -185,14 +185,20 @@ class ApiBrowser extends Model.build(
 
 const ApiBrowserView = DomView.build($(`
   <div class="api-browser">
-    <div class="api-find"/>
+    <div class="api-find">
+      <div class="api-find-input"/>
+      <button class="api-find-clear">&times;</button>
+    </div>
     <div class="api-sections"/>
   </div>`), template(
 
   find('.api-browser').classed('finding', from('find').map(nonblank)),
-  find('.api-find').render(from.attribute('find'))
+  find('.api-find-input').render(from.attribute('find'))
     .context('edit')
     .options({ placeholder: 'Find…' }),
+  find('.api-find-clear')
+    .classed('hide', from('finding').map(not))
+    .on('click', (_, subject) => { subject.set('find', ''); }),
   find('.api-sections').render(from('sections'))
 ));
 
