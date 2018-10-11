@@ -31,6 +31,9 @@ $font-body: ratio, "Helvetica Neue", Helvetica, Arial, sans-serif
 $font-monospace: consolas, monaco, monospace
 
 $z-mobile-toc: 1
+$z-toc-api-object: 1
+$z-api-find: 2
+$z-toc-toplevel-entry: 3
 $z-header-base: 100
 $z-header: 101
 $z-repl: 150
@@ -212,21 +215,26 @@ header
   @include fill
   background: $color-sidebar-background
   box-shadow: 0 -0.6em 0.6em rgba(0, 0, 0, 0.45)
-  overflow-x: hidden
-  overflow-y: auto
-  padding-top: $main-padding
   position: fixed
   right: auto
-  top: $header-height - 1rem
   width: $sidebar-width
 
-  $scrollbar-width: 0.9em
-  &::-webkit-scrollbar
-    background: rgba(0, 0, 10, 0.8)
-    width: $scrollbar-width
+  nav
+    @include fill
+    overflow-x: hidden
+    overflow-y: auto
+    top: $header-height - 1rem
 
-  &::-webkit-scrollbar-thumb
-    background: $color-accent
+    $scrollbar-width: 0.9em
+    &::-webkit-scrollbar
+      background: rgba(0, 0, 10, 0.8)
+      width: $scrollbar-width
+
+    &::-webkit-scrollbar-thumb
+      background: $color-accent
+
+    > ul
+      padding-top: $main-padding
 
   .toc-entry
     $vpadding: 0.8rem
@@ -249,6 +257,11 @@ header
       &:hover
         background: $color-sidebar-background-active
         transition: none
+
+    > a
+      // get the API Reference header to show over the 
+      position: relative
+      z-index: $z-toc-toplevel-entry
 
     ul
       padding-bottom: 1.5rem
@@ -282,17 +295,26 @@ header
     background: $color-sidebar-background3
     color: #fff
 
-    .api-find input
-      background: $color-sidebar-background2
-      border: none
-        bottom: 1px solid $color-accent2
-      color: #fff
-      font-family: $font-body
-      font-size: 1.3em
-      outline: none
-      padding: 0.8em 1em
-        left: $sidebar-padding
-      width: 100%
+    .api-find
+      $overdraw: 2rem
+      background: $color-sidebar-background
+      border-bottom: 1px solid $color-accent2
+      margin-top: -$overdraw
+      padding-top: $overdraw
+      position: sticky
+      top: 0
+      z-index: $z-api-find
+
+      input
+        background: $color-sidebar-background2
+        border: none
+        color: #fff
+        font-family: $font-body
+        font-size: 1.3em
+        outline: none
+        padding: 0.8em 1em
+          left: $sidebar-padding
+        width: 100%
 
     .api-sections
       padding-top: 1em
@@ -337,12 +359,16 @@ header
       padding-top: 0.7em
 
       .api-object-name
+        background: $color-sidebar-background3
         border-bottom: 0
-        border-top: 2px solid #ddd
+        border-top: 2px solid #666
         font-family: $font-monospace
         font-size: 1.6em
         font-weight: normal
         padding-left: $sidebar-padding
+        position: sticky
+        top: 5.5rem
+        z-index: $z-toc-api-object
 
       ul
         padding-bottom: 0
