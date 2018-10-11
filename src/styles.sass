@@ -337,7 +337,7 @@ header
         border: none
         color: #fff
         outline: none
-        padding: 0.9em 0 0.3em $sidebar-padding
+        padding: 0.9em 0 1rem $sidebar-padding
         position: relative
         text-align: left
         width: 100%
@@ -368,12 +368,11 @@ header
           display: block
 
     .api-object
-      padding-top: 0.7em
-
       .api-object-name
         background: $color-sidebar-background3
         border-bottom: 0
-        border-top: 2px solid #666
+        border-top: 3px solid $color-sidebar-background
+        box-shadow: 0 0.3rem 0 transparentize($color-sidebar-background3, 0.6)
         font-family: $font-monospace
         font-size: 1.6em
         font-weight: normal
@@ -381,6 +380,9 @@ header
         position: sticky
         top: 5.5rem
         z-index: $z-toc-api-object
+
+        &:hover
+          background: $color-sidebar-background-active
 
       ul
         padding-bottom: 0
