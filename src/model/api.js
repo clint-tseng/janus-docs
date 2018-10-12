@@ -17,7 +17,7 @@ class ApiObject extends Model.build(
   _initialize() {
     const lookup = {};
     for (const member of this.get('members'))
-      lookup[member.get('name')] = member;
+      lookup[member.get('ref')] = member;
     this.set('lookup', lookup);
   }
 }

@@ -275,10 +275,8 @@ can be called to reify the expression into an actual `Varying`.
 
 Calling `.all` again in the same chain just returns the chain itself as-is.
 
-### #map
+### #map !AS #map-all
 #### x: FromTerminus[…\*] => x.map(…\* -> U): FromTerminus[U]
-
-TODO: this link won't work; need to dedupe somehow.
 
 Maps the chained data.
 
@@ -296,7 +294,7 @@ return [
 ].map(point);
 ~~~
 
-### #flatMap
+### #flatMap !AS #flatMap-all
 #### x: FromTerminus[…\*] => x.flatMap(…\* -> U|Varying[U]): FromTerminus[U]
 
 Like `#map`, but should the mapping function return a `Varying` it will be flattened,

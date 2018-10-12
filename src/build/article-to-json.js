@@ -49,16 +49,23 @@ if (isApiRef === true) {
       obj.sections.push(section);
       reanchor(ptr);
     } else if (ptr.is('h3')) {
-      const name = ptr.text();
+      const rawname = ptr.text();
+      const nameparts = /^(.+) !AS (.+)$/.exec(rawname);
+      const name = (nameparts == null) ? rawname : nameparts[1];
+      const ref = (nameparts == null) ? rawname : nameparts[2];
+
       const level = levelTypes[name[0]];
       const type = typeTypes[name[0]];
-      member = { name, level, type, invocations: [] };
+      member = { name, ref, level, type, invocations: [] };
       obj.members.push(member);
-      section.members.push(name);
+      section.members.push(ref);
 
       ptr.addClass('level-' + level);
       ptr.addClass('type-' + type);
-      ptr.prop('id', (level === 'class') ? name : name.slice(1));
+
+      // fixup the on-page name and id.
+      ptr.text(name);
+      ptr.prop('id', (level === 'class') ? ref : ref.slice(1));
       reanchor(ptr);
     } else if (ptr.is('h4')) {
       const invocation = ptr.text()

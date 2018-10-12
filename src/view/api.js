@@ -45,7 +45,7 @@ const ApiBrowserMemberView = DomView.build($(`
   find('.api-member-name')
     .text(from('member').watch('name'))
     .attr('href', from('object').watch('path')
-      .and('member').watch('name').map((name) => name.replace(/^#/, ''))
+      .and('member').watch('ref').map((name) => name.replace(/^#/, ''))
       .all.map((path, part) => `${path}#${part}`)),
   find('.api-member-return-type').text(from('member').watch('return_type'))
 ));
@@ -62,8 +62,8 @@ class ApiBrowserObjectSection extends Model.build(
     const object = this.get('object');
     const browser = this.get('browser');
     const members = [];
-    for (const name of this.get('section').get('members')) {
-      const member = object.get(`lookup.${name}`);
+    for (const ref of this.get('section').get('members')) {
+      const member = object.get(`lookup.${ref}`);
       if (member != null)
         members.push(new ApiBrowserMember({ member, object, browser }));
     }
