@@ -27,6 +27,7 @@ const levelTypes = { '@': 'class', '::': 'class', '#': 'instance', '.': 'instanc
 const typeTypes = { '@': 'method', '#': 'method', '::': 'property', '.': 'property' };
 
 // separate paths for apirefs, articles.
+const doc = { inspect: 'entity' }; // global directives
 const isApiRef = infile.includes('docs/api/');
 if (isApiRef === true) {
   // API REFERENCE
@@ -92,6 +93,12 @@ if (isApiRef === true) {
             member.impure = true;
           } else if (text.startsWith('!CURRIES')) {
             member.curries = true;
+          } else if (text.startsWith('!SAMPLES')) {
+            if (text.includes('inspect-panel')) {
+              doc.inspect = 'panel';
+            } else if (text.includes('inspect-entity')) {
+              doc.inspect = 'entity';
+            }
           }
           $(child).remove();
         }
@@ -124,7 +131,7 @@ while ((first = dom.children('pre:first')).length > 0) {
     const [ , subtype ] = /^$|^language-(.*)$/.exec(code.prop('class'));
 
     if (isApiRef === true)
-      sample.inspect = true;
+      sample.inspect = doc.inspect;
 
     if (subtype === 'noexec') {
       sample.noexec = true;
@@ -135,6 +142,12 @@ while ((first = dom.children('pre:first')).length > 0) {
     } else if (subtype === 'html') {
       sample.noexec = true;
       sample.language = 'xml';
+      sample.main = code.text();
+    } else if (subtype === 'inspect-entity') {
+      sample.inspect = 'entity';
+      sample.main = code.text();
+    } else if (subtype === 'inspect-panel') {
+      sample.inspect = 'panel';
       sample.main = code.text();
     } else {
       sample[subtype || 'main'] = code.text();

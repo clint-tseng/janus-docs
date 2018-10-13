@@ -97,9 +97,11 @@ const Sample = Model.build(
 
   // apply noexec and inspect flags.
   bind('result.final', from('result.raw').and('noexec').and('inspect')
-    .all.flatMap((result, noexec, shouldInspect) => (noexec === true)
-      ? inert()
-      : ((shouldInspect === true) ? result.flatMap((x) => success(inspect(x))) : result)))
+    .all.flatMap((result, noexec, inspectWith) =>
+      (noexec === true) ? inert() :
+      (inspectWith === 'entity') ? result.mapSuccess(inspect) :
+      (inspectWith === 'panel') ? result.flatMap((x) => success(inspect.panel(x))) :
+      result))
 );
 
 const Samples = List.of(Sample);
