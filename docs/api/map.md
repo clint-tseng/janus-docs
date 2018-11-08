@@ -40,21 +40,6 @@ return Map.deserialize({ a: 1, b: 2, c: 3 });
 
 ## Value Manipulation
 
-### #get
-#### .get(key: String): \*|null
-
-Gets the value associated with the given key. If no value exists there, `null`
-will be returned. Maps understand dot notation for nesting data.
-
-~~~ inspect-entity
-const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
-return [
-  map.get('name'),
-  map.get('nested'),
-  map.get('nested.name')
-];
-~~~
-
 ### #set
 
 Ultimately, all of these methods set some value or values into the `Map`, but
@@ -109,16 +94,16 @@ varying.set(4);
 return map;
 ~~~
 
-### #setAll
-#### .setAll({ String: \* }): void
+### #unsetAll
+#### .unsetAll({ String: \* }): void
 
 * !IMPURE
 
-Like `.set({ … })`, but all extant data on this `Map` is first cleared out entirely.
+Removes all data from this `Map`.
 
 ~~~
 const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
-map.setAll({ new_data: 'is here', obj: { nested_name: 'nested obj' } });
+map.unsetAll();
 return map;
 ~~~
 
@@ -139,7 +124,22 @@ map.unset('nested');
 return map;
 ~~~
 
-## Value Observation
+## Value Retrieval and Observation
+
+### #get
+#### .get(key: String): \*|null
+
+Gets the value associated with the given key. If no value exists there, `null`
+will be returned. Maps understand dot notation for nesting data.
+
+~~~ inspect-entity
+const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
+return [
+  map.get('name'),
+  map.get('nested'),
+  map.get('nested.name')
+];
+~~~
 
 ### #watch
 #### .watch(key: String): Varying[\*]
@@ -231,7 +231,7 @@ return map.shadow().shadow().shadow().original() === map;
 ## Mapping and Transformation
 
 ### #mapPairs
-#### .mapPairs(f: (key: String, value: \* -> \*)): Map
+#### .mapPairs(f: (key: String, value: T -> U)): Map
 
 Returns a new object of the same classtype and key structure as the original, but
 with values mapped by the mapping function `f`, which takes the `key` and `value`
@@ -246,7 +246,7 @@ return mapped;
 ~~~
 
 ### #flatMapPairs
-#### .flatMapPairs(f: (key: String, value: \* -> \*|Varying[\*])): Map
+#### .flatMapPairs(f: (key: String, value: T -> U|Varying[U])): Map
 
 Like `#mapPairs`, but as with the rest of Janus the addition of `flat` indicates
 that should the result of mapping function `f` be a `Varying`, then that `Varying`
