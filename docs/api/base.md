@@ -278,6 +278,8 @@ have called `#destroy`.
 When destruction does occur, the following operations happen in this order:
 
 * A `destroying` event is emitted on the marked object.
+  * As a result of this, by default if the object has been added to any `List`s
+    it will be automatically removed from them.
 * All listeners the object held on other objects via `#listenTo` are removed.
 * All observations the object held on `Varying`s via `#reactTo` are stopped.
 * All listeners _to_ this object are removed, whether they were created via `#on`
