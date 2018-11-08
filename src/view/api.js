@@ -158,7 +158,12 @@ const ApiBrowserSectionView = DomView.build($(`
     .classed('match', from('match'))
     .classed('expanded', from('expanded.final')),
   find('.api-section-title').text(from('section.title')),
-  find('.api-section-objects').render(from('objects')),
+  find('.api-section-objects')
+    .render(from('objects'))
+    .on('click', '.api-object-name', (_, subject) => {
+      if (subject.get('expanded.explicit') === false)
+        subject.unset('expanded.explicit');
+    }),
 
   find('button').on('click', (_, subject) => {
     // do nothing if a find operation is in progress:
