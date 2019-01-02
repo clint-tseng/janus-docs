@@ -373,6 +373,41 @@ factor.set(1.5);
 return mapped;
 ~~~
 
+### #mapPairs
+#### .mapPairs(f: (index: Int, value: T -> U)): List[U]
+
+Like [`#map`](#map), but provides the mapping function `f` with arguments `(index, value)`
+rather than just the `value`. The mapped list will be eagerly updated until it
+is `destroy()`ed.
+
+~~~
+const list = new List([ 2, 3, 4, 7, 11 ]);
+const mapped = list.mapPairs((idx, num) => `Prime number ${idx + 1} is ${num}`);
+
+list.add(13);
+
+return mapped;
+~~~
+
+### #flatMapPairs
+#### .flatMapPairs(f: (index: Int, value: T -> U|Varying[U])): List[U]
+
+Like [`#flatMap`], but provides the mapping function `f` with arguments `(index, value)`
+rather than just the `value`. The flatmapped list will be eagerly updated until
+it is `destroy()`ed.
+
+~~~
+const list = new List([ 2, 3, 4, 7, 11 ]);
+const prefix = new Varying('Prime');
+const mapped = list.flatMapPairs((idx, num) =>
+  prefix.map((str) => `${str} number ${idx + 1} is ${num}`));
+
+prefix.set('Cool');
+list.add(13);
+
+return mapped;
+~~~
+
 ### #filter
 #### .filter(f: T -> Boolean|Varying[Boolean]): List[T]
 
@@ -395,8 +430,30 @@ threshold.set(3);
 return filtered;
 ~~~
 
+### #take
+#### .take(n: Int|Varying[Int]): List[T]
+
+Given an integer `n` or a `Varying` containing an integer `n`, returns a new List
+which will always contain at most the first `n` elements of the original list.
+Should `n` be larger than the list length, the entire list will be returned, and
+it will be the same length as the original list.
+
+Should the original list `l` change, the taken result list will be eagerly updated
+until it is `.destroy()`ed.
+
+~~~
+const list = new List([ 0, 1, 2, 3, 4, 5 ]);
+const take = new Varying(3);
+const result = list.take(take);
+
+list.add(-1, 0);
+take.set(4);
+
+return result;
+~~~
+
 ### #flatten
-#### l: List[List[\*]] => l.flatten(): List[\*]
+#### l: List[\*|List[\*]] => l.flatten(): List[\*]
 
 Returns a new `List`. For each _direct_ member of the original `l` which is a `List`,
 that list will be flattened and all its contents inserted in its place.
@@ -411,7 +468,27 @@ const flattened = list.flatten();
 list.add(new List([ 6, 7, new List([ 8 ]) ]));
 list.get(1).add(2.5);
 
-return flattened.
+return flattened;
+~~~
+
+### #concat
+#### .concat(…ls: List[\*]): List[\*]
+
+Given arguments of as many `List` instances as desired, returns a new `List` which
+concatenates the base `List` and all provided `List`s together in order.
+
+Should the base `List` or any of the argument-given `List`s change, the concatenated
+result list will be eagerly updated until it is `.destroy()`ed.
+
+~~~
+const list1 = new List([ 0, 1, 2 ]);
+const list2 = new List([ 4, 5, 6 ]);
+const list3 = new List([ 10, 11, 12 ]);
+
+const result = list1.concat(list2, list3);
+list1.add(3);
+
+return result;
 ~~~
 
 ### #uniq
@@ -435,6 +512,18 @@ list.remove(1);
 return list;
 ~~~
 
+### #serialize
+#### .serialize(): [\*]
+
+Returns a plain Javascript object representation of this `List`'s data. The resulting
+object instance is fresh, and may be modified without concern. It will _not_ be
+updated as the source data changes.
+
+~~~
+const list = new List([ 0, 1, 2, new List([ 3, 4 ]), new Map({ last: 6 }) ]);
+return list.serialize();
+~~~
+
 ## Fold-like Operations
 
 ### #includes
@@ -450,6 +539,29 @@ is work performed, and only for as long as required by those methods.
 ~~~
 const list = new List([ 0, 1, 2, 3, 4, 5 ]);
 const result = list.includes(3);
+
+list.remove(3);
+
+return result;
+~~~
+
+### #indexOf
+#### .indexOf(T|Varying[T]): Varying[Int]
+
+Given a single value, or a `Varying` that contains a value, returns a `Varying[Int]`
+indicating the integer index of the first instance of the value in the list, as
+determined by `===` equality.
+
+As with native JS Array `.indexOf`, the value `-1` is returned if the value cannot
+be found.
+
+The resulting `Varying` is managed, so calling `#indexOf` does not by itself cause
+any work to be done. Only when `#get` or `#react` are called on the `Varying` result
+is work performed, and only for as long as required by those methods.
+
+~~~
+const list = new List([ 0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0 ]);
+const result = list.indexOf(3);
 
 list.remove(3);
 
@@ -474,7 +586,7 @@ const threshold = new Varying(7);
 const result = list.any(x => threshold.map(k => x > k));
 
 list.remove(5);
-target.set(4);
+threshold.set(4);
 
 return result;
 ~~~
@@ -534,5 +646,90 @@ const sum = list.sum();
 list.remove(3);
 list.add(9);
 return sum;
+~~~
+
+## Enumeration
+
+### #enumerate
+#### .enumerate(): Array[Int]
+
+Returns a static array of the numeric indices in the `List`. Regardless of the
+presence of `null` elements or a sparse array, this method will always return all
+integer values from `0` to the index of the final element in the list.
+
+~~~
+const list = new List([ 0, 1, 2 ]);
+list.set(5, 'hello!');
+return list.enumerate();
+~~~
+
+### #enumeration
+#### .enumeration(): List[Int]
+
+Like `#enumerate`, but instead of a static `Array` returns a `List` will remain
+up-to-date as the `List` members change. Again, all integer values from `0` to
+the index of the final element in the list are always included.
+
+~~~
+const list = new List([ 0, 1, 2 ]);
+const enumeration = list.enumeration();
+list.set(5, 'hello!');
+return enumeration;
+~~~
+
+### .length
+#### .length: Int
+
+Returns the number of elements present in this `List` at the time of calling.
+
+~~~
+const list = new List([ 0, 1, 2 ]);
+list.set(5, 'hello!');
+return list.length;
+~~~
+
+### #watchLength
+#### .watchLength(): Varying[Int]
+
+Returns the number of elements present in this `List`, in the form of a `Varying[Int]`.
+This is exactly equivalent to calling `.enumeration().watchLength()`.
+
+~~~ inspect-entity
+const list = new List([ 0, 1, 2 ]);
+const length = list.watchLength();
+list.set(5, 'hello!');
+return length;
+~~~
+
+## Change Detection
+
+### #watchDiff
+#### .watchDiff(other: List): Varying[Boolean]
+
+Compares two structures, and returns a `Varying[Boolean]` indicating whether the
+structures are different (`true`) or not (`false`). The following rules are used
+to make this determination:
+
+* If the structures are not of the same type (eg `Map` vs `List`, or worse), they
+  are different.
+* If the structures are of the same type but have different indices, they are different.
+* Values are then compared: any value that is `Enumerable` (`Map` or `List`) will
+  be recursed into, and these rules reconsidered from the top. This happens even
+  if the two structures are different instances: this mechanism cares only about
+  structure and values.
+* Any other values are compared with `===` strict equality.
+
+~~~ inspect-entity
+const listA = new List([
+  2,
+  new List([ 4, 6, 8 ]),
+  new Map({ name: 'submap', sublist: new List([ 10 ]) })
+]);
+const listB = new List([
+  2,
+  new List([ 4, 6, 8 ]),
+  new Map({ name: 'submap', sublist: new List([ 10 ]) })
+]);
+return listA.watchDiff(listB);
 ~~~
 
