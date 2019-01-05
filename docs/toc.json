@@ -65,8 +65,6 @@
     "children": [
       "Varying",
       "Case",
-      "match",
-      "otherwise",
       "from",
       "Base"
     ]
@@ -83,11 +81,7 @@
     "children": [
       "Model",
       "Trait",
-      "attribute",
-      "bind",
-      "validate",
-      "transient",
-      "dēfault",
+      "Attribute",
       "Request",
       "Resolver"
     ]
