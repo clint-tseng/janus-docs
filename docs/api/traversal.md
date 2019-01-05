@@ -49,15 +49,15 @@ no deviation from standard behavior.
 
 For all of the below, the following function signatures apply:
 
-* `recurse: (obj: List|Map, context) => types.traversal` where `obj` is the original
+* `recurse: (obj: List|Map, context) -> types.traversal` where `obj` is the original
   structure pre-traversal, and `context` isa  freeform data object which should be
   treated as immutable for proper function. See the [full chapter](/further-reading/traversal)
   for further details on `context`.
-* `map: (key: Int|String, value: \*, attribute: Attribute?, context) => types.traversal`
+* `map: (key: Int|String, value: \*, attribute: Attribute?, context) -> types.traversal`
   where `key` and `value` relate to the original data, `attribute` gives an instance
   of the `Attribute` at that `key` if the structure is a `Model` and has an attribute
   defined for it, and `context` is as described above for `recurse`.
-* `reduce: (obj: Array|List) => \*` where `obj` is the mapped structure post-traversal.
+* `reduce: (obj: Array|List) -> \*` where `obj` is the mapped structure post-traversal.
 
 ### #asNatural
 #### Traversal.asNatural(obj: Enumerable, { [recurse], map }, context = {}): Map|List
