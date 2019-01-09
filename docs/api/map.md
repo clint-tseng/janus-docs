@@ -263,7 +263,7 @@ return mapped;
 ~~~
 
 ### #serialize
-#### .serialize(): { String : \* }
+#### .serialize(): {\*}
 
 Returns a plain Javascript object representation of this `Map`'s data. The resulting
 object instance is fresh, and may be modified without concern.

@@ -60,7 +60,7 @@ For all of the below, the following function signatures apply:
 * `reduce: (obj: Array|List) -> \*` where `obj` is the mapped structure post-traversal.
 
 ### #asNatural
-#### Traversal.asNatural(obj: Enumerable, { [recurse], map }, context = {}): Map|List
+#### Traversal.asNatural(obj: Enumerable, { recurse?, map }, context = {}): Map|List
 
 Performs traversal, preserving structure (`Map`s stay `Map`s, and `List`s stay
 `List`s) and returning an eagerly updated structure which will continue to maintain
@@ -80,7 +80,7 @@ return inspect.panel(result); // TODO: why does this not panel?
 ~~~
 
 ### #getNatural
-#### Traversal.getNatural(obj: Enumerable, { [recurse], map }, context = {}): Object|Array
+#### Traversal.getNatural(obj: Enumerable, { recurse?, map }, context = {}): Object|Array
 
 Like `#asNatural`, but performs the traversal only once, returning a static structure
 of plain Javascript `Object`s and `Array`s.
@@ -97,7 +97,7 @@ return Traversal.getNatural(data, {
 ~~~
 
 ### #asList
-#### Traversal.asList(obj: Enumerable, { [recurse], map, [reduce] }, context = {}): List
+#### Traversal.asList(obj: Enumerable, { recurse?, map, reduce? }, context = {}): List
 
 Performs traversal, crushing `Map`s to `List`s (with no particular guaranteed indexing
 order), and returning an eagerly updated structure which will continue to maintain
@@ -117,7 +117,7 @@ return inspect.panel(result);
 ~~~
 
 ### #getArray
-#### Traversal.getArray(obj: Enumerable, { [recurse], map, [reduce] }, context = {}): Array
+#### Traversal.getArray(obj: Enumerable, { recurse?, map, reduce? }, context = {}): Array
 
 Like `#asList`, but performs the traversal only once, returning a static structure
 of plain Javascript `Array's.
@@ -136,8 +136,8 @@ return Traversal.getArray(data, {
 
 ## Default Implementations
 
-### .default.serialize
-#### .default.serialize: { map }
+### ::serialize
+#### Traversal.default.serialize: { map }
 
 The default serializing Traversal operates on the following rules, in order:
 
@@ -153,8 +153,8 @@ const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) }
 return Traversal.getNatural(data, Traversal.default.serialize);
 ~~~
 
-### .default.diff
-#### .default.diff: { recurse, map, reduce }
+### ::diff
+#### Traversal.default.diff: { recurse, map, reduce }
 
 The default diffing Traversal relies on their `context` providing the diffing
 target under the key `other`.

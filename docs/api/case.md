@@ -217,7 +217,7 @@ return [
 
 ## Case Type Matching
 
-### match
+### λmatch
 #### (…Case[(…\* -> \*)]) -> Case[…\*] -> \*
 
 The matching function is described in depth in the [case classes](/theory/case-classes#case-class-fundamentals)
@@ -242,7 +242,7 @@ return [
 ];
 ~~~
 
-### otherwise
+### λotherwise
 #### \* -> Otherwise[\*]
 
 `otherwise` is used in conjunction with `match`; when `otherwise` is given instead

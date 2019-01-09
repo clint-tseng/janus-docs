@@ -20,7 +20,7 @@ and behavior modifiers you supply. Please see the [chapter on this topic](/theor
 for detailed information.
 
 ### @build
-#### Model.build(…builder: …({ attributes, bindings, validations } => void)): @Model
+#### Model.build(…builder: …({ attributes, bindings, validations } -> void)): @Model
 
 The Model builder takes any number of `builder`s, each of which takes a schema
 definition and directly mutates it. The builder functions `attribute`, `bind`,
@@ -44,7 +44,7 @@ const MyModel = Model.build(
 return new MyModel({ x: 2 });
 ~~~
 
-### attribute
+### λattribute
 #### (key: String, class: @Attribute) -> Schema -> void
 
 * !IMPURE
@@ -78,7 +78,7 @@ return [
 ];
 ~~~
 
-### bind
+### λbind
 #### (key: String, binding: FromTerminus) -> Schema -> void
 
 * !IMPURE
@@ -95,7 +95,7 @@ const SampleModel = Model.build(
 return new SampleModel({ name: 'alice' });
 ~~~
 
-### dēfault
+### λdēfault
 #### dfault: (key: String, value: \*) -> Schema -> void
 #### dēfault: (key: String, value: \*) -> Schema -> void
 
@@ -113,7 +113,7 @@ const model = new SampleModel();
 return model.get('name');
 ~~~
 
-### dēfault.writing
+### λdēfault.writing
 #### dfault.writing: (key: String, value: \*) -> Schema -> void
 #### dēfault.writing: (key: String, value: \*) -> Schema -> void
 
@@ -126,7 +126,7 @@ model.get('name');
 return model.serialize();
 ~~~
 
-### transient
+### λtransient
 #### (key: String) -> Schema -> void
 
 Used with `Model.build`. Given a `key`, creates an `Attribute` class for that key
@@ -150,7 +150,7 @@ return [
 ];
 ~~~
 
-### validate
+### λvalidate
 #### (binding: FromTerminus[types.validity]) -> Schema -> void
 
 * !IMPURE
@@ -347,7 +347,7 @@ for more information.
 ## Mapping and Transformation
 
 ### #serialize
-#### .serialize(): Object
+#### .serialize(): {\*}
 
 Returns a plain Javascript Object representation of this model. For any model
 `Attribute`s for which a `#serialize` method is defined, that method will be used

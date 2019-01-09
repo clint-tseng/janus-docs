@@ -23,8 +23,8 @@ const reanchor = (header) => {
 // convert markdown to html and feed it to jsdom/jquery for postprocessing.
 const converted = md(readFileSync(infile, 'utf8'));
 const dom = $(`<div class="article">${converted}</div>`);
-const levelTypes = { '@': 'class', '::': 'class', '#': 'instance', '.': 'instance' };
-const typeTypes = { '@': 'method', '#': 'method', '::': 'property', '.': 'property' };
+const levelTypes = { '@': 'class', ':': 'class', '#': 'instance', '.': 'instance', 'λ': 'package' };
+const typeTypes = { '@': 'method', '#': 'method', ':': 'property', '.': 'property', 'λ': 'function' };
 
 // separate paths for apirefs, articles.
 const doc = { inspect: 'entity' }; // global directives
@@ -55,8 +55,8 @@ if (isApiRef === true) {
       const name = (nameparts == null) ? rawname : nameparts[1];
       const ref = (nameparts == null) ? rawname : nameparts[2];
 
-      const level = levelTypes[name[0]];
-      const type = typeTypes[name[0]];
+      const level = levelTypes[name[0]] || 'package';
+      const type = typeTypes[name[0]] || 'object';
       member = { name, ref, level, type, invocations: [] };
       obj.members.push(member);
       section.members.push(ref);
@@ -66,7 +66,7 @@ if (isApiRef === true) {
 
       // fixup the on-page name and id.
       ptr.text(name);
-      ptr.prop('id', (level === 'class') ? ref : ref.slice(1));
+      ptr.prop('id', /^[a-z@λ:]/i.test(ref) ? ref : ref.slice(1));
       reanchor(ptr);
     } else if (ptr.is('h4')) {
       const invocation = ptr.text()
@@ -77,7 +77,7 @@ if (isApiRef === true) {
 
       // TODO: what if different invocations have different types? doesn't exist yet though.
       if (member.return_type == null) {
-        const returnType = /: ([^:]+)$/.exec(invocation);
+        const returnType = /(?::|→) ([^:→]+)$/.exec(invocation);
         if (returnType != null) member.return_type = returnType[1];
       }
 
