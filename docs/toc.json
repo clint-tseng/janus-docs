@@ -80,7 +80,6 @@
     "title": "Models",
     "children": [
       "Model",
-      "Trait",
       "Attribute",
       "Request",
       "Resolver"
