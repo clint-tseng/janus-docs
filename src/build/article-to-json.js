@@ -16,6 +16,17 @@ const reanchor = (header) => {
   header.prepend(anchor);
 };
 
+const addMemberAnnotation = (note, ptr) => {
+  const node = $(`<span class="annotation">${note}</span>`);
+  let headers = ptr.prevAll('h4:first');
+  let candidate = headers;
+
+  while ((candidate = candidate.prev('h4')).length > 0)
+    headers = headers.add(candidate);
+
+  headers.append(node);
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // BEGIN PROCESSING
@@ -91,8 +102,10 @@ if (isApiRef === true) {
             // for now do nothing; not sure how to model this.
           } else if (text.startsWith('!IMPURE')) {
             member.impure = true;
+            addMemberAnnotation('impure', ptr);
           } else if (text.startsWith('!CURRIES')) {
             member.curries = true;
+            addMemberAnnotation('curries', ptr);
           } else if (text.startsWith('!SAMPLES')) {
             if (text.includes('inspect-panel')) {
               doc.inspect = 'panel';
