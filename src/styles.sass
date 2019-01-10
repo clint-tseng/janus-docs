@@ -401,12 +401,15 @@ header
       padding-bottom: 0.8em
 
       .api-objsection-name
+        border-bottom: none
         color: #aaa
-        cursor: default
         font-family: $font-body
         font-size: 1.2em
-        padding-left: $sidebar-padding
-        padding-top: 0.5em
+        padding: 0.5em 0 0.25em $sidebar-padding
+
+        &:hover
+          background: inherit
+          text-decoration: underline
 
     .api-objsection-members li:last-child .api-member-name
       border-bottom: none

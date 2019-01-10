@@ -73,12 +73,16 @@ class ApiBrowserObjectSection extends Model.build(
 
 const ApiBrowserObjectSectionView = DomView.build($(`
   <div class="api-objsection">
-    <div class="api-objsection-name"/>
+    <a class="api-objsection-name"/>
     <div class="api-objsection-members"/>
   </div>`), template(
 
   find('.api-objsection').classed('match', from('match')),
-  find('.api-objsection-name').text(from('section').watch('name')),
+  find('.api-objsection-name')
+    .text(from('section').watch('name'))
+    .prop('href', from('object').watch('path')
+      .and('section').watch('name').map((name) => name.toLowerCase().replace(/[^a-z]/g, '-'))
+      .all.map((path, part) => `${path}#${part}`)),
   find('.api-objsection-members').render(from('members'))
 ));
 
