@@ -525,7 +525,7 @@ your application together at a higher level.
   given Request.
   * The default `.resolver()` also uses a Library, `app.resolvers`, to find a
     registered resolver for the Request.
-  * But `.resolver()` may be overriden to, for instance, add caching layers.
+  * But `.resolver()` may be overridden to, for instance, add caching layers.
   * Each Request that is resolved causes a `resolvedRequest` event on the App.
 
 Manifest uses App's relative omniscience and Model validation to offer one method

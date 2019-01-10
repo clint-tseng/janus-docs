@@ -266,7 +266,7 @@ But when chaining together multiple values, `.all.map(…)` and `.all.flatMap(�
 to map the values to a final output is a common pattern.
 
 ### .all
-#### x: FromPart[…\*] => x.all: FromTerminus[…\*]
+#### x: FromPart[…\*] => x.all: From[…\*]
 
 Available at any point in a `from` expression, calling `.all` moves the chain on
 to the terminus finalization phase, at which point `#map` and `#flatMap` can be
@@ -276,7 +276,7 @@ can be called to reify the expression into an actual `Varying`.
 Calling `.all` again in the same chain just returns the chain itself as-is.
 
 ### #map !AS #map-all
-#### x: FromTerminus[…\*] => x.map(…\* -> U): FromTerminus[U]
+#### x: From[…\*] => x.map(…\* -> U): From[U]
 
 Maps the chained data.
 
@@ -295,7 +295,7 @@ return [
 ~~~
 
 ### #flatMap !AS #flatMap-all
-#### x: FromTerminus[…\*] => x.flatMap(…\* -> U|Varying[U]): FromTerminus[U]
+#### x: From[…\*] => x.flatMap(…\* -> U|Varying[U]): From[U]
 
 Like `#map`, but should the mapping function return a `Varying` it will be flattened,
 just like [`Varying#flatMap`](Varying#flatMap).
@@ -322,7 +322,7 @@ return point(
 ~~~
 
 ### #point
-#### x: FromTerminus[…\*] => x.point(pointer: (\* -> Varying[\*])): UnreducedVarying[…\*]
+#### x: From[…\*] => x.point(pointer: (\* -> Varying[\*])): UnreducedVarying[…\*]
 
 Covered in depth in [this section](/theory/from-expressions#pointing-from-expressions)
 of the `from` expression chapter. In brief, `pointer` is a function that takes

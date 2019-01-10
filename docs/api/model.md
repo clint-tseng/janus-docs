@@ -79,7 +79,7 @@ return [
 ~~~
 
 ### λbind
-#### (key: String, binding: FromTerminus) -> Schema -> void
+#### (key: String, binding: From) -> Schema -> void
 
 * !IMPURE
 
@@ -151,7 +151,7 @@ return [
 ~~~
 
 ### λvalidate
-#### (binding: FromTerminus[types.validity]) -> Schema -> void
+#### (binding: From[types.validity]) -> Schema -> void
 
 * !IMPURE
 
@@ -263,6 +263,8 @@ return Person.deserialize({
 
 ### #get
 #### .get(key: String): \*|null
+
+* !IMPURE
 
 The `Model` version of `#get` differs from [the `Map` version](/api/map#get) in
 precisely one way: if there is no present value but there is an `Attribute` associated

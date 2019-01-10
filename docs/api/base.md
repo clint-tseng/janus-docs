@@ -286,7 +286,7 @@ When destruction does occur, the following operations happen in this order:
   or `#listenTo`.
 * `#_destroy` is invoked on the object. This does nothing by default, but you can
   override it to perform your own cleanup operations.
-* `#__destroy` is invoked on the object. This method should _not_ be overriden;
+* `#__destroy` is invoked on the object. This method should _not_ be overridden;
   it is reserved for cleanup operations by framework internals.
 
 Since Javascript does not feature manual `free` operations, the goal and job of
