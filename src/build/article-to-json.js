@@ -149,6 +149,9 @@ while ((first = dom.children('pre:first')).length > 0) {
     } else if (subtype === 'inspect-panel') {
       sample.inspect = 'panel';
       sample.main = code.text();
+    } else if (subtype === 'inspect-plain') {
+      sample.inspect = null;
+      sample.main = code.text();
     } else {
       sample[subtype || 'main'] = code.text();
     }
