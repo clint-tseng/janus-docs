@@ -59,7 +59,7 @@ For all of the below, the following function signatures apply:
   defined for it, and `context` is as described above for `recurse`.
 * `reduce: (obj: Array|List) -> \*` where `obj` is the mapped structure post-traversal.
 
-### #asNatural
+### λasNatural
 #### Traversal.asNatural(obj: Enumerable, { recurse?, map }, context = {}): Map|List
 
 Performs traversal, preserving structure (`Map`s stay `Map`s, and `List`s stay
@@ -79,7 +79,7 @@ data.set('w', 0);
 return inspect.panel(result); // TODO: why does this not panel?
 ~~~
 
-### #getNatural
+### λgetNatural
 #### Traversal.getNatural(obj: Enumerable, { recurse?, map }, context = {}): Object|Array
 
 Like `#asNatural`, but performs the traversal only once, returning a static structure
@@ -96,7 +96,7 @@ return Traversal.getNatural(data, {
 });
 ~~~
 
-### #asList
+### λasList
 #### Traversal.asList(obj: Enumerable, { recurse?, map, reduce? }, context = {}): List
 
 Performs traversal, crushing `Map`s to `List`s (with no particular guaranteed indexing
@@ -116,7 +116,7 @@ data.set('w', 0);
 return inspect.panel(result);
 ~~~
 
-### #getArray
+### λgetArray
 #### Traversal.getArray(obj: Enumerable, { recurse?, map, reduce? }, context = {}): Array
 
 Like `#asList`, but performs the traversal only once, returning a static structure

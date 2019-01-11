@@ -57,7 +57,7 @@ return exampleAttr.getValue();
 ~~~
 
 ### #watchValue
-#### .watchValue(); Varying[\*]
+#### .watchValue(): Varying[\*]
 
 Equivalent to calling `model.set(key, value)` on the `model` and `key` this `Attribute`
 instance is bound to.

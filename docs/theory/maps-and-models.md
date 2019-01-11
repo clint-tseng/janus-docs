@@ -853,7 +853,7 @@ The very last topic to overview about Models is that of validation. Janus provid
 a relatively lean interface for model validation: you may define one or more validation
 rules. Each of these are just `from` expressions that result in one of the `janus.types.validity`
 case classes: `valid`, `warning`, or `error`. There are standard methods to get
-the outstanding failing issues, or all the validation bindings, or just whether
+the outstanding failing rules, or all the validation bindings, or just whether
 the Model is passing validation or not.
 
 We want to provide a standard interface at all here, for reasons much like our
@@ -878,7 +878,7 @@ method to implement to make the standard machinery work.
 Here, we stick to the Janus default. You will not be surprised to learn that
 validation rules are specified alongside `bind`s and `attribute`s as a part of
 `Model.build`. We also demonstrate `.valid`, which returns a `Varying[boolean]`
-indicating whether all validation rules are passing, and `.issues`, which returns
+indicating whether all validation rules are passing, and `.errors`, which returns
 a List of only the failing validation results.
 
 ~~~
@@ -904,9 +904,9 @@ const dog = new Dog();
 const gadget = new Dog({ name: 'Gadget' });
 
 return [
-  spot.validations(), spot.valid(), spot.issues(),
-  dog.valid(), dog.issues(),
-  gadget.valid(), gadget.issues()
+  spot.validations(), spot.valid(), spot.errors(),
+  dog.valid(), dog.errors(),
+  gadget.valid(), gadget.errors()
 ].map(inspect);
 ~~~
 
@@ -943,8 +943,8 @@ const Dog = Model.build(
 
 // view helpers, again to reduce boilerplate:
 const applyValidationClass = (field) => find(`.${field}`).classed('invalid',
-  from.self(view => view.subject.issues()).flatMap(issues =>
-    issues.any(issue => issue.get('fields').includes(field))));
+  from.self(view => view.subject.errors()).flatMap(errors =>
+    errors.any(issue => issue.get('fields').includes(field))));
 
 const renderField = (field) => template(
   applyValidationClass(field),
@@ -952,12 +952,12 @@ const renderField = (field) => template(
 
 const DogEditor = DomView.build($(`
   <div class="dog-editor">
-    <div class="issues"/>
+    <div class="errors"/>
     <label class="line name">Name <span class="input"/></label>
     <label class="line status">Status <span class="input"/></label>
     <label class="line owner">Owner <span class="input"/></label>
   </div>`), template(
-  find('.issues').render(from.self(view => view.subject.issues())),
+  find('.errors').render(from.self(view => view.subject.errors())),
   renderField('name'),
   renderField('status'),
   renderField('owner')));
@@ -973,14 +973,14 @@ app.get('views').register(Dog, DogEditor);
 return app.view(new Dog());
 ~~~
 ~~~ styles
-.dog-editor .issues {
+.dog-editor .errors {
   margin-bottom: 0.8em;
 }
-.dog-editor .issues li {
+.dog-editor .errors li {
   color: red;
   font-weight: bold;
 }
-.dog-editor .issues li:before {
+.dog-editor .errors li:before {
   content: '×';
   padding-right: 0.2em;
 }
@@ -1001,7 +1001,7 @@ encapsulate this structure in a succinct declaration.
 
 Similarly, we create a helper for our editor view (which you could imagine using
 across all the different views in your application) which, for some field, checks
-whether any of the subject Model's `.issues` relates to that field, and applies
+whether any of the subject Model's `.errors` relates to that field, and applies
 an `invalid` class if so.
 
 Traits
