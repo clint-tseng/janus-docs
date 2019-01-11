@@ -10,6 +10,8 @@ const article = { samples: [] };
 // util.
 const last = (xs) => xs[xs.length - 1];
 
+const stripLeadingPeriod = (str) => str.startsWith('.') ? str.slice(1) : str;
+
 const reanchor = (header) => {
   const anchor = $('<a/>').attr('id', header.attr('id'));
   header.attr('id', null);
@@ -64,7 +66,7 @@ if (isApiRef === true) {
       const rawname = ptr.text();
       const nameparts = /^(.+) !AS (.+)$/.exec(rawname);
       const name = (nameparts == null) ? rawname : nameparts[1];
-      const ref = (nameparts == null) ? rawname : nameparts[2];
+      const ref = stripLeadingPeriod((nameparts == null) ? rawname : nameparts[2]);
 
       const level = levelTypes[name[0]] || 'package';
       const type = typeTypes[name[0]] || 'object';
