@@ -127,7 +127,7 @@ const view = new SampleView(model);
 return view.subject;
 ~~~
 
-### _render
+### #_render
 #### ._render(): \*
 
 * !IMPURE

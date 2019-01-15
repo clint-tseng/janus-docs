@@ -404,3 +404,212 @@ return new SampleParentView(model, { app });
 .italicChild { font-style: italic; }
 ~~~
 
+### .on
+#### find(…).on(event: String, handler: Handler): Template
+#### find(…).on(event: String, selector: String, handler: Handler): Template
+
+The `on` mutator attaches a client-side event to the target DOM node(s). When
+the `DomView` it is attached to performs a [`#wireEvents`](#wireEvents) action,
+all the event handlers created with `on` are activated and wired onto their respective
+targets.
+
+> As a result of this special "time of activation," as it were, the `on` mutator
+> is a little bit special and only works when used in conjunction with `DomView`.
+> Invoking it directly, for example, will not yield the expected result.
+
+The `event` name is passed directly to the jQuery-like framework you are using,
+and will have whatever properties and features that framework provides. If provided,
+the `selector` filter is similarly passed along, and will filter the event according
+to its target.
+
+The `Handler` given in the signatures above are an augmented version of the usual
+`event -> void` function:
+
+~~~ noexec
+Handler: (event: Event, subject: \*, view: DomView, artifact: DollarNode) -> void
+~~~
+
+Where `event` is the `Event` object you would normally receive, `subject` is the
+View subject, `view` is a reference to the containing `DomView` instance, and
+`artifact` is that `DomView`'s [`artifact`](#artifact).
+
+~~~
+const SampleView = DomView.build(
+  $('<a/>').attr('href', '#'),
+  find('a')
+    .text(from('count').map(x => `clicked ${x} times`))
+    .on('click', (event, subject) => {
+      event.preventDefault();
+      subject.set('count', subject.get('count') + 1);
+    })
+);
+
+const model = new Model({ count: 0 });
+const view = new SampleView(model);
+view.wireEvents(); // try commenting this line out.
+return view;
+~~~
+
+## Rendering and Events
+
+### #artifact
+#### .artifact(): DollarNode
+
+Returns a copy of the template fragment of this `DomView`, databound against its
+`subject`. Only one copy will ever be returned; subsequent calls just return the
+same fragment again.
+
+Calling this method alone will _not_ wire client-side events. To do that, call
+[`#wireEvents`](#wireEvents) as well.
+
+As with the parent [`View#artifact`](view#artifact), this method calls out to
+[`#_render`](#_render) to actually perform the rendering. Unlike the `View#artifact`,
+`DomView` has a (very short) implementation that you would not likely wish to
+override.
+
+> **See also**: [`#attach`](#attach), just below.
+
+~~~
+const SampleView = DomView.build(
+  $('<p>hello, this is a <em>test fragment</em></p>'),
+  template()
+);
+
+const model = new Model();
+const view = new SampleView(model);
+return view.artifact();
+~~~
+
+### #attach
+#### .attach(node: DollarNode): DollarNode
+
+* !IMPURE
+
+Like [`#artifact`](#artifact), `#attach` walks through a fragment and sets up
+databinding against it, forever remembering that fragment as its artifact.
+
+Unlike `#artifact`, `#attach` takes an existing `node` which was previously rendered
+by the same `DomView` class, and binds against it, making the assumption that it
+is already fully up-to-date with its given `subject` data, and therefore not mutating
+any data into the fragment until the _next_ time the data changes. (In other words,
+[`Varying#react`](varying#react) is called with `immediate` set to `false`.)
+
+> For more information about this capability, please see [this chapter section](/theory/views-templates-mutators#attaching-to-rendered-views).
+> And if you implement your own custom `View` or `DomView` that performs its own
+> rendering, take care to implement `#_attach` in addition to `#_render` if you
+> intend to use `#attach`.
+
+`#attach` allows you to render a fragment in one execution context (say, on your
+webserver) and pick the fragment (and all its subfragments) back up at near-zero
+cost and without rerendering or recycling the entire DOM tree.
+
+~~~
+const SampleView = DomView.build(
+  $(`<div><h1/><p/></div>`),
+  template(
+    find('h1').text(from('name')),
+    find('p').text(from('body'))));
+
+const model = new Model({ name: 'DomView', body: 'is pretty cool' });
+const firstView = new SampleView(model);
+const markup = firstView.markup(); // markup is a string!
+
+const secondView = new SampleView(model);
+secondView.attach($(markup));
+model.set('body', 'is really cool');
+return secondView;
+~~~
+
+### #wireEvents
+#### .wireEvents(): void
+
+* !IMPURE
+
+When called, `#wireEvents` sets up client-side events for the `DomView`. If `#wireEvents`
+has already been called, nothing happens. Otherwise, the following five things
+occur:
+
+1. `#artifact` is called to ensure a target fragment to actually attach events to.
+2. For your future convenience, if your jQuery-like wrapper supports [`#data`](https://api.jquery.com/data/),
+   then the `DomView` instance will be attached as data on its root DOM node(s)
+   under the key `view`.
+3. The user-overridable method `_wireEvents` is called.
+4. Any [`on`](#on) mutators present on the `DomView` are activated.
+5. `#wireEvents` is called on all child views, and any future child views `render`ed
+   into this `DomView` subtree will have `#wireEvents` automatically called.
+
+Because client-side events are not applicable during server-side rendering, the
+goal behind the `#wireEvents` system is to avoid this event-wiring overhead when
+processing pages on the server. If your application is set up as a tree with a
+single application root node, you can just call `.wireEvents()` on that root view
+upon startup, and never worry about event wiring again.
+
+Please see the sample listing for the [`on` mutator](#on) to see that technique
+in use. Here, we demonstrate the use of `#_wireEvents` instead. As implied by the
+ordered list above, the two may be used in conjuction.
+
+~~~
+class SampleView extends DomView.build(
+  $(`<div class="collapsableSection"><h1/><p/></div>`),
+  template(
+    find('div').classed('collapsed', from('collapsed')),
+    find('h1').text(from('name')),
+    find('p').text(from('body')))
+) {
+  _wireEvents() {
+    const artifact = this.artifact();
+    artifact.on('click', () => {
+      this.subject.set('collapsed', !this.subject.get('collapsed'));
+    });
+  }
+}
+
+const model = new Model({ name: 'DomView', body: 'is pretty cool' });
+const view = new SampleView(model);
+view.wireEvents();
+return view;
+~~~
+
+~~~ styles
+.collapsableSection.collapsed p { display: none; }
+~~~
+
+## Extending DomView (Overrides)
+
+Generally, [`DomView@build`](#@build) should cover all but the most extreme needs.
+Most overrides of `DomView` will only involve [providing a `#_wireEvents` method](#wireEvents).
+
+However, in rendering complex visualizations and other performance-heavy situations,
+it may be helpful to augment the default `_render` method (in which case it is
+advisable to also pay attention to `_attach`. Even in these cases, the best practice
+is to still use `DomView@build` for everything you can.
+
+### #_wireEvents
+#### ._wireEvents(): void
+
+Please see [`#wireEvents`](#wireEvents).
+
+### #_render
+#### ._render(): DollarNode
+
+This method is called by `DomView` when it is asked to furnish a view artifact.
+Some additional details may be found at [`#artifact`](#artifact), and in [the theory
+chapter section](/theory/views-templates-mutators#custom-view-render) about implementing
+custom rendering.
+
+> It is relevant to note that since `DomView` derives from `Base`, any databinding
+> operations may be done via [`#reactTo`](base#reactTo), [`#destroyWith`](base#destroyWith),
+> or implementing [`#_destroy`](base#_destroy).
+
+Sample code can be found in the relevant theory chapter linked above.
+
+### #_attach
+#### .attach(): void
+
+This method is called by `DomView` when it is asked to attach to an existing DOM
+fragment via [`#attach`](#attach). You only need to override it if you have also
+overridden [`#_render`](#_render).
+
+More information and sample code may be found in the [further reading chapter](/further-reading/attach)
+about `attach()`ing responsibly.
+

@@ -81,7 +81,7 @@ const ApiBrowserObjectSectionView = DomView.build($(`
   find('.api-objsection-name')
     .text(from('section').watch('name'))
     .prop('href', from('object').watch('path')
-      .and('section').watch('name').map((name) => name.toLowerCase().replace(/[^a-z]/g, '-'))
+      .and('section').watch('name').map((name) => name.toLowerCase().replace(/[^a-z]+/g, '-'))
       .all.map((path, part) => `${path}#${part}`)),
   find('.api-objsection-members').render(from('members'))
 ));
