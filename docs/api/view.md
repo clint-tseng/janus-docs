@@ -37,6 +37,8 @@ return new View(new Model());
 ### #artifact
 #### .artifact(): \*
 
+* !IMPURE
+
 The `#artifact` method is the primary interface of a `View`; it retrieves the
 actual view artifact itself, whether that be an HTML fragment, or an XML payload,
 a native system view component, or anything else.
@@ -127,6 +129,8 @@ return view.subject;
 
 ### _render
 #### ._render(): \*
+
+* !IMPURE
 
 This is the method that is called by [`#artifact`](#artifact) to actually produce
 the view artifact for this view instance. In general, this method should both produce
