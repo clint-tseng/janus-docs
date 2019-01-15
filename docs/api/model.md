@@ -176,7 +176,7 @@ const ValidatingModel = Model.build(
 );
 
 const model = new ValidatingModel({ age: -2 });
-return model.issues();
+return model.errors();
 ~~~
 
 ### Trait
@@ -320,8 +320,7 @@ The `types.from.app` case will only be resolved if the model instance has an
 `options.app` property present.
 
 In general, there is little reason to manually call this method: the Model and
-DomView databinding systems will both perform this call on your behalf when
-appropriate.
+databinding system will both perform this call on your behalf when appropriate.
 
 ~~~
 const binding = from('name').map(name => `hello, ${name}!`);
@@ -403,17 +402,17 @@ const model = new ValidatingModel({ age: 4 });
 return model.validations();
 ~~~
 
-### #issues
-#### .issues(): List[\*]
+### #errors
+#### .errors(): List[\*]
 
 Like [#validations](#validations), but returns only validation failures (values
-of `types.validity.warning` or `types.validity.error` type) and returns the inner
-contents of those case classes rather than the case classes themselves.
+of `types.validity.error` type) and returns the inner contents of those case classes
+rather than the case classes themselves.
 
 The list will be eagerly updated as the model validation state changes, until it
 or the parent model is `.destroy()`ed.
 
-Should there be no outstanding validation issues, the `List` will be empty.
+Should there be no outstanding validation errors, the `List` will be empty.
 
 ~~~
 const validIfTrue = (message, f) => (x) => f(x)
@@ -432,13 +431,13 @@ const ValidatingModel = Model.build(
 );
 
 const model = new ValidatingModel({ age: -1 });
-return model.issues();
+return model.errors();
 ~~~
 
 ### #valid
 #### .valid(): Varying[Boolean]
 
-Like [#issues](#issues), but returns just a `Varying[Boolean]` indicating whether
+Like [#errors](#errors), but returns just a `Varying[Boolean]` indicating whether
 the model is presently considered valid or not. It is valid if there are no failing
 validation rules.
 
