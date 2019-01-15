@@ -252,10 +252,13 @@ by instance reference equality, but this precludes our ability to generate Reque
 at will and still take advantage of caching. Instead, the packaged caching solution
 relies on those extra methods and properties you saw on Request earlier:
 
-* `.signature()` returns a caching signature for the Request. If it is not
-  implemented or it returns `null`ish, the Request is assumed uncacheable. If it
-  returns a `signature` that's already been seen, those Requests are assumed
-  identical.
+* `.signature()` returns a caching signature that uniquely describes the resource
+  in question. If it is not implemented or it returns `null`ish, the Request is
+  assumed uncacheable. If it returns a `signature` that's already been seen, those
+  Requests are assumed to refer to the same resource.
+  * Note that requests of different `type`s (see below) that refer to the same
+    resource should have the same `signature`. The default Janus caching toolset
+    will manage the cache appropriately given each Request `type`.
 * `.type` is a property of type `types.operation`, which contains the cases `read`,
   `create`, `update`, and `delete`. Each of the operations has assumed semantics
   by REST convention: `read` Requests are directly cacheable, all other Requests

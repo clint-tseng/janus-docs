@@ -207,13 +207,14 @@ return a common signature (say, `user-42`). Then the `MemoryCache` will behave
 as follows for the following hypothetical request sequence:
 
 * `FetchUser(42)`: cache miss; `user-42` is empty. gets the data from the remote
-  resource via the fallback resolver; it sees `types.result.success` and caches
-  the resulting resource at `user-42`.
-* `FetchUser(42)`: cache hit; the extant `Varying[types.result.success]` is returned.
+  resource via the fallback resolver; it sees `Varying[types.result]` and caches
+  that `Varying` at `user-42`.
+* `FetchUser(42)`: cache hit; the extant `Varying[types.result]` is returned.
 * `UpdateUser(42)`: cache hit, it is cleared out and the fallback resolver is
   asked to perform the operation. Say we left `cacheable` at its default `true`
   value: the server response to the request, which by standard `REST` semantics
-  ought to be the present state of the resource, is cached at `user-42`.
+  ought to be the present state of the resource, is cached at `user-42`, but only
+  upon a `types.result.success`ful response.
 * `FetchUser(42)`: cache hit; the extant `Varying[types.result.success]` which
   was returned by the `UpdateUser` operation is returned.
 
@@ -247,16 +248,21 @@ const articleResolver = (request) => {
 const resolvers = new Library();
 resolvers.register(ArticleRequest, articleResolver);
 
-const resolver = Resolver.caching(
-  new Resolver.MemoryCache(),
-  Resolver.oneOf(
-    Resolver.fromDom(cacheDom),
-    Resolver.fromLibrary(resolvers)
-  ));
+class DocsApp extends App {
+  resolver() {
+    return Resolver.caching(
+      new Resolver.MemoryCache(),
+      Resolver.oneOf(
+        Resolver.fromDom(cacheDom),
+        Resolver.fromLibrary(resolvers)
+      ));
+  }
+}
 
-const x = resolver(new ArticleRequest('/theory'));
-const y = resolver(new ArticleRequest('/theory'));
-const z = resolver(new ArticleRequest('/api/resolver'));
+const app = new DocsApp();
+const x = app.resolve(new ArticleRequest('/theory'));
+const y = app.resolve(new ArticleRequest('/theory'));
+const z = app.resolve(new ArticleRequest('/api/resolver'));
 
 return [
   x, y, z,
