@@ -44,7 +44,7 @@ return view.subject;
 ~~~
 
 ### @build
-#### DomView.build(fragment: DollarNode, template: Template): @DomView
+#### DomView.build(fragment: $Node, template: Template): @DomView
 
 The `@build` class method is the primary interface for creating `DomView` class
 definitions. It takes a `fragment` target HTML fragment, wrapped in a jQuery-like
@@ -184,7 +184,7 @@ return new ArticleView(article);
 A `Mutator` is any function that follows the given signature:
 
 ~~~ noexec
-(…\*) -> dom: DollarNode, point: (types.from -> Varying), immediate: Boolean? -> Observation
+(…\*) -> dom: $Node, point: (types.from -> Varying), immediate: Boolean? -> Observation
 ~~~
 
 By nature of returning an `Observation`, `Mutators` are impure functions. Usually,
@@ -426,7 +426,7 @@ The `Handler` given in the signatures above are an augmented version of the usua
 `event -> void` function:
 
 ~~~ noexec
-Handler: (event: Event, subject: \*, view: DomView, artifact: DollarNode) -> void
+Handler: (event: Event, subject: \*, view: DomView, artifact: $Node) -> void
 ~~~
 
 Where `event` is the `Event` object you would normally receive, `subject` is the
@@ -453,7 +453,7 @@ return view;
 ## Rendering and Events
 
 ### #artifact
-#### .artifact(): DollarNode
+#### .artifact(): $Node
 
 Returns a copy of the template fragment of this `DomView`, databound against its
 `subject`. Only one copy will ever be returned; subsequent calls just return the
@@ -481,7 +481,7 @@ return view.artifact();
 ~~~
 
 ### #attach
-#### .attach(node: DollarNode): DollarNode
+#### .attach(node: $Node): $Node
 
 * !IMPURE
 
@@ -590,7 +590,7 @@ is to still use `DomView@build` for everything you can.
 Please see [`#wireEvents`](#wireEvents).
 
 ### #_render
-#### ._render(): DollarNode
+#### ._render(): $Node
 
 This method is called by `DomView` when it is asked to furnish a view artifact.
 Some additional details may be found at [`#artifact`](#artifact), and in [the theory

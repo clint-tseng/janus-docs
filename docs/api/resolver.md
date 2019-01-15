@@ -68,7 +68,7 @@ return libraryResolver(new SampleRequest());
 ~~~
 
 ### λfromDom
-#### Resolver: (Request -> Varying[types.result]?) => fromDom(dom: DollarNode, deserialize: (String, DollarNode -> \*)?): Resolver
+#### Resolver: (Request -> Varying[types.result]?) => fromDom(dom: $Node, deserialize: (String, $Node -> \*)?): Resolver
 
 Given a `dom` node wrapped in a jQuery or equivalent interface, returns a `Resolver`
 which returns data encoded into the `dom` node based on caching signatures.
@@ -93,9 +93,9 @@ a caching layer like [`MemoryCache`](#MemoryCache) which gives you finer control
 over cache management and expiry.
 
 Optionally, a second parameter `deserialize` may be given. If so, it will be given
-the `String` text contents of the caching node, and the `DollarNode` jQuery-ish
-wrapped matching node itself. Whatever it returns will be used as the success
-value (it will be wrapped in `types.result.success` for you).
+the `String` text contents of the caching node, and the `$Node` jQuery-ish wrapped
+matching node itself. Whatever it returns will be used as the success value (it
+will be wrapped in `types.result.success` for you).
 
 ~~~
 const dom = $(`
