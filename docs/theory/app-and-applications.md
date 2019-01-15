@@ -66,7 +66,8 @@ inputs right along to `app.view()`, which then performs a number of steps:
 2. Otherwise, now that it has a View classtype, it instantiates an instance of it,
    passing the subject as the first argument and the `options` you hand it as the
    second. Here's one of its tricks, though: it injects itself as `options.app`
-   as it does so. This is how subviews get access to App context.
+   as it does so. This is how subviews get access to App context. (It does this
+   first, so if you provide your own `app`, you may override it.)
 3. It then performs auto-resolution and manual resolution, which we will cover
    later.
 
@@ -267,7 +268,7 @@ which we will cover at the end of this chapter.
 The Library
 ===========
 
-You've already see a lot of the Library in use. Here, we'll just formalize what
+You've already seen a lot of the Library in use. Here, we'll just formalize what
 you already know and add some minor details and additional options.
 
 You already know that you can `.register` View classes to subject classes and
