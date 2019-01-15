@@ -12,10 +12,20 @@ const last = (xs) => xs[xs.length - 1];
 
 const stripLeadingPeriod = (str) => str.startsWith('.') ? str.slice(1) : str;
 
+// moves the header id to an anchor so we can account for floating header height.
+// also adds a section link to that anchor.
 const reanchor = (header) => {
-  const anchor = $('<a/>').attr('id', header.attr('id'));
+  const anchor = $('<a/>')
+    .addClass('anchor')
+    .attr('id', header.attr('id'));
   header.attr('id', null);
   header.prepend(anchor);
+
+  const link = $('<a/>')
+    .addClass('self-link')
+    .html('&sect;')
+    .attr('href', '#' + anchor.attr('id'));
+  header.append(link);
 };
 
 const addMemberAnnotation = (note, ptr) => {

@@ -554,12 +554,23 @@ footer
     font-size: 2em
 
   h1, h2, h3
-    a
+    a.anchor
       $dist: $header-height + $main-padding
       display: block
       margin-top: -$dist
       padding-top: $dist
       pointer-events: none
+
+    a.self-link
+      color: #ccc
+      margin-left: 0.8rem
+      visibility: hidden
+
+      &:hover
+        color: #666
+
+    &:hover a.self-link
+      visibility: visible
 
   p
     font-size: 1.6em
