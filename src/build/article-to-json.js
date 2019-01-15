@@ -57,7 +57,7 @@ if (isApiRef === true) {
   // set some things up for api mode.
   dom.addClass('apiref');
   article.exports = [];
-  const apiPath = '/api/' + /docs\/api\/([a-z]+).md$/.exec(infile)[1];
+  const apiPath = '/api/' + /docs\/api\/([a-z-]+).md$/.exec(infile)[1];
 
   // run linearly through the document and build an API model.
   let ptr = dom.children(':first');
