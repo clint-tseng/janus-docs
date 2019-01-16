@@ -416,7 +416,7 @@ Let's see an example of these facilities in action.
 ~~~
 const existsOrError = (err => x => (x != null)
   ? types.validity.valid()
-  : types.validity.invalid(err));
+  : types.validity.error(err));
 
 const User = Model.build();
 
