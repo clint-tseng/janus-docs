@@ -7,35 +7,35 @@ The navigation menu on the left is searchable by object and member name.
 
 ## Core
 
-* [`Varying`](varying)
-* [`Case`](case) ([`match`](case#λmatch), [`otherwise`](case#λotherwise))
-* [`from`](from)
-* [`Base`](Base)
+* [`Varying`](/api/varying)
+* [`Case`](/api/case) ([`match`](/api/case#λmatch), [`otherwise`](/api/case#λotherwise))
+* [`from`](/api/from)
+* [`Base`](/api/Base)
 
 ## Collection
 
-* [`List`](list)
-* [`Set`](set)
-* [`Map`](map)
-* [`Traversal`](traversal)
+* [`List`](/api/list)
+* [`Set`](/api/set)
+* [`Map`](/api/map)
+* [`Traversal`](/api/traversal)
 
 ## Model
 
-* [`Model`](model) ([`bind`](model#λbind), [`validate`](model#λvalidate),
-  [`transient`](model#λtransient), [`dēfault`](model#λdēfault), [`Trait`](model#λTrait))
-* [`Attribute`](attribute)
-* [`Request`](request)
-* [`Resolver`](resolver)
+* [`Model`](/api/model) ([`bind`](/api/model#λbind), [`validate`](/api/model#λvalidate),
+  [`transient`](/api/model#λtransient), [`dēfault`](/api/model#λdēfault), [`Trait`](/api/model#λTrait))
+* [`Attribute`](/api/attribute)
+* [`Request`](/api/request)
+* [`Resolver`](/api/resolver)
 
 ## View
 
-* [`View`](view)
-* [`DomView`](dom-view) ([`find`](dom-view#λfind), [`template`](dom-view#λtemplate),
-  [`mutators`](dom-view#mutators))
+* [`View`](/api/view)
+* [`DomView`](/api/dom-view) ([`find`](/api/dom-view#λfind), [`template`](/api/dom-view#λtemplate),
+  [`mutators`](/api/dom-view#mutators))
 
 ## Application
 
-* [`App`](app)
-* [`Library`](library)
-* [`Manifest`](manifest)
+* [`App`](/api/app)
+* [`Library`](/api/library)
+* [`Manifest`](/api/manifest)
 
