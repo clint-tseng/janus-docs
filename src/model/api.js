@@ -1,12 +1,12 @@
 const { Model, attribute, List } = require('janus');
 
 class ApiMember extends Model.build(
-  attribute('invocations', attribute.List.ofPrimitive)
+  attribute('invocations', attribute.List)
 ) {}
 const ApiMembers = List.of(ApiMember);
 
 class ApiSection extends Model.build(
-  attribute('members', attribute.List.ofPrimitive)
+  attribute('members', attribute.List)
 ) {}
 const ApiSections = List.of(ApiSection);
 
