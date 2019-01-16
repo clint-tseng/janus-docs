@@ -6,7 +6,10 @@ const lineRegex = /^ *at ([^ ]+)(?:[^<]+<anonymous>:(\d+):(\d+))?/;
 
 class StackLine extends Model {
   constructor(line) {
-    const [ , context, lineStr, colStr ] = lineRegex.exec(line);
+    const parsed = lineRegex.exec(line);
+    if (parsed == null) return super();
+
+    const [ , context, lineStr, colStr ] = parsed;
     super({
       context,
       line: parseInt(lineStr) - 3, // TODO: why? i'd expect 1 or maybe 2 but not 3.
