@@ -10,7 +10,7 @@ class AppView extends DomView.build($('body').clone(), template(
 
   find('#repl')
     .render(from('repl'))
-    .classed('active', from('repl.active'))
+    .classed('active', from('active.repl'))
 )) {
   dom() { return $('body'); }
 
@@ -51,8 +51,8 @@ class AppView extends DomView.build($('body').clone(), template(
     // header events:
     dom.find('#repl-link').on('click', (event) => {
       event.preventDefault();
-      const active = !app.get('repl.active');
-      app.set('repl.active', active);
+      const active = !app.get('active.repl');
+      app.set('active.repl', active);
       if (active)
         dom.find('#repl .repl').data('view').focusLast();
     });
