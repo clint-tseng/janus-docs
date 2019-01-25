@@ -13,6 +13,7 @@ $color-sidebar-background2: #2d2d31
 $color-sidebar-background3: #1c1c22
 $color-splash: #085b5b
 $color-heading: #000
+$color-text: #333
 $color-success: #4c4
 $color-error: #c44
 
@@ -72,7 +73,7 @@ table, caption, tbody, tfoot, thead, tr, th, td
   vertical-align: baseline
 
 html
-  color: #333
+  color: $color-text
   font-family: $font-body
   font-size: 62.5%
 
@@ -1004,10 +1005,10 @@ footer
 
   &.named .repl-statement-name
     input
-      color: #333
+      color: $color-text
 
     &:after
-      color: #333
+      color: $color-text
       content: '='
 
   .repl-statement-status
@@ -1038,6 +1039,9 @@ footer
     > .eval-success > .janus-list > li > .janus-literal
       font-family: $font-monospace
 
+    .janus-inspect-panel
+      clear: left
+
 ////////////////////////////////////////
 // COMPONENTS: inspect
 
@@ -1053,15 +1057,96 @@ footer
     color: #fff
     font-size: 1.3em
     font-weight: bold
-    padding: 0.5em 0.7em
+    padding: 0.5em
+      bottom: 0.6em
 
   .panel-content
     padding: 1em
+
+  .panel-sidebar
+    $sidebar-width: 14em
+    @include fill
+    left: auto
+    width: $sidebar-width
+
+    .panel-sidebar-title
+      background-color: $color-accent2
+      border-top-right-radius: 0.2em
+      color: #fff
+      font-size: 1.1em
+      font-weight: bold
+      padding: 0.8em
+
+    .panel-sidebar-content
+      @include fill
+      background-color: #eee
+      overflow-x: hidden
+      overflow-y: auto
+      top: 3em
+
+    ~ .panel-content
+      margin-right: $sidebar-width
 
 .janus-inspect-kvPair
   padding-bottom: 0.15em
   .kvPair-valueBlock
     line-height: 1.4em
+
+.janus-inspect-varying.janus-inspect-panel
+  .varying-snapshot
+    background-color: #fadd00 // TODO: copied from -inspect
+    border-radius: 0.2em
+    color: $color-text
+    font-size: 0.8em
+    margin-left: 0.3em
+    padding: 0.2em 0.4em
+      right: 1.8em
+
+    .varying-snapshot-close
+      color: $color-text
+      display: inline-block
+      font-size: 1.6em
+      line-height: 0.9em
+      margin-left: 0.2em
+      overflow: hidden
+      position: absolute
+      text-decoration: none
+      width: 0.6em
+
+      &:before
+        content: '×'
+        padding-right: 1em
+
+  .panel-content > .varying-tree
+    padding-top: 0.4em
+
+  .varying-inert
+    color: #777
+    padding-bottom: 0.8em
+
+    a
+      color: $color-accent2
+
+  .varying-reactions
+    li:nth-child(2n)
+      background-color: #f7f7f7
+
+    .janus-list-selectItem
+      position: relative
+
+      &.checked
+        background-color: #fff
+        box-shadow: -0.2em 0 0 $color-accent inset
+
+      > button
+        @include fill
+        cursor: default
+        opacity: 0
+        width: 100%
+
+      .reaction
+        padding: 0.3em 0.6em
+
 
 ////////////////////////////////////////
 // COMPONENT: thinker
