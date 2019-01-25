@@ -1,12 +1,13 @@
 const { Model, DomView, find, from } = require('janus')
 $ = require('janus-dollar')
 
-const ContextModel = Model.build();
+class ContextModel extends Model {
+  get isContext() { return true; }
+}
 const withContext = (target, context) => new ContextModel({ target, context });
 
 const ContextView = DomView.build($('<div/>'),
-  find('div').render(from('target'))
-    .context(from('context')));
+  find('div').render(from('target')).context(from('context')));
 
 module.exports = {
   ContextModel, ContextView,

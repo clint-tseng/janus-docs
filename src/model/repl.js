@@ -1,11 +1,11 @@
 const $ = require('janus-dollar');
 const janus = require('janus');
 const stdlib = require('janus-stdlib');
-const { inspect } = require('janus-inspect');
 
 const { Map, Model, attribute, dēfault, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
 const { blank, nonblank } = require('../util/util');
+const { inspect } = require('../util/inspect');
 
 const and = (x, y) => x && y;
 const baseEnv = Object.assign({ $, stdlib, inspect }, janus);

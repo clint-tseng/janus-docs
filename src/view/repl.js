@@ -1,10 +1,10 @@
 const { DomView, template, find, from, match } = require('janus');
 const $ = require('janus-dollar');
-const { inspect } = require('janus-inspect');
 
 const { Statement, Repl } = require('../model/repl');
 const { success, fail } = require('../util/eval');
 const { blank, not, give } = require('../util/util');
+const { inspect } = require('../util/inspect');
 
 
 const StatementView = DomView.build($(`
