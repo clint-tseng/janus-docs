@@ -36,36 +36,36 @@ return new attribute.Attribute();
 ~~~
 
 ### #getValue
-#### .getValue(): \*|null
+#### .getValue(): Varying[\*]
 
-* !IMPURE
+Equivalent to calling `model.get(key)` on the `model` and `key` this `Attribute`
+instance is bound to.
 
-Gets the associated value from the `model` and `key` this `Attribute` is bound
-to.
-
-> When `Model` performs a `get` operation, it checks to see if it has an attribute
+> When `Model` performs a `get_` operation, it checks to see if it has an attribute
 > defined for the given `key` and uses its default if it exists. But because an
 > `Attribute` can be manually constructed against any `Model`/`key` pair even if
-> the model does not know about the attribute, then in this case `model.get` would
+> the model does not know about the attribute, then in this case `model.get_` would
 > return `null` rather than the attribute default. Because of this, `Attribute`
-> has its own logic to enforce its own default when `#getValue` is called.
+> has its own logic to enforce its own default when `#getValue_` is called.
 
-~~~
+~~~ inspect-entity
 const model = new Model({ x: 42 });
 const exampleAttr = new attribute.Attribute(model, 'x');
 return exampleAttr.getValue();
 ~~~
 
-### #watchValue
-#### .watchValue(): Varying[\*]
+### #getValue_
+#### .getValue_(): \*|null
 
-Equivalent to calling `model.set(key, value)` on the `model` and `key` this `Attribute`
-instance is bound to.
+* !IMPURE
 
-~~~ inspect-entity
+Gets the associated value from the `model` and `key` this `Attribute` is bound
+to. Please see the note attached to [`#getValue`](#getValue) above.
+
+~~~
 const model = new Model({ x: 42 });
 const exampleAttr = new attribute.Attribute(model, 'x');
-return exampleAttr.watchValue();
+return exampleAttr.getValue_();
 ~~~
 
 ### #setValue
@@ -88,7 +88,7 @@ return model;
 
 * !IMPURE
 
-Equivalent to calling `model.set(key, value)` on the `model` and `key` this `Attribute`
+Equivalent to calling `model.unset(key)` on the `model` and `key` this `Attribute`
 instance is bound to.
 
 ~~~ inspect-panel
@@ -147,7 +147,7 @@ By default, this method just passes the value through.
 ~~~ inspect-panel
 // simplified from the actual implementation (does not handle null/transient):
 class DateAttribute extends attribute.Attribute {
-  serialize() { return this.getValue().getTime(); }
+  serialize() { return this.getValue_().getTime(); }
   static deserialize(value) { return new Date(value); }
 }
 
@@ -162,7 +162,7 @@ return ModelWithDate.deserialize({ date: 1547083603524 }); // TODO: Date class d
 #### .default(): \*?
 
 Returns the default value for this `Attribute`; if there is no value on the `model`
-at the expected `key` and [`Model#get`](/api/model#get) or [`Attribute#getValue`](#getValue)
+at the expected `key` and [`Model#get_`](/api/model#get_) or [`Attribute#getValue_`](#getValue_)
 are used, then this value should be returned instead.
 
 Though this value is returned, it is not actually written to the `model`. To request
@@ -179,8 +179,8 @@ const ModelWithDefault = Model.build(
 const model = new ModelWithDefault();
 
 return [
-  model.get('x'),
-  model.attribute('x').getValue(),
+  model.get_('x'),
+  model.attribute('x').getValue_(),
   model.serialize()
 ];
 ~~~
@@ -208,8 +208,8 @@ const model = new ModelWithDefault();
 
 return [
   model.serialize(),
-  model.get('x'),
-  model.attribute('x').getValue(),
+  model.get_('x'),
+  model.attribute('x').getValue_(),
   model.serialize()
 ];
 ~~~
@@ -365,8 +365,8 @@ by the class property `@modelClass`, and defaults to `Model`.
 The `writeDefault` property is set to `true`, and it is inadvisable to change this:
 if a `default` value is provided (`default() { return new ChildModel(); }`, for
 instance), but `writeDefault` is set to `false`, then that model instance is generated
-and immediately discarded with each operation. So code like `.get('child').set('x', 42)`
-will look like it failed on a subsequent `.get('child')`, since this call actually
+and immediately discarded with each operation. So code like `.get_('child').set('x', 42)`
+will look like it failed on a subsequent `.get_('child')`, since this call actually
 generates a new model instance.
 
 (There is _not_ a `default` declared on the base `ModelAttribute` class.)
@@ -393,7 +393,7 @@ const ParentWidget = Model.build(
   })
 );
 
-return ParentWidget.deserialize({ child: { x: 42 } }).get('child');
+return ParentWidget.deserialize({ child: { x: 42 } }).get_('child');
 ~~~
 
 ### @of
@@ -408,7 +408,7 @@ const ParentWidget = Model.build(
   attribute('child', attribute.Model.of(ChildWidget))
 );
 
-return ParentWidget.deserialize({ child: { x: 42 } }).get('child');
+return ParentWidget.deserialize({ child: { x: 42 } }).get_('child');
 ~~~
 
 ## List Attribute
@@ -438,7 +438,7 @@ const ParentWidget = Model.build(
   })
 );
 
-return ParentWidget.deserialize({ children: [{ x: 42 }] }).get('children');
+return ParentWidget.deserialize({ children: [{ x: 42 }] }).get_('children');
 ~~~
 
 ### @of
@@ -455,7 +455,7 @@ const ParentWidget = Model.build(
   attribute('children', attribute.List.of(ChildWidgets))
 );
 
-return ParentWidget.deserialize({ children: [{ x: 42 }] }).get('children');
+return ParentWidget.deserialize({ children: [{ x: 42 }] }).get_('children');
 ~~~
 
 ## Reference Attribute
@@ -518,7 +518,7 @@ app.resolvers.register(ArticleRequest, articleResolver);
 
 const site = new Site({ path: '/api/attribute.json' });
 site.autoResolveWith(app);
-return site.watch('article').map(article => article ? article.keys() : null);
+return site.get('article').map(article => article ? article.keys() : null);
 ~~~
 
 ### @to
@@ -595,6 +595,6 @@ app.resolvers.register(ArticleRequest, articleResolver);
 
 const site = new Site({ path: '/api/attribute.json' });
 site.attribute('article').resolveWith(app); // this is the key line
-return site.watch('article').map(article => article ? article.keys() : null);
+return site.get('article').map(article => article ? article.keys() : null);
 ~~~
 

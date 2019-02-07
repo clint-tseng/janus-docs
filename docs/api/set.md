@@ -87,7 +87,20 @@ return [
 ## Value Retrieval and Observation
 
 ### #includes
-#### .includes(x: \*): Boolean
+#### .includes(x: \*): Varying[Boolean]
+
+Given any value `x`, returns a `Varying` whose boolean value will always indicate
+whether that value is presently a member of this `Set`.
+
+~~~
+const set = new Set([ 2, 4, { x: 8 } ]);
+const result = set.includes(6);
+set.add(6);
+return result;
+~~~
+
+### #includes_
+#### .includes_(x: \*): Boolean
 
 Given any value `x`, returns a boolean indicating whether that value is presently
 a member of this `Set`.
@@ -95,48 +108,33 @@ a member of this `Set`.
 ~~~
 const set = new Set([ 2, 4, { x: 8 } ]);
 return [
-  set.includes(2),
-  set.includes(3),
-  set.includes({ x: 8 })
+  set.includes_(2),
+  set.includes_(3),
+  set.includes_({ x: 8 })
 ];
 ~~~
 
-### #watchIncludes
-#### .watchIncludes(x: \*): Varying[Boolean]
-
-Given any value `x`, returns a `Varying` whose boolean value will always indicate
-whether that value is presently a member of this `Set`.
-
-~~~
-const set = new Set([ 2, 4, { x: 8 } ]);
-const result = set.watchIncludes(6);
-set.add(6);
-return result;
-~~~
-
 ### .length
-#### .length: Int
-
-TODO: also missing from nav list
-
-Gives the number of elements in this `Set`.
-
-~~~
-const set = new Set([ 0, 1, 2, 3, 4, 5 ]);
-return set.length;
-~~~
-
-### #watchLength
-#### .watchLength(): Varying[Int]
+#### .length: Varying[Int]
 
 Returns a `Varying` whose integer value always represents the number of members
 in this `Set`.
 
 ~~~
 const set = new Set([ 0, 1, 2, 3, 4, 5 ]);
-const result = set.watchLength();
+const result = set.length;
 set.add(6);
 return result;
+~~~
+
+### .length_
+#### .length_: Int
+
+Gives the number of elements in this `Set`.
+
+~~~
+const set = new Set([ 0, 1, 2, 3, 4, 5 ]);
+return set.length_;
 ~~~
 
 ## Mapping and Transformation
@@ -317,19 +315,19 @@ return sum;
 ## Enumeration
 
 ### #enumerate
-#### .enumerate(): Array[\*]
+#### .enumerate(): this
+
+Because `Set` is unordered and unindexed, the members are themselves the enumerate
+of `Set`. Therefore, calling `#enumerate` just returns the `Set` itself.
+
+### #enumerate_
+#### .enumerate_(): Array[\*]
 
 Returns a static array of the members of this `Set`. Because `Set` is unordered
 and unindexed, the members are themselves the enumeration of the `Set`.
 
 ~~~
 const set = new Set([ 0, 1, 2, 3 ]);
-return set.enumerate();
+return set.enumerate_();
 ~~~
-
-### #enumeration
-#### .enumeration(): this
-
-Because `Set` is unordered and unindexed, the members are themselves the enumeration
-of `Set`. Therefore, calling `#enumeration` just returns the `Set` itself.
 

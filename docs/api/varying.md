@@ -61,6 +61,7 @@ return v.get();
 
 ### #set
 #### .set(x: T): void
+
 * !VARIANT DerivedVarying !UNAVAILABLE
 * !IMPURE
 
@@ -82,6 +83,7 @@ return v.get();
 
 ### #react
 #### v: Varying[T] => v.react(callback: (T -> void)): Observation
+
 * !VARIANT UnreducedVarying v.react(callback: (…* -> void)): Observation
 * !IMPURE
 
@@ -106,6 +108,7 @@ return results;
 ~~~
 
 #### v: Varying[T] => v.react(immediate: Bool, callback: (T -> void)): Observation
+
 * !VARIANT UnreducedVarying v.react(immediate: Bool, callback: (…* -> void)): Observation
 * !IMPURE
 
@@ -125,6 +128,7 @@ return results;
 
 ### #map
 #### v: Varying[T] => v.map(f: (T -> U)): Varying[U]
+
 * !VARIANT UnreducedVarying v.map(f: (…* -> U)): Varying[U]
 
 Returns a new `Varying` that always contains the value of the original `Varying`
@@ -144,6 +148,7 @@ return results;
 
 ### #flatMap
 #### v: Varying[T] => v.flatMap(f: (T -> U|Varying[U])): Varying[U]
+
 * !VARIANT UnreducedVarying v.map(f: (…* -> U|Varying[U])): Varying[U]
 
 Like `.map`, but when `f` returns a `Varying[U]`, the mapped `Varying` will adopt
@@ -163,6 +168,7 @@ return results;
 
 ### #flatten
 #### v: Varying[Varying[T]] => v.flatten(): Varying[T]
+
 * !VARIANT UnreducedVarying !UNAVAILABLE
 
 Returns a new `Varying`, but if the original `Varying` contained a nested `Varying`,
@@ -199,6 +205,7 @@ return results;
 ### @mapAll
 #### Varying.mapAll(…vs: …Varying[\*], f: (…xs: …\* -> U)): Varying[U]
 #### Varying.mapAll(f: (…xs: …\* -> U), …vs: …Varying[\*]): Varying[U]
+
 * !CURRIES
 
 Takes one or more `Varying`s `vs`, and a function which receives the same number
@@ -222,6 +229,7 @@ return results;
 ### @flatMapAll
 #### Varying.flatMapAll(…Varying[\*], f: (…\* -> U|Varying[U])): Varying[U]
 #### Varying.flatMapAll(f: (…\* -> U|Varying[U]), …Varying[\*]): Varying[U]
+
 * !CURRIES
 
 Like `@mapAll`, but should `f` return a `Varying`, that result will be flattened
@@ -288,7 +296,7 @@ theory chapter for more information.
 const expensiveComputation = Varying.managed(
   () => new Map({ a: 4, b: 5, c: 6 }),
   () => new List([ 1, 2, 3 ]),
-  (map, list) => map.enumeration().concat(list).watchLength()
+  (map, list) => map.enumerate().concat(list).length
 );
 const results = [];
 // causes the map and list to be instantiated:

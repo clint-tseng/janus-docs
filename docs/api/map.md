@@ -127,7 +127,20 @@ return map;
 ## Value Retrieval and Observation
 
 ### #get
-#### .get(key: String): \*|null
+#### .get(key: String): Varying[\*]
+
+Returns a `Varying` that always contains the value at the given `key`. Results
+are cached, so all `Varying`s returned for a given `key` will be the same instance.
+
+~~~ inspect-entity
+const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
+const result = map.get('nested.name');
+map.set('nested.name', 'objects in space');
+return result;
+~~~
+
+### #get_
+#### .get_(key: String): \*|null
 
 Gets the value associated with the given key. If no value exists there, `null`
 will be returned. Maps understand dot notation for nesting data.
@@ -135,23 +148,10 @@ will be returned. Maps understand dot notation for nesting data.
 ~~~ inspect-entity
 const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
 return [
-  map.get('name'),
-  map.get('nested'),
-  map.get('nested.name')
+  map.get_('name'),
+  map.get_('nested'),
+  map.get_('nested.name')
 ];
-~~~
-
-### #watch
-#### .watch(key: String): Varying[\*]
-
-Returns a `Varying` that always contains the value at the given `key`. Results
-are cached, so all `Varying`s returned for a given `key` will be the same instance.
-
-~~~ inspect-entity
-const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
-const result = map.watch('nested.name');
-map.set('nested.name', 'objects in space');
-return result;
 ~~~
 
 ## Shadow Copying
@@ -276,8 +276,25 @@ return map.serialize();
 ## Enumeration
 
 ### #keys
-#### .keys(): Array[String]
-#### .enumerate(): Array[String]
+#### .keys(): List[String]
+#### .enumerate(): List[String]
+
+Returns a `List` of the `String` keys in the `Map`. The List will remain up-to-date
+as the `Map` structure changes, until either is destroyed. Only data leaves are
+represented; intermediate keys that point at nested objects are not returned.
+Nested structures will result in dot-delimited key names.
+
+~~~
+const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
+const keys = map.enumerate();
+map.set('number', 13);
+map.set('nested.number', 17);
+return keys;
+~~~
+
+### #keys_
+#### .keys_(): Array[String]
+#### .enumerate_(): Array[String]
 
 TODO how should we handle aliases? are there even any others?
 
@@ -287,43 +304,39 @@ Nested objects will result in dot-delimited keys.
 
 ~~~
 const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
-return map.keys();
+return map.keys_();
 ~~~
 
-### #watchKeys
-#### .watchKeys(): List[String]
-#### .enumeration(): List[String]
-
-Like `#keys`/`#enumerate`, but the returned `List` will remain up-to-date as the
-`Map` structure changes. Again, only data leaves are represented, and nested keys
-will be given in dot-delimited format.
-
-~~~
-const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
-const keys = map.enumeration();
-map.set('number', 13);
-map.set('nested.number', 17);
-return keys;
-~~~
-
-### #watchLength
-#### .watchLength(): Varying[Int]
+### .length
+#### .length(): Varying[Int]
 
 Returns the number of key/value pairs present in this `Map`, in the form of a
-`Varying[Int]`. This is exactly equivalent to calling `.enumeration().watchLength()`.
+`Varying[Int]`. This is exactly equivalent to calling `.enumerate().length()`.
 
 ~~~ inspect-entity
 const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
-const length = map.watchLength();
+const length = map.length;
 map.set('number', 13);
 map.set('nested.number', 17);
 return length;
 ~~~
 
+### .length_
+#### .length_: Int
+
+Returns the number of key/value pairs present in this `Map`, as a plain integer.
+This is exactly equivalent to calling `.enumerate().length_`.
+
+~~~ inspect-entity
+const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
+return map.length_;
+~~~
+
+
 ## Change Detection
 
-### #watchDiff
-#### .watchDiff(other: Map): Varying[Boolean]
+### #diff
+#### .diff(other: Map): Varying[Boolean]
 
 Compares two structures, and returns a `Varying[Boolean]` indicating whether the
 structures are different (`true`) or not (`false`). The following rules are used
@@ -350,17 +363,17 @@ const mapB = new Map({
   submap: new Map({ name: 'submap', subsublist: new List([ 0 ]) }),
   sublist: new List([ 2, 4, 8 ])
 });
-return mapA.watchDiff(mapB);
+return mapA.diff(mapB);
 ~~~
 
-### #watchModified
-#### .watchModified(): Varying[Boolean]
+### #modified
+#### .modified(): Varying[Boolean]
 
-Like `#watchDiff`, but rather than being passed another object to compare against,
-`#watchModified` compares a `Map` against its shadow parent. If the `Map` is an
+Like `#diff`, but rather than being passed another object to compare against,
+`#modified` compares a `Map` against its shadow parent. If the `Map` is an
 original with no parent, `Varying[false]` is always returned.
 
-For the rules of comparison, see the notes on `#watchDiff` above.
+For the rules of comparison, see the notes on `#diff` above.
 
 ~~~ inspect-entity
 const original = new Map({
@@ -371,8 +384,8 @@ const original = new Map({
 const shadow = original.shadow();
 
 shadow.set('sublist', new List([ 2, 4, 8 ]));
-// shadow.get('submap').get('subsublist').add(1);
+// shadow.get_('submap').get_('subsublist').add(1);
 
-return shadow.watchModified();
+return shadow.modified();
 ~~~
 

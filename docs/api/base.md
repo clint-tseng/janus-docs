@@ -308,7 +308,7 @@ uses `#tap` to track the additional dependents.
 
 ~~~
 const data = new Map({ a: 1, b: 2, c: 3 });
-const computation = Base.managed(() => data.enumeration());
+const computation = Base.managed(() => data.enumerate());
 
 const dataKeysOne = computation();
 data.set('d', 4);

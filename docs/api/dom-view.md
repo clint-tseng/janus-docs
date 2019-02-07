@@ -33,7 +33,7 @@ Compare the following sample to the sample for [View@viewModelClass](view#@viewM
 
 ~~~ inspect-panel
 class SampleViewModel extends Model.build(
-  bind('greeting', from('subject').watch('name').map(name => `Hello, ${name}!`))
+  bind('greeting', from('subject').get('name').map(name => `Hello, ${name}!`))
 ) {};
 
 const SampleView = DomView.withOptions({ viewModelClass: SampleViewModel });
@@ -373,7 +373,7 @@ const SampleParentView = DomView.build(
   find('div')
     .render(from('subobject'))
       .context('summary')
-      .criteria(from('subobject').watch('type').map(type => ({ type })))
+      .criteria(from('subobject').get('type').map(type => ({ type })))
     .classed('hasChild', from('subobject').map(x => (x != null)))
 );
 
@@ -440,7 +440,7 @@ const SampleView = DomView.build(
     .text(from('count').map(x => `clicked ${x} times`))
     .on('click', (event, subject) => {
       event.preventDefault();
-      subject.set('count', subject.get('count') + 1);
+      subject.set('count', subject.get_('count') + 1);
     })
 );
 
@@ -559,7 +559,7 @@ class SampleView extends DomView.build(
   _wireEvents() {
     const artifact = this.artifact();
     artifact.on('click', () => {
-      this.subject.set('collapsed', !this.subject.get('collapsed'));
+      this.subject.set('collapsed', !this.subject.get_('collapsed'));
     });
   }
 }

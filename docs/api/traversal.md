@@ -59,8 +59,8 @@ For all of the below, the following function signatures apply:
   defined for it, and `context` is as described above for `recurse`.
 * `reduce: (obj: Array|List) -> \*` where `obj` is the mapped structure post-traversal.
 
-### λasNatural
-#### Traversal.asNatural(obj: Enumerable, { recurse?, map }, context = {}): Map|List
+### λnatural
+#### Traversal.natural(obj: Enumerable, { recurse?, map }, context = {}): Map|List
 
 Performs traversal, preserving structure (`Map`s stay `Map`s, and `List`s stay
 `List`s) and returning an eagerly updated structure which will continue to maintain
@@ -70,7 +70,7 @@ its transformation of the source structures until `.destroy()`ed.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-const result = Traversal.asNatural(data, {
+const result = Traversal.natural(data, {
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2)
@@ -79,25 +79,25 @@ data.set('w', 0);
 return inspect.panel(result); // TODO: why does this not panel?
 ~~~
 
-### λgetNatural
-#### Traversal.getNatural(obj: Enumerable, { recurse?, map }, context = {}): Object|Array
+### λnatural_
+#### Traversal.natural_(obj: Enumerable, { recurse?, map }, context = {}): Object|Array
 
-Like `#asNatural`, but performs the traversal only once, returning a static structure
+Like `#natural`, but performs the traversal only once, returning a static structure
 of plain Javascript `Object`s and `Array`s.
 
 > Please see above for definitions of `recurse` and `map`.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-return Traversal.getNatural(data, {
+return Traversal.natural_(data, {
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2)
 });
 ~~~
 
-### λasList
-#### Traversal.asList(obj: Enumerable, { recurse?, map, reduce? }, context = {}): List
+### λlist
+#### Traversal.list(obj: Enumerable, { recurse?, map, reduce? }, context = {}): List
 
 Performs traversal, crushing `Map`s to `List`s (with no particular guaranteed indexing
 order), and returning an eagerly updated structure which will continue to maintain
@@ -107,7 +107,7 @@ its transformation of the source structures until `.destroy()`ed.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-const result = Traversal.asList(data, {
+const result = Traversal.list(data, {
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2)
@@ -116,17 +116,18 @@ data.set('w', 0);
 return inspect.panel(result);
 ~~~
 
-### λgetArray
-#### Traversal.getArray(obj: Enumerable, { recurse?, map, reduce? }, context = {}): Array
+### λlist_
+#### Traversal.list_(obj: Enumerable, { recurse?, map, reduce? }, context = {}): Array
 
-Like `#asList`, but performs the traversal only once, returning a static structure
-of plain Javascript `Array's.
+Like `#list`, but performs the traversal only once, returning a static structure
+of plain Javascript `Array's. Note that despite the name `list_` (chose for consistency
+with `#list`), this method returns an `Array`.
 
 > Please see above for definitions of `recurse`, `map`, and `reduce`.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-return Traversal.getArray(data, {
+return Traversal.list_(data, {
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2),
@@ -150,7 +151,7 @@ The default serializing Traversal operates on the following rules, in order:
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-return Traversal.getNatural(data, Traversal.default.serialize);
+return Traversal.natural_(data, Traversal.default.serialize);
 ~~~
 
 ### ::diff
@@ -188,7 +189,7 @@ const data2 = new Map({
   friend: new Map({ name: 'Bob', meta: new Map({ clicked: 2 }) }),
   meta: new Map({ clicked: 1 })
 });
-return Traversal.asList(data1, {
+return Traversal.list(data1, {
   recurse: Traversal.default.diff.recurse,
   map: k => (k === 'meta')
     ? types.traversal.value(false)

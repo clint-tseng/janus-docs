@@ -9,7 +9,7 @@ result.
 
 A full chapter describing `from` expressions can be found [here](/theory/from-expressions).
 
-While a default set of useful descriptor classes (`from.watch`, `from.app`, etc)
+While a default set of useful descriptor classes (`from.get`, `from.app`, etc)
 are provided by default, [`from.build()`](#@build) can be used to build custom
 descriptor chains. When you see `{x}` in method names below, this is a placeholder
 for your set of given descriptor classes.
@@ -46,7 +46,7 @@ const model = new Model({ name: 'Spot', age: 7 });
 const point = (expr) => expr.all.point(model.pointer());
 
 return [
-  from(model => model.watch('name')),
+  from(model => model.get('name')),
   from('age'),
   from(42)
 ].map(point);
@@ -62,7 +62,7 @@ case supplied to the builder becomes directly a chaining method on `from`.
 The default set, when used with the default `DomView` or `Model` `point`, consists
 of the following methods:
 
-* `from.watch(key: String)` will `.watch(key)` on the subject.
+* `from.get(key: String)` will `.get(key)` on the subject.
 * `from.attribute(key: String)` will call `.attribute(key)` on the `Model`,
   resulting in the [`Attribute`](attribute#Attribute) instance associated with
   the key rather than the data at the key.
@@ -90,10 +90,10 @@ const model = new TestModel({ name: 'Spot', age: 7 }, { app });
 const point = (expr) => expr.all.point(model.pointer());
 
 return [
-  from.watch('name'),
+  from.get('name'),
   from.attribute('name'),
   from.varying(Varying.of(42)),
-  from.varying(subject => subject.enumeration().watchLength()),
+  from.varying(subject => subject.enumerate().length),
   from.app(),
   from.app('views'),
   from.self()
@@ -156,18 +156,18 @@ const model = new Model({ name: 'Spot', age: 7 });
 const point = (expr) => expr.all.point(model.pointer());
 
 return [
-  from.self().map(model => model.enumeration().watchLength()),
-  from.self().flatMap(model => model.enumeration().watchLength())
+  from.self().map(model => model.enumerate().length),
+  from.self().flatMap(model => model.enumerate().length)
 ].map(point);
 ~~~
 
-### #watch
-#### x: FromPart[…\*, Enumerable] => x.watch(key: String): FromPart[…\*, U]
+### #get
+#### x: FromPart[…\*, Enumerable] => x.get(key: String): FromPart[…\*, U]
 
-Attempts to map the current value by calling `.watch(key)` on it. If the value
-does not exist or does not support `#watch`, `null` will be returned.
+Attempts to map the current value by calling `.get(key)` on it. If the value
+does not exist or does not support `#get`, `null` will be returned.
 
-This is roughly equivalent to `.flatMap(model => model.watch(key))`, but with
+This is roughly equivalent to `.flatMap(model => model.get(key))`, but with
 the abovementioned safety checks.
 
 ~~~
@@ -180,8 +180,8 @@ const model = new Model({
 const point = (expr) => expr.all.point(model.pointer());
 
 return [
-  from('nested').watch('name'),
-  from('nested').watch('again').watch('name')
+  from('nested').get('name'),
+  from('nested').get('again').get('name')
 ].map(point);
 ~~~
 
@@ -315,9 +315,9 @@ const model = new Model({
 const point = (expr) => expr.all.point(model.pointer());
 
 return point(
-  from('dog').watch('name')
+  from('dog').get('name')
     .and('lookup')
-    .all.flatMap((name, lookup) => lookup.watch(name))
+    .all.flatMap((name, lookup) => lookup.get(name))
 );
 ~~~
 
@@ -339,19 +339,19 @@ value is returned. But if multiple data values exist at the end of the chain, an
 `UnreducedVarying` with all values is the result.
 
 ~~~
-const expr = from.watch('name')
-  .and.watch('age')
+const expr = from.get('name')
+  .and.get('age')
   .all.map((name, age) => `${name} is ${age} years old`);
 
 const model = new Model({ name: 'Spot', age: 7 });
 return expr.point(match(
-  types.from.watch(x => model.watch(x))
+  types.from.get(x => model.get(x))
 ));
 ~~~
 
 ## Custom Chaining
 
-Should the default set of chaining methods (`watch`, `self`, `app`, and so on as
+Should the default set of chaining methods (`get`, `self`, `app`, and so on as
 described [here](#{x})) are unsatisfactory, it is possible to build your own.
 
 ### @build
@@ -377,9 +377,9 @@ const blue = new Model({ name: 'blue' });
 const green = new Model({ name: 'green' });
 
 return expr.point(match(
-  cases.red(x => red.watch(x)),
-  cases.blue(x => blue.watch(x)),
-  cases.green(x => green.watch(x))
+  cases.red(x => red.get(x)),
+  cases.blue(x => blue.get(x)),
+  cases.green(x => green.get(x))
 ));
 ~~~
 

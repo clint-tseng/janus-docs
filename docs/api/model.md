@@ -73,7 +73,7 @@ const ExampleModel = Model.build(
 
 const model = new ExampleModel();
 return [
-  model.get('name'),
+  model.get_('name'),
   new EnumAttributeEditView(model.attribute('status'))
 ];
 ~~~
@@ -110,7 +110,7 @@ will not work in conjunction with other attribute declarations at the key, inclu
 ~~~
 const SampleModel = Model.build(dēfault('name', 'anonymous'));
 const model = new SampleModel();
-return model.get('name');
+return model.get_('name');
 ~~~
 
 ### λdēfault.writing
@@ -122,7 +122,7 @@ Like `dēfault`, but also marks `writeDefault` as true.
 ~~~
 const SampleModel = Model.build(dēfault.writing('name', 'anonymous'));
 const model = new SampleModel();
-model.get('name');
+model.get_('name');
 return model.serialize();
 ~~~
 
@@ -145,7 +145,7 @@ const SampleModel = Model.build(
 
 const model = new SampleModel({ name: 'Alice' });
 return [
-  model.get('greeting'),
+  model.get_('greeting'),
   model.serialize()
 ];
 ~~~
@@ -261,12 +261,12 @@ return Person.deserialize({
 
 ## Value Manipulation
 
-### #get
-#### .get(key: String): \*|null
+### #get_
+#### .get_(key: String): \*|null
 
 * !IMPURE
 
-The `Model` version of `#get` differs from [the `Map` version](/api/map#get) in
+The `Model` version of `#get_` differs from [the `Map` version](/api/map#get_) in
 precisely one way: if there is no present value but there is an `Attribute` associated
 with the requested `key` that provides a `default` value, then that default value
 will be returned. If the `Attribute` additionally specifies `writeDefault` to be
@@ -282,8 +282,8 @@ const SampleModel = Model.build(
 
 const model = new SampleModel({ name: 'Alice' });
 return [
-  model.get('name'),
-  model.get('status')
+  model.get_('name'),
+  model.get_('status')
 ];
 ~~~
 
@@ -304,7 +304,7 @@ const ExampleModel = Model.build(
 );
 
 const model = new ExampleModel({ name: 'Alice' });
-return model.attribute('name').getValue();
+return model.attribute('name').getValue_();
 ~~~
 
 ## Binding and Context
@@ -359,7 +359,7 @@ Any attributes marked `transient` will be omitted from the result.
 ~~~
 const SampleModel = Model.build(
   attribute('status', class extends attribute.Text {
-    serialize() { return this.getValue().toUpperCase(); }
+    serialize() { return this.getValue_().toUpperCase(); }
   }),
   bind('greeting', from('name').map(name => `hello, ${name}!`)),
   transient('greeting')
@@ -472,7 +472,7 @@ reaction in the preinitializer can be more appropriate.
 ~~~ inspect-panel
 class PlayerModel extends Model {
   _preinitialize() {
-    this.reactTo(this.watch('playing'), isPlaying => {
+    this.reactTo(this.get('playing'), isPlaying => {
       if (isPlaying === false)
         this.set('pausedAt', (new Date()).getTime());
     });
@@ -497,7 +497,7 @@ load, it can be used effectively ignore the constructed state of the model data.
 ~~~ inspect-panel
 class PlayerModel extends Model {
   _initialize() {
-    this.reactTo(this.watch('playing'), false, isPlaying => {
+    this.reactTo(this.get('playing'), false, isPlaying => {
       if (isPlaying === false)
         this.set('pausedAt', new Date());
     });

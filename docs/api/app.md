@@ -44,7 +44,7 @@ return new App({ locale: { major: 'en', minor: 'US' } });
 ### .views
 #### .views: Library
 
-A convenience getter which is exactly equivalent to calling `app.get('views')`.
+A convenience getter which is exactly equivalent to calling `app.get_('views')`.
 
 ~~~
 const app = new App();
@@ -94,7 +94,7 @@ return app.view(new SampleModel({ message: 'hello!' }));
 ### .resolvers
 #### .resolvers: Library
 
-A convenience getter which is exactly equivalent to calling `app.get('resolvers')`.
+A convenience getter which is exactly equivalent to calling `app.get_('resolvers')`.
 
 ~~~
 const app = new App();

@@ -227,12 +227,31 @@ return list;
 ## Value Retrieval and Observation
 
 ### #at
-#### .at(index: Int): \*?
-#### .get(index: Int): \*?
+#### .at(index: Int): Varying[\*?]
+#### .get(index: Int): Varying[\*?]
+
+Given an integer `index`, both `#at` and `#get` (they are identical) will
+return a `Varying` whose value will always reflect the contents of the List at
+that index. Negative `index` values are allowed, and will count from the end of
+the `List`, where `-1` points at the very last element of the `List`.
+
+~~~
+const list = new List([ 0, 1, 2, 3, 4, 5 ]);
+const first = list.at(0);
+const last = list.get(-1);
+
+list.remove(0);
+list.add([ 6, 7, 8 ]);
+return [ first, last ];
+~~~
+
+### #at_
+#### .at_(index: Int): \*?
+#### .get_(index: Int): \*?
 
 TODO alias
 
-You can access list members by index using either `.at` or `.get`; they are identical.
+You can access list members by index using either `#at_` or `#get_`; they are identical.
 If an element exists at the given `index`, it will be returned. Negative `index`
 values are allowed, and will count from the end of the `List`, where `-1` points
 at the very last element of the `List`.
@@ -240,101 +259,80 @@ at the very last element of the `List`.
 ~~~
 const list = new List([ 2, 4, 8 ]);
 return [
-  list.at(0),
-  list.get(-1),
-  list.at(99)
+  list.at_(0),
+  list.get_(-1),
+  list.at_(99)
 ];
 ~~~
 
-### #watchAt
-#### .watchAt(index: Int): Varying[\*?]
-#### .watch(index: Int): Varying[\*?]
-
-Given an integer `index`, both `#watch` and `#watchAt` (they are identical) will
-return a `Varying` whose value will always reflect the contents of the List at
-that index. Negative `index` values are allowed, and will count from the end of
-the `List`, where `-1` points at the very last element of the `List`.
-
-~~~
-const list = new List([ 0, 1, 2, 3, 4, 5 ]);
-const first = list.watchAt(0);
-const last = list.watch(-1);
-
-list.remove(0);
-list.add([ 6, 7, 8 ]);
-return [ first, last ];
-~~~
-
 ### .length
-#### .length: Int
-
-TODO: missing from nav list
-
-Gives the length of the list.
-
-~~~
-const list = new List([ 0, 1, 2, 3, 4, 5 ]);
-return list.length;
-~~~
-
-### #watchLength
-#### .watchLength(): Varying[Int]
+#### .length: Varying[Int]
 
 Returns a `Varying` whose value always reflects the length of this `List`.
 
 ~~~
 const list = new List([ 0, 1, 2, 3, 4, 5 ]);
-const result = list.watchLength();
+const result = list.length;
 list.add([ 6, 7, 8 ]);
 return result;
 ~~~
 
+### .length_
+#### .length_: Int
+
+Gives the length of the list once.
+
+~~~
+const list = new List([ 0, 1, 2, 3, 4, 5 ]);
+return list.length_;
+~~~
+
 ### #empty
-#### .empty(): Boolean
-
-Returns `true` if this `List` is empty, `false` otherwise.
-
-~~~
-return [
-  new List([ 0 ]).empty(),
-  new List().empty()
-];
-~~~
-
-### #watchEmpty
-#### .watchEmpty(): Boolean
+#### .empty(): Varying[Boolean]
 
 Returns a `Varying` whose value is `true` if this `List` is empty, `false` otherwise.
 
 ~~~
 const list = new List([ 0, 1, 2, 3, 4, 5 ]);
-const result = list.watchEmpty();
+const result = list.empty();
 list.removeAll();
 return result;
 ~~~
 
-### #nonEmpty
-#### .nonEmpty(): Boolean
+### #empty_
+#### .empty_(): Boolean
 
-Returns `false` if this `List` is empty, `true` otherwise.
+Returns `true` if this `List` is empty, `false` otherwise.
 
 ~~~
 return [
-  new List([ 0 ]).nonEmpty(),
-  new List().nonEmpty()
+  new List([ 0 ]).empty_(),
+  new List().empty_()
 ];
 ~~~
 
-### #watchNonEmpty
-#### .watchNonEmpty(): Boolean
+### #nonEmpty
+#### .nonEmpty(): Varying[Boolean]
 
 Returns a `Varying` whose value is `false` if this `List` is empty, `true` otherwise.
 
 ~~~
 const list = new List();
-const result = list.watchNonEmpty();
+const result = list.nonEmpty();
 list.add(16);
 return result;
+~~~
+
+### #nonEmpty_
+#### .nonEmpty_(): Boolean
+
+Returns `false` if this `List` is empty, `true` otherwise.
+
+~~~
+return [
+  new List([ 0 ]).nonEmpty_(),
+  new List().nonEmpty_()
+];
 ~~~
 
 ## Mapping and Transformation
@@ -466,7 +464,7 @@ const list = new List([ 0, new List([ 1, 2 ]), 3, new List([ 4, 5 ]) ]);
 const flattened = list.flatten();
 
 list.add(new List([ 6, 7, new List([ 8 ]) ]));
-list.get(1).add(2.5);
+list.get_(1).add(2.5);
 
 return flattened;
 ~~~
@@ -651,60 +649,37 @@ return sum;
 ## Enumeration
 
 ### #enumerate
-#### .enumerate(): Array[Int]
+#### .enumerate(): List[Int]
 
-Returns a static array of the numeric indices in the `List`. Regardless of the
-presence of `null` elements or a sparse array, this method will always return all
-integer values from `0` to the index of the final element in the list.
-
-~~~
-const list = new List([ 0, 1, 2 ]);
-list.set(5, 'hello!');
-return list.enumerate();
-~~~
-
-### #enumeration
-#### .enumeration(): List[Int]
-
-Like `#enumerate`, but instead of a static `Array` returns a `List` will remain
-up-to-date as the `List` members change. Again, all integer values from `0` to
-the index of the final element in the list are always included.
+Returns a `List` whose contents are the numeric indices in the List. It will remain
+up-to-date as the `List` members change. All integer values from `0` to the index
+of the final element in the list are always included.
 
 ~~~
 const list = new List([ 0, 1, 2 ]);
-const enumeration = list.enumeration();
+const enumeration = list.enumerate();
 list.set(5, 'hello!');
 return enumeration;
 ~~~
 
-### .length
-#### .length: Int
+### #enumerate_
+#### .enumerate(): Array[Int]
 
-Returns the number of elements present in this `List` at the time of calling.
+Returns a static array of the numeric indices in the `List`. As with [`#enumerate`](#enumerate),
+regardless of the presence of `null` elements or a sparse array, this method will
+always return all integer values from `0` to the index of the final element in
+the list.
 
 ~~~
 const list = new List([ 0, 1, 2 ]);
 list.set(5, 'hello!');
-return list.length;
-~~~
-
-### #watchLength
-#### .watchLength(): Varying[Int]
-
-Returns the number of elements present in this `List`, in the form of a `Varying[Int]`.
-This is exactly equivalent to calling `.enumeration().watchLength()`.
-
-~~~ inspect-entity
-const list = new List([ 0, 1, 2 ]);
-const length = list.watchLength();
-list.set(5, 'hello!');
-return length;
+return list.enumerate_();
 ~~~
 
 ## Change Detection
 
-### #watchDiff
-#### .watchDiff(other: List): Varying[Boolean]
+### #diff
+#### .diff(other: List): Varying[Boolean]
 
 Compares two structures, and returns a `Varying[Boolean]` indicating whether the
 structures are different (`true`) or not (`false`). The following rules are used
@@ -730,6 +705,6 @@ const listB = new List([
   new List([ 4, 6, 8 ]),
   new Map({ name: 'submap', sublist: new List([ 10 ]) })
 ]);
-return listA.watchDiff(listB);
+return listA.diff(listB);
 ~~~
 

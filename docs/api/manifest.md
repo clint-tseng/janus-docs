@@ -72,7 +72,7 @@ const PageModel = Model.build(
 const PageView = DomView.build(
   $('<div><h1>my cool page</h1><p/></div>'),
   template(
-    find('p').text(from('remote_resource').watch('text'))
+    find('p').text(from('remote_resource').get('text'))
   )
 );
 
@@ -126,9 +126,9 @@ const PageView = DomView.build(
     <p class="four"/>
   </div>`),
   template(
-    find('.one').text(from('remoteThingA').watch('text')),
-    find('.two').text(from('remoteThingB').watch('text')),
-    find('.four').text(from('remoteThingD').watch('text'))
+    find('.one').text(from('remoteThingA').get('text')),
+    find('.two').text(from('remoteThingB').get('text')),
+    find('.four').text(from('remoteThingD').get('text'))
   )
 );
 

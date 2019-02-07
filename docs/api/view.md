@@ -55,7 +55,7 @@ and returned directly after the first call.
 class SampleView extends View {
   _render() {
     const node = $('<div/>');
-    this.reactTo(this.subject.watch('name'), name => {
+    this.reactTo(this.subject.get('name'), name => {
       node.text(name);
     });
     return node;
@@ -115,7 +115,7 @@ parent `View` is destroyed.
 
 ~~~ inspect-panel
 class SampleViewModel extends Model.build(
-  bind('greeting', from('subject').watch('name').map(name => `Hello, ${name}!`))
+  bind('greeting', from('subject').get('name').map(name => `Hello, ${name}!`))
 ) {};
 
 class SampleView extends View {
@@ -149,7 +149,7 @@ thereafter.
 class SampleView extends View {
   _render() {
     const node = $('<div/>');
-    this.reactTo(this.subject.watch('name'), name => {
+    this.reactTo(this.subject.get('name'), name => {
       node.text(name);
     });
     return node;
