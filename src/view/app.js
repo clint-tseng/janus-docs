@@ -51,7 +51,7 @@ class AppView extends DomView.build($('body').clone(), template(
     // header events:
     dom.find('#repl-link').on('click', (event) => {
       event.preventDefault();
-      const active = !app.get('active.repl');
+      const active = !app.get_('active.repl');
       app.set('active.repl', active);
       if (active)
         dom.find('#repl .repl').data('view').focusLast();

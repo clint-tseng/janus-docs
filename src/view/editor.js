@@ -36,11 +36,11 @@ class EditorView extends DomView {
       matchBrackets: true,
       mode: this.options.language || 'javascript',
       showTrailingSpace: true,
-      value: this.subject.getValue() || '',
+      value: this.subject.getValue_() || '',
       viewportMargin: Infinity
     });
 
-    this.subject.watchValue().react(false, (value) => {
+    this.subject.getValue().react(false, (value) => {
       if (this._lock !== true) this._cm.setValue(value);
     });
 

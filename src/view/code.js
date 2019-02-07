@@ -4,7 +4,7 @@ const $ = require('janus-dollar');
 // used in place of the codemirror editor in ./editor.js on the server-side.
 const StaticCodeView = DomView.build(
   $(`<pre class="code-static"><code/></pre>`),
-  template(find('code').text(from((subject) => subject.watchValue())))
+  template(find('code').text(from((subject) => subject.getValue())))
 );
 
 module.exports = {

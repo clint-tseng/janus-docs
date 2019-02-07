@@ -6,7 +6,7 @@ class ArticleView extends DomView {
   _render() {
     // we have to render on our own because the markup is not statically known.
     // we count heavily here on Articles being static, which they are.
-    const dom = $(this.subject.get('html'));
+    const dom = $(this.subject.get_('html'));
     this._drawSamples(dom);
     return dom;
   }
@@ -15,8 +15,8 @@ class ArticleView extends DomView {
 
   _drawSamples(dom) {
     const point = this.pointer();
-    this._bindings = this.subject.get('samples').list.map((sample) =>
-      mutators.render(from(sample))(dom.find(`#sample-${sample.get('id')}`), point));
+    this._bindings = this.subject.get_('samples').list.map((sample) =>
+      mutators.render(from(sample))(dom.find(`#sample-${sample.get_('id')}`), point));
   }
 }
 

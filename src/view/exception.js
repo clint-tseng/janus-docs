@@ -35,8 +35,8 @@ const StackLineView = DomView.build($(`
     .on('click', (event, subject) => {
       event.preventDefault();
       $(event.target).trigger('code-navigate', {
-        line: subject.get('line'),
-        col: subject.get('col')
+        line: subject.get_('line'),
+        col: subject.get_('col')
       });
     })
 ));

@@ -17,7 +17,7 @@ const { nonblank, not } = require('../util/util');
 // * TocApiSections + Api => ApiBrowser with ApiBrowserSections
 
 
-const anyByAttr = (attr) => (list) => list.any((item) => item.watch(attr));
+const anyByAttr = (attr) => (list) => list.any((item) => item.get(attr));
 const anyMatch = anyByAttr('match');
 
 const findMatch = (input, name) => {
@@ -30,8 +30,8 @@ const findMatch = (input, name) => {
 // API OBJECT MEMBER
 
 class ApiBrowserMember extends Model.build(
-  bind('match', from('browser').watch('find')
-    .and('member').watch('name')
+  bind('match', from('browser').get('find')
+    .and('member').get('name')
     .all.map((input, name) => nonblank(input) && findMatch(input, name)))
 ) {}
 
@@ -43,11 +43,11 @@ const ApiBrowserMemberView = DomView.build($(`
 
   find('.api-member').classed('match', from('match')),
   find('.api-member-name')
-    .text(from('member').watch('name'))
-    .attr('href', from('object').watch('path')
-      .and('member').watch('ref').map((name) => name.replace(/^#/, ''))
+    .text(from('member').get('name'))
+    .attr('href', from('object').get('path')
+      .and('member').get('ref').map((name) => name.replace(/^#/, ''))
       .all.map((path, part) => `${path}#${part}`)),
-  find('.api-member-return-type').text(from('member').watch('return_type'))
+  find('.api-member-return-type').text(from('member').get('return_type'))
 ));
 
 
@@ -59,11 +59,11 @@ class ApiBrowserObjectSection extends Model.build(
 ) {
   _initialize() {
     // we do this this ugly way so incomplete sections don't crash everything.
-    const object = this.get('object');
-    const browser = this.get('browser');
+    const object = this.get_('object');
+    const browser = this.get_('browser');
     const members = [];
-    for (const ref of this.get('section').get('members')) {
-      const member = object.get(`lookup.${ref}`);
+    for (const ref of this.get_('section').get_('members')) {
+      const member = object.get_(`lookup.${ref}`);
       if (member != null)
         members.push(new ApiBrowserMember({ member, object, browser }));
     }
@@ -79,9 +79,9 @@ const ApiBrowserObjectSectionView = DomView.build($(`
 
   find('.api-objsection').classed('match', from('match')),
   find('.api-objsection-name')
-    .text(from('section').watch('name'))
-    .prop('href', from('object').watch('path')
-      .and('section').watch('name').map((name) => name.toLowerCase().replace(/[^a-z]+/g, '-'))
+    .text(from('section').get('name'))
+    .prop('href', from('object').get('path')
+      .and('section').get('name').map((name) => name.toLowerCase().replace(/[^a-z]+/g, '-'))
       .all.map((path, part) => `${path}#${part}`)),
   find('.api-objsection-members').render(from('members'))
 ));
@@ -92,18 +92,18 @@ const ApiBrowserObjectSectionView = DomView.build($(`
 
 class ApiBrowserObject extends Model.build(
   bind('match', from('sections').flatMap(anyMatch)
-    .and('browser').watch('find')
-    .and('object').watch('name')
+    .and('browser').get('find')
+    .and('object').get('name')
     .all.map((childMatch, input, name) => childMatch ||
       (nonblank(input) && findMatch(input, name)))),
 
-  bind('navigated', from('object').watch('path').and('browser').watch('path')
+  bind('navigated', from('object').get('path').and('browser').get('path')
     .all.map((own, current) => own === current))
 ) {
   _initialize() {
-    const object = this.get('object');
-    const browser = this.get('browser');
-    this.set('sections', object.get('sections').map((section) =>
+    const object = this.get_('object');
+    const browser = this.get_('browser');
+    this.set('sections', object.get_('sections').map((section) =>
       new ApiBrowserObjectSection({ object, section, browser })));
   }
 }
@@ -118,8 +118,8 @@ const ApiBrowserObjectView = DomView.build($(`
     .classed('match', from('match'))
     .classed('navigated', from('navigated')),
   find('.api-object-name')
-    .text(from('object').watch('name'))
-    .attr('href', from('object').watch('path')),
+    .text(from('object').get('name'))
+    .attr('href', from('object').get('path')),
   find('.api-object-sections').render(from('sections'))
 ));
 
@@ -138,11 +138,11 @@ class ApiBrowserSection extends Model.build(
 ) {
   _initialize() {
     // ditto; we do this in this ugly way to soften missing objects.
-    const api = this.get('api');
-    const browser = this.get('browser');
+    const api = this.get_('api');
+    const browser = this.get_('browser');
     const objects = [];
-    for (const name of this.get('section.children')) {
-      const object = api.get(`lookup.${name}`);
+    for (const name of this.get_('section.children')) {
+      const object = api.get_(`lookup.${name}`);
       if (object != null)
         objects.push(new ApiBrowserObject({ object, api, browser }));
     }
@@ -165,15 +165,15 @@ const ApiBrowserSectionView = DomView.build($(`
   find('.api-section-objects')
     .render(from('objects'))
     .on('click', '.api-object-name', (_, subject) => {
-      if (subject.get('expanded.explicit') === false)
+      if (subject.get_('expanded.explicit') === false)
         subject.unset('expanded.explicit');
     }),
 
   find('button').on('click', (_, subject) => {
     // do nothing if a find operation is in progress:
-    if (subject.get('browser').get('finding') === true) return;
+    if (subject.get_('browser').get_('finding') === true) return;
     // otherwise, do the needful:
-    subject.set('expanded.explicit', !subject.get('expanded.final'));
+    subject.set('expanded.explicit', !subject.get_('expanded.final'));
   })
 ));
 
@@ -184,11 +184,11 @@ const ApiBrowserSectionView = DomView.build($(`
 class ApiBrowser extends Model.build(
   attribute('find', attribute.Text),
   bind('finding', from('find').map(nonblank)),
-  bind('path', from('app').watch('path'))
+  bind('path', from('app').get('path'))
 ) {
   _initialize() {
-    this.set('sections', this.get('sections').map((section) =>
-      new ApiBrowserSection({ section, api: this.get('api'), browser: this })));
+    this.set('sections', this.get_('sections').map((section) =>
+      new ApiBrowserSection({ section, api: this.get_('api'), browser: this })));
   }
 }
 

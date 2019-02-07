@@ -26,10 +26,10 @@ class Statement extends Model.build(
     statements
       .take(seqId)
       .filter((statement) => Varying.mapAll(and,
-        statement.watch('named'),
-        statement.watch('result').map(success.match)))
+        statement.get('named'),
+        statement.get('result').map(success.match)))
       .flatMap((statement) =>
-        Varying.mapAll(statement.watch('name'), statement.watch('result'),
+        Varying.mapAll(statement.get('name'), statement.get('result'),
           (name, result) => ({ [name]: result.getSuccess() }))))),
 
   // TODO: the de/restructuring hurts.
@@ -50,16 +50,16 @@ class Statement extends Model.build(
 ) {
   commit() {
     // fallthrough to default if we've already committed:
-    if (this.get('active') === true) return false;
+    if (this.get_('active') === true) return false;
     // or if we do not compile:
-    if (!success.match(this.get('compiled'))) return false;
+    if (!success.match(this.get_('compiled'))) return false;
     // or if we have no code:
-    if (!this.get('has_code')) return false;
+    if (!this.get_('has_code')) return false;
 
     // going through with it.
     // commit our preprocessor munges:
-    this.set('name', this.get('preprocessed.name'));
-    this.set('code', this.get('preprocessed.code'));
+    this.set('name', this.get_('preprocessed.name'));
+    this.set('code', this.get_('preprocessed.code'));
 
     this.set('active', true);
     return true;
@@ -74,8 +74,8 @@ class Repl extends Model.build(
   }
 
   createStatement() {
-    const statements = this.get('statements');
-    const seqId = statements.length;
+    const statements = this.get_('statements');
+    const seqId = statements.length_;
 
     const statement = new Statement({ seqId, statements });
 

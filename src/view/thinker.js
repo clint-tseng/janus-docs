@@ -15,9 +15,7 @@ const think = (thought) => {
   });
 };
 
-thoughts.watchLength().map((active) => active > 0).react((thinking) => {
-  thinker.toggleClass('thinking', thinking);
-});
+thoughts.nonEmpty().react((thinking) => { thinker.toggleClass('thinking', thinking); });
 
 module.exports = { think };
 

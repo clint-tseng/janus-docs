@@ -16,8 +16,8 @@ class ApiObject extends Model.build(
 ) {
   _initialize() {
     const lookup = {};
-    for (const member of this.get('members'))
-      lookup[member.get('ref')] = member;
+    for (const member of this.get_('members'))
+      lookup[member.get_('ref')] = member;
     this.set('lookup', lookup);
   }
 }
@@ -27,7 +27,7 @@ class Api extends Model {
     const result = { lookup: {}, list: new List() };
     for (const objectData of data) {
       const object = ApiObject.deserialize(objectData);
-      result.lookup[object.get('name')] = object;
+      result.lookup[object.get_('name')] = object;
       result.list.add(object);
     }
     return new this(result);

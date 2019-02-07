@@ -12,16 +12,16 @@ class DocsApp extends App.build(
 ) {
   resolver() {
     return Resolver.caching(new Resolver.MemoryCache(),
-      Resolver.oneOf(this.articleCache(), Resolver.fromLibrary(this.get('resolvers'))));
+      Resolver.oneOf(this.articleCache(), Resolver.fromLibrary(this.resolvers)));
   }
 
   cacheArticle(path, article) {
-    this.get('cache.articles').push({ path, article });
+    this.get_('cache.articles').push({ path, article });
   }
 
   articleCache() {
     return (request) => {
-      for (const cached of this.get('cache.articles'))
+      for (const cached of this.get_('cache.articles'))
         if (request.path === cached.path)
           return new Varying(types.result.success(cached.article.shadow()));
     };
