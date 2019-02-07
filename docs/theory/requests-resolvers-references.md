@@ -476,8 +476,8 @@ const SiteView = DomView.build(
   $('<div><div class="path"/><div class="sample-count"/><button>Home</button></div>'),
   template(
     find('.path').text(from('path')),
-    find('.sample-count').text(from('article').watch('samples').flatMap(
-      ifValue(samples => samples.watchLength().map(count => `${count} samples`)))),
+    find('.sample-count').text(from('article').get('samples').flatMap(
+      ifValue(samples => samples.length.map(count => `${count} samples`)))),
 
     find('button').on('click', (_, subject) => { subject.set('path', '/'); })));
 
@@ -561,9 +561,9 @@ const SiteView = DomView.withOptions({ resolve: [ 'article' ] }).build(
   template(
     find('.path').text(from('path')),
     find('button').on('click', (event, subject, view, dom) => {
-      const article = subject.get('article');
+      const article = subject.get_('article');
       if (article == null) return;
-      dom.find('.sample-count').text(article.get('samples').length + ' samples');
+      dom.find('.sample-count').text(article.get_('samples').length_ + ' samples');
     })));
 
 const app = new App();
@@ -579,8 +579,8 @@ which indicates some set of Model keys you wish to resolve.
 
 But as you can see, we had to go to some rather evil lengths to concoct a sample
 here: you'll learn in the following section and chapter that even if you avoid
-the typical `from` templating syntax and write `this.subject.watch('article')`,
-the Reference will still end up getting automatically resolved. (The `.watch` is
+the typical `from` templating syntax and write `this.subject.get('article')`,
+the Reference will still end up getting automatically resolved. (The `.get` is
 the key.)
 
 Either way, the bottom line is that given the two keys we mentioned above: a
@@ -611,9 +611,9 @@ Reference is `.resolveWith`, which takes an `app` and does a laundry list of tas
   * Subsequent calls do nothing and return nothing.
 * Calls `.request()` on itself and does any homework needed to arrive at a `Request`
   or `Varying[Request]` object.
-* Sets up a reaction to check whether anybody is actually `.watch`ing its key on
+* Sets up a reaction to check whether anybody is actually `.get`ting its key on
   the Model (so in the example above, if anybody has actually `.react`ed on
-  `site.watch('article')`.
+  `site.get('article')`.
   * If somebody is, asks `app` to resolve the Request into `Varying[types.result]`.
     * If that resulting Varying ever carries a `types.result.success` value, sets
       that value onto the Model at the appropriate key. You may recall this [from
@@ -637,10 +637,10 @@ its own observation on the result, and goes back to waiting for somebody to care
 > `varying.set(types.result.success("new result"))` again and that new value will
 > be written into the Model.
 
-Notice that this dependence on `.watch` observation means a `.get('article')` call
-will _not_ trigger any Request resolution. Beacuse `.get` returns synchronously
+Notice that this dependence on `.get` observation means a `.get_('article')` call
+will _not_ trigger any Request resolution. Beacuse `.get_` returns synchronously
 a static value, we can't give back a Varying pointing at some future value, and
-we have no idea given a single `.get` whether that value will be checked again,
+we have no idea given a single `.get_` whether that value will be checked again,
 so we don't know if anybody actually cares. Ergo, Reference does nothing in this
 case.
 

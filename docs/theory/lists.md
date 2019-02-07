@@ -98,8 +98,7 @@ list.removeAt(0); // or remove by index.
 list.move(1.33, 2); // move by === comparison to an index.
 list.moveAt(2, 1); // or move by index to index.
 
-list.put(1.5, 2); // put a value to an index.
-list.set(2, 1.5); // set an index to a value. (whichever you prefer)
+list.set(2, 1.5); // set an index to a value.
 
 return list;
 ~~~
@@ -114,20 +113,20 @@ it'll happily take an index instead.
 do the work); `.set` mostly exists to harmonize with Map, which also has a `.set`
 method.
 
-You see the same thing with `.get` as we cover item retrieval:
+You see the same thing with `.get_` as we cover item retrieval:
 
 ~~~
 const list = new List([ 0, 1, 2, 3 ]);
 
 return [
-  list.at(2), // get by index,
-  list.get(2), // or get by index.
-  list.watchAt(2), // or, watch the value at an index.
-  list.watchAt(-1), // you can count from the end
-  list.at(-1), // with any of these methods.
+  list.at_(2), // get by index,
+  list.get_(2), // or get by index.
+  list.at(2), // or, watch the value at an index.
+  list.at(-1), // you can count from the end
+  list.at_(-1), // with any of these methods.
 
-  list.length, // get the list length
-  list.watchLength() // or watch the list length
+  list.length_, // get the list length
+  list.length // or watch the list length
 ].map(inspect);
 ~~~
 
@@ -367,7 +366,7 @@ here are some simple examples to give you a sense for them:
 const { recurse, varying, value } = types.traversal;
 const includesDeep = (data, target) => {
   target = Varying.of(target);
-  return Traversal.asList(data, {
+  return Traversal.list(data, {
     map: (k, v) => ((v != null) && (v.isEnumerable === true))
       ? recurse(v)
       : varying(target.map(tgt => value(tgt === v))),
@@ -410,7 +409,7 @@ const Business = Model.build();
 const Person = Model.build();
 
 const { delegate, value } = types.traversal;
-const serialize = (data, personIdsOnly) => Traversal.getNatural(data, {
+const serialize = (data, personIdsOnly) => Traversal.natural_(data, {
   map: (k, v) => ((v instanceof Person) && (personIdsOnly === true))
     ? value(v.get('id'))
     : delegate(Traversal.default.serialize.map)

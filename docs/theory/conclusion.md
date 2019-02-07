@@ -46,9 +46,9 @@ That said, here is a short overview of what you have hopefully picked up here:
   Views oversee the broader lifecycle of a DOM fragment and a bundle of mutators,
   tying them together with some particular subject for context.
 * Lists and Maps are standard versions of those data structures, but with methods
-  like `.watch` and `.watchLength` that return Varying computed values rather than
-  static answers, and transformations like `.map` and `.filter` which are maintained
-  forever instead of computed once.
+  like `.get` and `.length` that return Varying computed values rather than static
+  answers, and transformations like `.map` and `.filter` which are maintained forever
+  instead of computed once.
   * List and Map are both Enumerable, meaning you can retrieve a List of their
     keys. This enumerability enables Traversal, which is a powerful way to process
     complex trees of data involving Lists or Maps or both.

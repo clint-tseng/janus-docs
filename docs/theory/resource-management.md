@@ -33,7 +33,7 @@ similar behavior of your own.
 
 Reference attributes actually use this: remember that Reference attributes don't
 actually resolve their Request unless they detect that someone actually cares
-about their attribute: not just that it has been `.watch`ed, but that the `.watch`
+about their attribute: not just that it has been `.get`ted, but that the `.get`
 has been `.react`ed upon. Here's a sample mechanism somewhat similar to that one:
 
 ~~~
@@ -110,7 +110,7 @@ return results;
 
 Of course, expensive Mapped Varying computations are already and automatically
 managed by Varying itself. Usually, you'd use this process to, for instance,
-instantiate derived data structures (`.flatMap(…).filter(…).uniq().watchLength()`,
+instantiate derived data structures (`.flatMap(…).filter(…).uniq().length`,
 anybody?). But this all sounds quite repetitive. Surely there is some way to hand
 off all of that homework, and just focus on what matters.
 
@@ -188,9 +188,9 @@ class ErrorLog extends Model.build(
   dēfault.writing('errors', new List())
 ){
   _initialize() {
-    this.listenTo(this.get('app'), 'resolvedRequest', (request, result) => {
+    this.listenTo(this.get_('app'), 'resolvedRequest', (request, result) => {
       this.reactTo(result, value => {
-        if (types.result.failure.match(value)) this.get('errors').add(value);
+        if (types.result.failure.match(value)) this.get_('errors').add(value);
       });
     });
   }
@@ -211,7 +211,7 @@ app.resolve(new Request({ result: types.result.success(42) }));
 log.destroy();
 app.resolve(new Request({ result: types.result.failure("No response.") }));
 
-return inspect(log.get('errors'));
+return inspect(log.get_('errors'));
 ~~~
 
 You can see that once `log.destroy` is called, the listener and reaction are unbound
@@ -225,7 +225,7 @@ need to worry about destroying objects instantiated inside pure mapping function
 
 ~~~ noexec
 bind('even_count',
-  from('some_list').flatMap(list => list.filter(x => (x % 2) === 0).watchLength()))
+  from('some_list').flatMap(list => list.filter(x => (x % 2) === 0).length))
 ~~~
 
 Here, a Filtered List and a Varying are created as part of the mapping pure function.
@@ -255,7 +255,7 @@ class CustomList extends List.Derived {
     this.listenTo(this._trackingList, 'added', x => { /* … */ });
 
     // don't use .react, use .reactTo:
-    this.reactTo(this._trackingList.watchLength(), l => { /* … */ });
+    this.reactTo(this._trackingList.length, l => { /* … */ });
   }
 
   _destroy() {
@@ -294,14 +294,14 @@ The basic implementation is straightforward enough:
 ~~~
 class SampleList extends List {
   enumeration() {
-    const result = new List((new Array(this.length)).fill().map((_, idx) => idx));
-    this.listenTo(this, 'added', () => { result.add(result.length); });
+    const result = new List((new Array(this.length_)).fill().map((_, idx) => idx));
+    this.listenTo(this, 'added', () => { result.add(result.length_); });
     this.listenTo(this, 'removed', () => { result.removeAt(-1); });
     return result;
   }
 }
 
-const list = new List([ 4, 8, 15, 16, 23, 42 ]);
+const list = new SampleList([ 4, 8, 15, 16, 23, 42 ]);
 const enumeration = list.enumeration();
 
 list.add(63);
@@ -326,8 +326,8 @@ class SampleList extends List {
   enumeration() {
     if (this.enumeration$ == null)
       this.enumeration$ = Base.managed(() => {
-        const list = new List();
-        list.listenTo(this, 'added', () => { list.add(result.length); });
+        const list = new List((new Array(this.length_)).fill().map((_, idx) => idx));
+        list.listenTo(this, 'added', () => { list.add(list.length_); });
         list.listenTo(this, 'removed', () => { list.removeAt(-1); });
         return list;
       });
@@ -337,7 +337,7 @@ class SampleList extends List {
 }
 
 const results = [];
-const list = new List([ 12 ]);
+const list = new SampleList([ 12 ]);
 const enumeration = list.enumeration();
 const enumeration2 = list.enumeration();
 

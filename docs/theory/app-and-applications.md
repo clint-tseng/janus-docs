@@ -222,8 +222,8 @@ class AppViewModel extends Model.build(
   dēfault.writing('pending_requests', new List())
 ) {
   _initialize() {
-    const app = this.get('subject');
-    const pending = this.get('pending_requests');
+    const app = this.get_('subject');
+    const pending = this.get_('pending_requests');
     app.on('resolvedRequest', (_, result) => { pending.add(result); });
   }
 }
@@ -236,10 +236,10 @@ const AppView = DomView.withOptions({ viewModelClass: AppViewModel }).build($(`
   </div>`), template(
 
   find('#demo-loader').classed('loading', from('pending_requests').flatMap(pr =>
-    pr.filter(req => req.map(types.result.pending.match)).watchNonEmpty())),
+    pr.filter(req => req.map(types.result.pending.match)).nonEmpty())),
 
   find('button').on('click', (event, subject) => {
-    subject.get('subject').resolve(new MockRequest()); })
+    subject.get_('subject').resolve(new MockRequest()); })
 ));
 
 // Application glue:
@@ -414,6 +414,7 @@ Manifest answers these questions:
 Let's see an example of these facilities in action.
 
 ~~~
+const ifExists = (f) => (x) => (x == null) ? null : f(x);
 const existsOrError = (err => x => (x != null)
   ? types.validity.valid()
   : types.validity.error(err));
@@ -425,7 +426,7 @@ const ProfilePage = Model.build(
     from('cookie').map(cookie => new UserRequest({ cookie })))),
 
   attribute('friends', attribute.Reference.to(
-    from('user').watch('id').map(uid => new FriendsRequest(uid)))),
+    from('user').get('id').map(uid => new FriendsRequest(uid)))),
 
   validate(from('user').map(existsOrError('Could not find user by session.'))),
   validate(from('friends').map(existsOrError('Could not fetch friends list.'))));
@@ -462,11 +463,11 @@ const ProfilePageView = DomView.build($(`
     <div class="user-friend-count"><span class="count"/> friends</div>
     <div class="user-friends"/>
   </div>`), template(
-  find('.user-display-name').text(from('user').watch('displayName')),
-  find('.user-friend-count .count').text(from('friends').flatMap(friends =>
-    friends.watchLength())),
-  find('.user-friends').render(from('friends').map(friends =>
-    friends.flatMap(friend => friend.watch('displayName'))))));
+  find('.user-display-name').text(from('user').get('displayName')),
+  find('.user-friend-count .count').text(from('friends').flatMap(ifExists(
+    friends => friends.length))),
+  find('.user-friends').render(from('friends').map(ifExists(
+    friends => friends.flatMap(friend => friend.get('displayName')))))));
 
 const app = new App();
 app.views.register(ProfilePage, ProfilePageView);
@@ -480,7 +481,7 @@ const manifest = Manifest.run(app, profilePage);
 
 return [
   inspect(manifest.result),
-  manifest.requests.watchLength()
+  manifest.requests.length
 ];
 ~~~
 

@@ -153,7 +153,7 @@ const person = new Model({ name: 'Jane', age: 34 });
 const dog = new Model({ name: 'Spot', age: 12, owner: person });
 
 const relationship = from('name')
-  .and('owner').watch('name').map(x => x || 'nobody')
+  .and('owner').get('name').map(x => x || 'nobody')
   .all.map((name, owner) => `${name} is owned by ${owner}.`);
 
 return [
@@ -165,8 +165,8 @@ return [
 return { magic: (subject, from) => from.all.point(subject.pointer()) };
 ~~~
 
-Here, the `.watch` helper is [equivalent to writing](https://github.com/clint-tseng/janus/blob/7f81b0000c318de1bc6f9e5df4effa2b22f015c7/src/core/from.coffee#L27)
-`.flatMap(model => (model == null) ? null : model.watch('name'))`, which is quite a
+Here, the `.get` helper is [equivalent to writing](https://github.com/clint-tseng/janus/blob/7f81b0000c318de1bc6f9e5df4effa2b22f015c7/src/core/from.coffee#L27)
+`.flatMap(model => (model == null) ? null : model.get('name'))`, which is quite a
 mouthful. This little bit of simple syntactic sugar helps save a lot of typing
 and reading. Other such helpers are available; check the [API documentation](/api/from)
 for more.
@@ -184,7 +184,7 @@ method attached to it?
 
 ~~~
 class Dog extends Model {
-  isYoung() { return this.watch('age').map(age => age < 7); }
+  isYoung() { return this.get('age').map(age => age < 7); }
 }
 
 const pack = new Model();
@@ -196,7 +196,7 @@ pack.set('dogs', new List([ chief, nutmeg, jupiter, oracle ]));
 pack.set('leader', chief);
 
 // given a dog, is it the leader of its pack?
-const isLeader = from.watch('pack').watch('leader')
+const isLeader = from.get('pack').get('leader')
   .and.self()
   .all.map((leader, self) => leader === self);
 
@@ -216,7 +216,7 @@ return { magic: (subject, from) => from.all.point(subject.pointer()) };
 ~~~
 
 So there are other methods available as alternatives to just calling `from` or
-`.and` directly, and three of them appear to be `.watch()`, `.self()`, and `.varying()`.
+`.and` directly, and three of them appear to be `.get()`, `.self()`, and `.varying()`.
 We call these different toplevel methods **source cases**. But how do these terms
 acquire meaning, where do they come from, and what does it mean when we don't
 directly reference one and just call `from` or `.and` directly with a string?
@@ -238,8 +238,8 @@ and see what the code looks like.
 ~~~
 const dog = new Model({ name: 'Spot', age: 12 });
 
-const name = from.watch('name');
-const dogYears = from.watch('age').map(x => x * 7);
+const name = from.get('name');
+const dogYears = from.get('age').map(x => x * 7);
 
 return [
   name.all.point(dog.pointer()),
@@ -263,11 +263,11 @@ doing under the covers.
 ~~~
 const dog = new Model({ name: 'Spot', age: 12 });
 
-const name = from.watch('name');
-const dogYears = from.watch('age').map(x => x * 7);
+const name = from.get('name');
+const dogYears = from.get('age').map(x => x * 7);
 
 const pointer = match(
-  types.from.watch(key => dog.watch(key))
+  types.from.get(key => dog.get(key))
 )
 
 return [
@@ -277,10 +277,10 @@ return [
 ~~~
 
 Oh! It's a case class matching statement. Let's see a fuller example, with the
-pack of dogs we met earlier, and their need for `watch`, `self`, and `varying`:
+pack of dogs we met earlier, and their need for `get`, `self`, and `varying`:
 
 ~~~
-const isLeader = from.watch('pack').watch('leader')
+const isLeader = from.get('pack').get('leader')
   .and.self()
   .all.map((leader, self) => leader === self);
 
@@ -288,7 +288,7 @@ const isYoung = from.varying(dog => dog.isYoung())
   .map(young => young ? 'young' : 'old');
 
 const pointer = (dog) => match(
-  types.from.watch(key => dog.watch(key)),
+  types.from.get(key => dog.get(key)),
   types.from.self(() => new Varying(dog)),
   types.from.varying(f => Varying.of(f(dog)))
 )
@@ -302,7 +302,7 @@ return [
 ~~~
 ~~~ env-additions
 class Dog extends Model {
-  isYoung() { return this.watch('age').map(age => age < 7); }
+  isYoung() { return this.get('age').map(age => age < 7); }
 }
 
 const pack = new Model();
@@ -316,7 +316,7 @@ pack.set('leader', chief);
 return { pack, chief, nutmeg, jupiter, oracle };
 ~~~
 
-So these methods, these source cases like `watch`, `self`, and `varying`, all have
+So these methods, these source cases like `get`, `self`, and `varying`, all have
 their own semantics that we can rely on when defining computations with `from`,
 and which `point` must fulfill when it sees them. All `dog.pointer()` does is return
 a function that performs this task with `dog` as the focal point.
@@ -324,7 +324,7 @@ a function that performs this task with `dog` as the focal point.
 You'll notice that the `self` and `varying` handlers above take care to wrap their
 results with a `Varying`. This is because they are allowed to change their mind
 about what they reference; if something happens to change the meaning of
-`from.watch(key)` or `from.self()`, they can swap out the contained Varying (the
+`from.get(key)` or `from.self()`, they can swap out the contained Varying (the
 one that actually carries the data value) for another one.
 
 > Yes, because ultimately `from` is meant to yield a concrete `Varying`, this means
@@ -340,7 +340,7 @@ of the string (or really, any value type).
 
 Here are all the [default source cases](https://github.com/clint-tseng/janus/blob/bc460e61109288ebbb96cc2188bc29c1c0e8588f/src/core/types.coffee#L6):
 
-* `watch(key)` will watch the `key` of the target.
+* `get(key)` will watch the `key` of the target.
 * `attribute(key)` will get the `key` [attribute object](/theory/model) for a Model.
 * `varying(f|v)` will pass the target to `f`, which ought to return a Varying with
   the resolved data resource within it. Or, a Varying `v` can be directly supplied.
@@ -348,7 +348,7 @@ Here are all the [default source cases](https://github.com/clint-tseng/janus/blo
   if present, and optionally watches the given `key` on it.
 * `self()` gives the target itself.
 * `dynamic(key)` is what is called when `from(x)` or `.and(x)` are called directly;
-  given a string it behaves like `watch`, and given a function it acts like `varying`.
+  given a string it behaves like `get`, and given a function it acts like `varying`.
 
 Not all of these terms will make sense to you just yet. That's okay; we'll cover
 each one again at an appropriate time. But for now, say that you don't like these
@@ -376,11 +376,11 @@ If you want to use your own set of case classes, use `from.build()`:
 const cases = Case.build('name', 'property', 'method');
 
 class Dog extends Model {
-  isYoung() { return this.watch('age').map(age => age < 7); }
+  isYoung() { return this.get('age').map(age => age < 7); }
   pointer() {
     return match(
-      cases.name(() => this.watch('name')),
-      cases.property(key => this.watch(`properties.${key}`)),
+      cases.name(() => this.get('name')),
+      cases.property(key => this.get(`properties.${key}`)),
       cases.method(m => Varying.of(this[m]()))
     );
   }
@@ -463,7 +463,7 @@ these things than we started with at the top of this chapter:
     meanings.
 * Each data resource, as well as the `.all` aggregate of all of them, may be
   transformed via `map`/`flatMap`.
-  * Other useful helpers are available, like `.pipe` and `.watch`.
+  * Other useful helpers are available, like `.pipe` and `.get`.
 * The process of taking an abstract `from` expression and creating a bound version
   of it against some data context is called pointing, done by calling `.point()`.
   * `.point()` takes a function which resolves the source case classes and their

@@ -18,7 +18,7 @@ more.
 
 In particular, here is what we're going to cover for Maps:
 
-* Basic key/value operations like `get`, `set`, and `watch`.
+* Basic key/value operations like `get`, `get_`, and `set`.
 * Shadow-copied Maps, allowing data to be layered together.
 * Enumeration and mapping.
 
@@ -67,17 +67,17 @@ data.unset('oops'); // instead, use .unset()
 return inspect.panel(data);
 ~~~
 
-Once set, `.get` and `.watch` can be used to fetch or watch keys.
+Once set, `.get` and `.get_` can be used to watch or fetch keys.
 
 ~~~
 const data = new Map({ id: 42, nested: { value: 'here' } });
 return [
+  data.get_('id'),
+  data.get_('nested'),
+  data.get_('nested.value'),
   data.get('id'),
   data.get('nested'),
-  data.get('nested.value'),
-  data.watch('id'),
-  data.watch('nested'),
-  data.watch('nested.value')
+  data.get('nested.value')
 ].map(inspect);
 ~~~
 
@@ -86,13 +86,13 @@ are some things to watch out for if you do this, and it's generally a good idea
 to only get individual values at a time if you can help it.
 
 > # Warnings
-> To expand on that, think about what it means to `.watch('nested')` here. Recall
+> To expand on that, think about what it means to `.get('nested')` here. Recall
 > that Varying will not react unless the value _actually changes_, and that comparison
 > is done with `===`. So unless the actual substructure object itself is replaced
-> with another one (ie the reference changes), `.watch`ing it isn't likely to be
+> with another one (ie the reference changes), `.get`ting it isn't likely to be
 > very useful.
 >
-> In addition, when you `.get('nested')`, be very careful not to modify the structure
+> In addition, when you `.get_('nested')`, be very careful not to modify the structure
 > you get back, since it's the actual object the Map is using to maintain its own
 > structure. If you mess with it, the Map will get out of sync with itself.
 
@@ -142,7 +142,7 @@ const shadow = data.with({ owner: 'Lindsay' });
 shadow.set('name', 'Gadget!');
 shadow.revert('owner');
 
-return shadow.watchModified();
+return shadow.modified();
 ~~~
 
 The `.with({ … })` shortcut just makes a shadow and then immediately `.set`s
@@ -154,19 +154,19 @@ rather than a shadow it'll give itself back.
 which explicitly overrides a location with empty data).
 
 A shadowed Map will automatically `.shadow` any nested Maps or Lists it contains
-when `.get`ting or `.watch`ing them. (Lists also implement `.shadow`, but really
+when `.get`ting or `.get_`ting them. (Lists also implement `.shadow`, but really
 it's more of a cloning operation and it is done mostly so that this property, that
 shadowed structures automatically shadow their entire nested tree, stays true.)
 
-Lastly, the `.watchModified()` operation tells you whether the Map has changed
-compared with its original. It's actually just a shortcut to `shadow.watchDiff(shadow.original())`,
+Lastly, the `.modified()` operation tells you whether the Map has changed
+compared with its original. It's actually just a shortcut to `shadow.diff(shadow.original())`,
 which compares any two collections, and actually does so quite intelligently;
 consider this sample, for instance:
 
 ~~~
 const a = new Map({ name: 'Gadget', age: 8, owner: new Map({ name: 'Jane' }) });
 const b = new Map({ name: 'Gadget', age: 8, owner: new Map({ name: 'Jane' }) });
-return a.watchDiff(b);
+return a.diff(b);
 ~~~
 
 It understands that they are the same despite the nested Maps that are different
@@ -185,8 +185,8 @@ structures in Janus, this List is kept up to date as the Map changes.
 ~~~
 const data = new Map({ name: 'Gadget', age: 8, owner: { name: 'Jane' } });
 
-const keys = data.enumeration();
-const pairs = keys.flatMap(key => data.watch(key)
+const keys = data.enumerate();
+const pairs = keys.flatMap(key => data.get(key)
   .map(value => `${key}: ${value}`));
 
 data.set('owner.age', 27);
@@ -198,8 +198,8 @@ You can imagine that this sort of thing might be useful when you don't know in
 advance what exactly a Map schema might look like, for instance if there are
 user-defined custom properties in it.
 
-> You can use `.enumerate()` to get a static array of keys instead. If you don't
-> like these names, you can use `.watchKeys()` and `.keys()` instead, respectively.
+> You can use `.enumerate_()` to get a static array of keys instead. If you don't
+> like these names, you can use `.keys()` and `.keys_()` instead, respectively.
 
 It can also be very useful when you need a list of some things, for instance to
 render all of them on the page, but you also need to be able to rapidly look one
@@ -219,14 +219,14 @@ const PersonView = DomView.build(
   template(
     find('.name').text(from('name')),
     find('.bff').text(from('bff').flatMap(bff =>
-      people.watch(bff).flatMap(person => person.watch('name'))))));
+      people.get(bff).flatMap(person => person.get('name'))))));
 
-return people.enumeration().mapPairs((_, person) => new PersonView(person));
+return people.enumerate().mapPairs((_, person) => new PersonView(person));
 ~~~
 
 Here, we need to be able to look up a person's full name from some identifier in
 order to display their BFF, so storing them by key/value pairs makes sense. But
-we also want to render all of the people we know about, so we get an `.enumeration()`
+we also want to render all of the people we know about, so we get an enumeration
 of that Map.
 
 > # Aside
@@ -237,10 +237,10 @@ of that Map.
 > in Janus at time of writing: how do we offer this kind of parent/child context
 > in a sane, safe way?
 
-This time around, rather than all the homework of `.enumeration().flatMap(key => data.watch(key).map(value =>  …))`
-we use `.enumeration().mapPairs((key, value) => …)`, which is a convenience
+This time around, rather than all the homework of `.enumerate().flatMap(key => data.get(key).map(value =>  …))`
+we use `.enumerate().mapPairs((key, value) => …)`, which is a convenience
 shortcut offered by the Enumeration List. This is different from calling `.mapPairs`
-directly on Map, which you'll be seeing in the following section: calling `.enumeration`
+directly on Map, which you'll be seeing in the following section: calling `.enumerate`
 first gets you a List, and so when you chain `.mapPairs` onto that you'll get another
 List, which is what we want here. Calling `.mapPairs` directly on Map maps the Map
 over to another Map.
@@ -268,13 +268,13 @@ will notice, don't worry.)
 const balances = new Map({ alice: 23.16, bob: 10.74, chelsea: 29.93 });
 const adjusted = balances.flatMapPairs((key, value) => (key === 'chelsea')
   // for chelsea, add 5 cents for every other account in the system.
-  ? balances.watchLength().map((numAccounts) => value + (0.05 * (numAccounts - 1)))
+  ? balances.length.map((numAccounts) => value + (0.05 * (numAccounts - 1)))
 
   // otherwise, deduct 5 cents.
   : value - 0.05);
 
 // alice makes a deposit..
-balances.set('alice', balances.get('alice') + 5);
+balances.set('alice', balances.get_('alice') + 5);
 
 return inspect.panel(adjusted);
 ~~~
@@ -313,7 +313,7 @@ extremely familiar if you recall the chapter on [Views](/theory/views-templates-
 ~~~
 const SubEntity = Model.build();
 const Entity = Model.build(
-  bind('subentity_id', from('subentity').watch('id'))
+  bind('subentity_id', from('subentity').get('id'))
 );
 
 const entity = new Entity({ subentity: new SubEntity({ id: 42 }) });
@@ -356,8 +356,8 @@ class SegmentedAxis extends Model.build(
     new List(idxs).map(index => new Tick({ index, axis }))))
 ) {
   _initialize() {
-    this.reactTo(this.watch('mouse.clicking'), clicking => {
-      if (clicking === true) this.set('mouse.down', this.get('mouse.now'));
+    this.reactTo(this.get('mouse.clicking'), clicking => {
+      if (clicking === true) this.set('mouse.down', this.get_('mouse.now'));
     });
   }
 }
@@ -392,7 +392,7 @@ class SegmentedAxisView extends DomView.build(
 
 // Tick marks:
 const Tick = Model.build(
-  bind('left', from('index').and('axis').watch('segment.width')
+  bind('left', from('index').and('axis').get('segment.width')
     .all.map((idx, segWidth) => idx * segWidth)));
 
 const TickView = DomView.build($('<div class="tick"/>'), find('.tick')
@@ -401,9 +401,9 @@ const TickView = DomView.build($('<div class="tick"/>'), find('.tick')
 
 // Final assembly:
 const app = new App();
-stdlib.view.registerWith(app.get('views'));
-app.get('views').register(SegmentedAxis, SegmentedAxisView);
-app.get('views').register(Tick, TickView);
+stdlib.view.registerWith(app.get_('views'));
+app.get_('views').register(SegmentedAxis, SegmentedAxisView);
+app.get_('views').register(Tick, TickView);
 
 const axis = new SegmentedAxis({ ticks: { count: 10 } });
 return app.view(axis);
@@ -481,7 +481,7 @@ complications we introduce into our application.
 > We have the Model do this point-in-time copy by implementing its `_initialize`
 > method, which is called just after the initial data has been injected into the
 > Model and databinding has begun. We use `this.reactTo` rather than just calling
-> `this.watch('mouse.clicking').react(…)` for purposes of [resource management](/theory/resource-management).
+> `this.get('mouse.clicking').react(…)` for purposes of [resource management](/theory/resource-management).
 >
 > You see the same `.reactTo` method called in the `_wireEvents` body, for the
 > same reason.
@@ -551,7 +551,7 @@ of a class deriving from some `attribute` type. The default types are:
 All attribute types share a few methods in common. One of these is `.default()`,
 which you see above. It doesn't show up in the inspector because default values
 are not eagerly injected into the data, but rather lazily pulled on `.get()` or
-`.watch()`. Alongside `.default` is `.writeDefault`, whose purpose we also
+`.get_()`. Alongside `.default` is `.writeDefault`, whose purpose we also
 demonstrate here:
 
 ~~~
@@ -569,14 +569,14 @@ const Dog = Model.build(
 
 const spot = new Dog({ name: 'Spot' });
 const gadget = new Dog({ name: 'Gadget' });
-gadget.get('owner').set('name', 'Jenny');
+gadget.get_('owner').set('name', 'Jenny');
 
 return [
-  spot.get('status'),
+  spot.get_('status'),
   spot,
   gadget,
-  gadget.get('owner'),
-  gadget.get('owner').get('name')
+  gadget.get_('owner'),
+  gadget.get_('owner').get_('name')
 ].map(inspect.panel);
 ~~~
 
@@ -613,11 +613,11 @@ const Dog = Model.build(
 );
 
 const spot = new Dog({ name: 'Spot' });
-spot.get('owner').set('name', 'Jenny');
+spot.get_('owner').set('name', 'Jenny');
 
 return [
-  spot.get('status'),
-  spot.get('listed'),
+  spot.get_('status'),
+  spot.get_('listed'),
   spot
 ].map(inspect.panel);
 ~~~
@@ -643,7 +643,7 @@ at that key, and are straightforward:
 const Dog = Model.build(
   // say the server communicates numbers as strings:
   attribute('age', class extends attribute.Number {
-    serialize() { return this.getValue().toString(); }
+    serialize() { return this.getValue_().toString(); }
     static deserialize(data) { return parseFloat(data); }
   }),
 
@@ -685,7 +685,7 @@ const Window = Model.build(
   dēfault.writing('documents', () => new List([ new Document() ])),
 
   attribute('current_document', class extends attribute.Enum {
-    default() { return this.model.get('documents').at(0); }
+    default() { return this.model.get_('documents').at_(0); }
     values() { return from('documents'); }
   })
 );
@@ -715,14 +715,14 @@ const WindowView = DomView.build($(`
   find('.current').render(from('current_document')),
 
   find('.documents .new-doc').on('click', (_, subject) => {
-    subject.get('documents').add(new Document()); })));
+    subject.get_('documents').add(new Document()); })));
 
 // Assembly:
 const app = new App();
-stdlib.view.registerWith(app.get('views'));
-app.get('views').register(Document, DocumentEditView);
-app.get('views').register(Document, DocumentSummaryView, { context: 'summary' });
-app.get('views').register(Window, WindowView);
+stdlib.view.registerWith(app.get_('views'));
+app.get_('views').register(Document, DocumentEditView);
+app.get_('views').register(Document, DocumentSummaryView, { context: 'summary' });
+app.get_('views').register(Window, WindowView);
 
 return app.view(new Window());
 ~~~
@@ -812,7 +812,7 @@ applied throughout the standard library&mdash;they are not core to Janus itself.
 
 You can also see that the Enum attribute `values()` method is allowed to return
 a `from` expression instead of a `List` (or, for that matter, a `Varying` would
-work too, so we could have written `this.model.watch('documents')`). This fact
+work too, so we could have written `this.model.get('documents')`). This fact
 is natural in the context of a framework where we strive to deal gracefully with
 changes, and it helps us solve the problem here of managing a set of tabbed views.
 
@@ -944,7 +944,7 @@ const Dog = Model.build(
 // view helpers, again to reduce boilerplate:
 const applyValidationClass = (field) => find(`.${field}`).classed('invalid',
   from.self(view => view.subject.errors()).flatMap(errors =>
-    errors.any(issue => issue.get('fields').includes(field))));
+    errors.any(issue => issue.get_('fields').includes(field))));
 
 const renderField = (field) => template(
   applyValidationClass(field),
@@ -966,9 +966,9 @@ const IssueView = DomView.build($('<span/>'),
   find('span').text(from('message')));
 
 const app = new App();
-stdlib.view.registerWith(app.get('views'));
-app.get('views').register(Issue, IssueView);
-app.get('views').register(Dog, DogEditor);
+stdlib.view.registerWith(app.get_('views'));
+app.get_('views').register(Issue, IssueView);
+app.get_('views').register(Dog, DogEditor);
 
 return app.view(new Dog());
 ~~~
@@ -1052,14 +1052,14 @@ have thus far encountered into meaningful conglomerations.
 
 Maps are the pure data structure essence behind Models:
 
-* They perform all the key/value storage (`.get`, `.set`) and key `.watch`ing.
+* They perform all the key/value storage (`.get_`, `.set`) and key `.get`ting.
   * Keys may be nested into subobjects, but you should take care when directly
-    `.get`ting or `.watch`ing a subobject instead of a data leaf.
+    `.get`ting or `.get_`ting a subobject instead of a data leaf.
 * They support `.shadow` copying, allowing interrelated clones of your data.
   * This can be useful when trying to manage multiple versions of data, for
     instance when the user wants to edit something.
 * They are enumerable and mappable.
-  * `.enumeration` gets you the keys of a Map, which is useful when dealing with
+  * `.enumerate` gets you the keys of a Map, which is useful when dealing with
     unknown schemas or solving problems where data must be listable (for instance
     to render) but also quick to lookup by some key.
   * The `.serialize` and `.diff` features supported by Map are enabled by Traversals,

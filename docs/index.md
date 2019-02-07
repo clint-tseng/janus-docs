@@ -187,8 +187,8 @@ const pets = new List([
 ]);
 const editors = pets.map(pet => new PetEditor(pet));
 const dogNames = pets
-  .filter(pet => pet.watch('kind').map(kind => kind === 'dog'))
-  .flatMap(pet => pet.watch('name'));
+  .filter(pet => pet.get('kind').map(kind => kind === 'dog'))
+  .flatMap(pet => pet.get('name'));
 
 return [ editors, dogNames ];
 ~~~
@@ -210,8 +210,8 @@ const widget = new Map({
   }
 });
 
-return widget.watchKeys()
-  .flatMap(key => widget.watch(key).map(value => `${key}: ${value}`));
+return widget.keys()
+  .flatMap(key => widget.get(key).map(value => `${key}: ${value}`));
 ~~~
 
 Another example of enumeration involves the shadow-copy feature of Maps and Models.
@@ -234,7 +234,7 @@ const Editor = DomView.build(
     find('.child-name').render(from('child').attribute('name')).context('edit')
   ));
 
-const changed = shadow.watchModified().map(modified => `Changed: ${modified}`);
+const changed = shadow.modified().map(modified => `Changed: ${modified}`);
 
 return [ new Editor(shadow), changed ];
 ~~~
@@ -281,22 +281,22 @@ const TodoListView = DomView.build($(`
   </div>`), template(
 
   find('.completed').text(from('items').flatMap(items =>
-    items.filter(item => item.watch('done')).watchLength())),
+    items.filter(item => item.get('done')).length)),
 
-  find('.total').text(from('items').flatMap(items => items.watchLength())),
+  find('.total').text(from('items').flatMap(items => items.length)),
 
   find('.items').render(from('items')),
 
   find('.add').on('click', (event, subject) => {
     event.preventDefault();
-    subject.get('items').add(new Item());
+    subject.get_('items').add(new Item());
   })
 ));
 
 const app = new App();
-stdlib.view.registerWith(app.get('views'));
-app.get('views').register(Item, ItemView);
-app.get('views').register(Main, TodoListView);
+stdlib.view.registerWith(app.get_('views'));
+app.get_('views').register(Item, ItemView);
+app.get_('views').register(Main, TodoListView);
 const view = app.view(new Main({ items: new List() }));
 view.wireEvents();
 return view;

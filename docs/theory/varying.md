@@ -50,7 +50,7 @@ constructor, wrapping the value in a Varying and handing it back.
 
 In reality, it will be rare that you manually construct a Varying. For the most
 part, you'll be instead making use of Varyings that more advanced tools in Janus
-give you, like `List.watchLength()` or `Model.isValid()`.
+give you, like `List.length` or `Model.valid()`.
 
 Getting a Value
 ===============
@@ -262,16 +262,28 @@ Flattening a Varying
 What does it mean to flatten a Varying? Consider the following practical situation,
 where we end up with a bit of an awkward result.
 
-List has a neat method called `watchLength` which gives you a Varying containing
-the live length of that list at all times. What we are trying to do is to see if
-perhaps it is too big.
+List has a neat version of `.length` which gives you a Varying containing the live
+length of that list at all times. What we are trying to do is to see if perhaps
+it is too big.
+
+> # Aside
+> This is a good time to note that throughout Janus and this documentation, you
+> will notice many pairs of methods and properties that share a name, except that
+> one has an underscore (`_`) at the end, and the other does not; `.length` and
+> `.length_` is an example; `.get(key)` and `.get_(key)` is another.
+>
+> In these cases, the version without the underscore will return a `Varying` whose
+> value will always answer your question (`.length` returns a `Varying` whose Integer
+> value is always the list length, for example), while the version with an underscore
+> will give you a plain value that only answers the question at that moment (`.length_`
+> just returns an Integer with the length of the list at the time it is called).
 
 ~~~
 const quota = new Varying(10);
 const items = new List([ 1, 1, 3, 8 ]);
 
 const exceededQuota =
-  quota.map(q => items.watchLength().map(count => count > q));
+  quota.map(q => items.length.map(count => count > q));
 
 return inspect(exceededQuota.get());
 ~~~
@@ -281,12 +293,13 @@ we wanted, we got some other Varying back that was inside of it&mdash; rather
 than yielding a `Varying[bool]` as we might have hoped, we have created a
 `Varying[Varying[bool]]`.
 
-Of course, part of the awkwardness here is how we nested `items.watchLength.map`
-inside of `quota.map`, but that's simply because we don't yet know how to take
-two Varyings side-by-side and perform some simple work on them at once, so we have
-to nest the two together like this. But either way, this result doesn't really
-work; anybody trying to listen in to this result has to do a lot of homework to
-get rid of that extra Varying that has snuck its way into our output.
+Of course, part of the awkwardness here is how we nested `items.length.map` (which
+yields a `Varying[Int]` inside of `quota.map`, but that's simply because we don't
+yet know how to take two Varyings side-by-side and perform some simple work on
+them at once, so we have to nest the two together like this. But either way, this
+result doesn't really work; anybody trying to listen in to this result has to do
+a lot of homework to get rid of that extra Varying that has snuck its way into our
+output.
 
 This is where flattening comes in. When a Varying `x` that contains a Varying `y`
 is flattened, that new flattened Varying will always contain the same value as `y`,
@@ -321,7 +334,7 @@ const quota = new Varying(10);
 const items = new List([ 1, 1, 3, 8 ]);
 
 const exceededQuota =
-  quota.flatMap(q => items.watchLength().map(count => count > q));
+  quota.flatMap(q => items.length.map(count => count > q));
 
 return inspect(exceededQuota.get());
 ~~~

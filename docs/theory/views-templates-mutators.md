@@ -81,7 +81,7 @@ you'll use the templating interface.
 
 ~~~
 const dog = new Model({ name: 'Spot' });
-const pointer = (model) => match(types.from.dynamic(key => model.watch(key)));
+const pointer = (model) => match(types.from.dynamic(key => model.get(key)));
 
 const observation = mutators.text(from('name'))($('.target'), pointer(dog));
 const teardown = () => { observation.stop(); }; // for use later.
@@ -289,7 +289,7 @@ which is a pretty effective tool for doing this sort of thing, but how does it
 fit into the Janus picture?
 
 There are two options. (We're going to simplify the template itself for the next
-few examples, since you presumably get that point by now.)
+few examples, since you probably get that point by now.)
 
 ~~~
 class NameTag extends DomView.build(
@@ -302,7 +302,7 @@ class NameTag extends DomView.build(
     const dom = this.artifact();
     const dog = this.subject;
     dom.find('button').on('click', () => {
-      dog.set('age', dog.get('age') + 1);
+      dog.set('age', dog.get_('age') + 1);
     });
   }
 }
@@ -328,7 +328,7 @@ const NameTag = DomView.build(
     find('.age').text(from('age').map(x => x * 7)),
 
     find('button').on('click', (event, subject) => {
-      subject.set('age', subject.get('age') + 1);
+      subject.set('age', subject.get_('age') + 1);
     })));
 
 const dog = new Model({ name: 'Spot!', age: 4 });
@@ -420,7 +420,7 @@ const NameTag = DomView.build(
     find('.child').render(from('pup'))));
 
 const app = new App();
-app.get('views').register(Dog, NameTag);
+app.get_('views').register(Dog, NameTag);
 
 const dog = new Dog({
   name: 'Spot',
@@ -470,7 +470,7 @@ const NameTag = DomView.build(
   ));
 
 const app = new App();
-app.get('views').register(Dog, NameTag);
+app.get_('views').register(Dog, NameTag);
 
 const dog = new Dog({ name: 'Spot',
   pup: new Dog({ name: 'Tot',
@@ -564,14 +564,14 @@ const EligibilityViewModel = Model.build();
 const EligibilityView = DomView.build(
   $('<div><span class="name"/> <span class="status"/> eligible for benefits.</div>'),
   template(
-    find('.name').text(from('person').watch('name')),
-    find('.status').text(from('person').watch('age')
-      .and('policy').watch('minimum_age')
+    find('.name').text(from('person').get('name')),
+    find('.status').text(from('person').get('age')
+      .and('policy').get('minimum_age')
       .all.map((age, min) => (age >= min) ? 'is' : 'is not'))));
 
 const app = new App();
-app.get('views').register(Policy, PolicyView);
-app.get('views').register(EligibilityViewModel, EligibilityView);
+app.get_('views').register(Policy, PolicyView);
+app.get_('views').register(EligibilityViewModel, EligibilityView);
 
 // say we set this somewhere as a part of logging in:
 app.set('current_user', new Person({ name: 'Jane', age: 34 }));
@@ -605,8 +605,8 @@ const Person = Model.build();
 const PersonViewModel = Model.build(
   attribute('children.show', attribute.Boolean),
 
-  bind('children.count', from('subject').watch('children')
-    .flatMap(cs => (cs == null) ? 0 : cs.watchLength()))
+  bind('children.count', from('subject').get('children')
+    .flatMap(cs => (cs == null) ? 0 : cs.length))
 );
 const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).build($(`
   <div>
@@ -618,7 +618,7 @@ const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).buil
     <div class="child-list"/>
   </div>`), template(
 
-  find('.name').text(from('subject').watch('name')),
+  find('.name').text(from('subject').get('name')),
 
   find('.child-count .num').text(from('children.count')
     .map(count => (count === 0) ? 'no' : count)),
@@ -633,14 +633,14 @@ const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).buil
     .classed('hide', from('children.count').map(count => count === 0)),
 
   find('.child-list')
-    .render(from('subject').watch('children'))
+    .render(from('subject').get('children'))
     .classed('hide', from('children.show').map(x => !x))
 
 ));
 
 const app = new App();
-stdlib.view.registerWith(app.get('views'));
-app.get('views').register(Person, PersonView);
+stdlib.view.registerWith(app.get_('views'));
+app.get_('views').register(Person, PersonView);
 
 const person = new Person({ name: 'Alice', children: new List([
   new Person({ name: 'Bob', children: new List([ new Person({ name: 'Bobbi' }) ]) }),
@@ -757,10 +757,10 @@ const Sample = Model.build();
 
 class ArticleView extends DomView {
   _render() {
-    const dom = $(this.subject.get('html'));
+    const dom = $(this.subject.get_('html'));
     const pointer = this.pointer();
-    this._sampleBindings = this.subject.get('samples').map((sample) => {
-      const sampleDom = dom.find(`#sample-${sample.get('id')}`);
+    this._sampleBindings = this.subject.get_('samples').map((sample) => {
+      const sampleDom = dom.find(`#sample-${sample.get_('id')}`);
       return mutators.render(from(sample))(sampleDom, pointer);
     });
     return dom;
@@ -775,8 +775,8 @@ class ArticleView extends DomView {
 const SampleView = DomView.build($('<code/>'), find('code').text(from('code')));
 
 const app = new App();
-app.get('views').register(Article, ArticleView);
-app.get('views').register(Sample, SampleView);
+app.get_('views').register(Article, ArticleView);
+app.get_('views').register(Sample, SampleView);
 
 const article = new Article({
   html: `

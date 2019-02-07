@@ -632,10 +632,10 @@ classes and their friends.
 Even `from` is really just a way to eventually get a `Varying`. And everything
 else in Janus is just a different assembly or consumption of these three things.
 Models and Lists are just containers of data that provide ways to get `Varying`s
-out of them: `Model.watch('somekey')` yields a `Varying`, for example.  Or
-`List.watchLength()`. Views and templates are just facilities that understand how
-to receive these core pieces and do meaningful work based on them, using the
-friendliest syntax we could come up with.
+out of them: `Model.get('somekey')` yields a `Varying`, for example.  Or `List.length`.
+Views and templates are just facilities that understand how to receive these core
+pieces and do meaningful work based on them, using the friendliest syntax we could
+come up with.
 
 Through it all, the one constant is the philosophy that computation should be
 usefully expressible in extremely generic terms: that rules can be defined free
