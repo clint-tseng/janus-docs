@@ -431,6 +431,39 @@ y.set(1);
 return results;
 ~~~
 
+Visualizing the Structure
+-------------------------
+
+Perhaps the above examples have been a little bit difficult to follow, because
+you only see the results. The [`janus-inspect`](/further-reading/inspect) tool
+has an answer for you.
+
+~~~
+const a = new Varying(1);
+const b = new Varying(2);
+const c = new Varying(3);
+const x = new Varying(4);
+
+const d = Varying.all([ a, b, c ]).map((a, b, c) => a + b + c);
+const y = x.map(x => x * 2);
+const z = d.flatMap(d => y.map(y => d * y));
+
+z.react(); // cause things to actually happen.
+
+return [
+  inspect(z),
+  inspect.panel(z),
+  b.set(6)
+];
+~~~
+
+You can find more information about the inspector in the chapter linked above,
+but you can see here the structure of the computation we have built, along with
+the mapping functions transforming all the values. On the right-hand side, you
+can see a log of all the value changes that have occurred since the inspector
+was attached. Click on one to see how that value change propagated through the
+tree.
+
 Underlying Mechanics
 ====================
 
