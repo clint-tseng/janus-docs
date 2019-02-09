@@ -1,5 +1,5 @@
 const jInspect = require('janus-inspect');
-const { withContext } = require('../view/context');
+const { asPanel } = require('../view/context');
 
 // we make our own inspect() that prevents re-inspection.
 const inspect = (x) => ((x != null) && ((x.isInspector === true) || (x.isContext === true)))
@@ -7,7 +7,7 @@ const inspect = (x) => ((x != null) && ((x.isInspector === true) || (x.isContext
   : jInspect.inspect(x);
 
 // augment inspect with the ability to directly request a panel view.
-inspect.panel = (x) => withContext(inspect(x), 'panel');
+inspect.panel = (x) => asPanel(inspect(x));
 
 module.exports = { inspect };
 

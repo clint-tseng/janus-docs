@@ -867,6 +867,30 @@ footer
       .exception
         background-color: $color-error
 
+.context-view .context-switcher button
+  background: none
+  border: none
+  outline: none
+  padding: 0
+  position: absolute
+  right: 0
+  text-indent: -9999px
+  top: 0
+
+  &:after
+    $size: 0.8em
+    $title: 0.3em
+
+    @include reify
+    border: 0.1em solid #666
+      top-width: $title
+    float: left
+    height: $size - $title
+    width: $size
+
+  &:hover:after
+    border-color: $color-accent
+
 .CodeMirror.cm-s-default
   .CodeMirror-activeline-background
     background: #f7f7f7
@@ -1034,6 +1058,8 @@ footer
       background-color: #ccc
 
   .repl-statement-result
+    position: relative
+
     .janus-literal
       font-size: 1.2em
 
