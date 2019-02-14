@@ -221,13 +221,14 @@ Given `Varying` `v` and a `callback` function, creates a reaction and returns an
 
 ~~~
 const varying = new Varying(14);
-const list = new List(); // List extends Base
-list.reactTo(varying, value => { list.add(value); });
+const results = [];
+const base = new Base();
+base.reactTo(varying, value => { results.push(value); });
 
 varying.set(27);
-list.destroy();
+base.destroy();
 varying.set(42);
-return list;
+return results;
 ~~~
 
 #### .reactTo(v: Varying, immediate: Boolean, callback: (T -> void)): Observation
@@ -241,13 +242,14 @@ had been called. As with that invocation, if `immediate` is `false` then the
 
 ~~~
 const varying = new Varying(14);
-const list = new List(); // List extends Base
-list.reactTo(varying, false, value => { list.add(value); });
+const results = [];
+const base = new Base();
+base.reactTo(varying, false, value => { results.push(value); });
 
 varying.set(27);
-list.destroy();
+base.destroy();
 varying.set(42);
-return list;
+return results;
 ~~~
 
 ## Lifecycle Management
@@ -307,17 +309,20 @@ then a new one is created with your given function. Under the covers, `@managed`
 uses `#tap` to track the additional dependents.
 
 ~~~
-const data = new Map({ a: 1, b: 2, c: 3 });
-const computation = Base.managed(() => data.enumerate());
+const computation = Base.managed(() => new List());
 
-const dataKeysOne = computation();
-data.set('d', 4);
-const dataKeysTwo = computation();
-dataKeysOne.destroy();
-data.set('e', 5);
-dataKeysTwo.destroy();
-data.set('f', 6);
-return [ dataKeysOne, dataKeysTwo ];
+const instanceOne = computation();
+const instanceTwo = computation();
+instanceOne.destroy();
+const instanceThree = computation();
+instanceTwo.destroy();
+instanceThree.destroy();
+const instanceFour = computation();
+return [
+  instanceOne === instanceTwo,
+  instanceTwo === instanceThree,
+  instanceThree === instanceFour
+];
 ~~~
 
 ### #tap

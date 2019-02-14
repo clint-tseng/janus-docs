@@ -204,6 +204,7 @@ class SampleApp extends App {
 
 const app = new SampleApp();
 const log = new ErrorLog({ app });
+const errors = log.get_('errors');
 
 app.resolve(new Request({ result: types.result.failure("No connection.") }));
 app.resolve(new Request({ result: types.result.success(42) }));
@@ -211,7 +212,7 @@ app.resolve(new Request({ result: types.result.success(42) }));
 log.destroy();
 app.resolve(new Request({ result: types.result.failure("No response.") }));
 
-return inspect(log.get_('errors'));
+return inspect(errors);
 ~~~
 
 You can see that once `log.destroy` is called, the listener and reaction are unbound
@@ -341,14 +342,21 @@ const list = new SampleList([ 12 ]);
 const enumeration = list.enumeration();
 const enumeration2 = list.enumeration();
 
-enumeration.destroy();
-list.add(24);
 enumeration2.destroy();
-list.add(48);
+list.add(24);
+
+// take a quick snapshot for demonstration purposes, since the list goes away
+// on destroy.
+const snapshot = enumeration.list;
+enumeration.destroy();
+
+const enumeration3 = list.enumeration();
 
 return [
   enumeration === enumeration2,
-  enumeration
+  enumeration2 === enumeration3,
+  inspect(snapshot),
+  inspect(enumeration3)
 ];
 ~~~
 
