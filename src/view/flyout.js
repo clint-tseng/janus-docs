@@ -1,3 +1,4 @@
+const { min } = Math;
 const { DomView, find, from } = require('janus');
 const $ = require('janus-dollar');
 
@@ -17,10 +18,25 @@ class FlyoutView extends DomView.build(
     // order to measure ourselves.
     const dom = this.artifact();
     const trigger = this.subject.get_('trigger');
+    const margin = 20; //px
 
     const offset = trigger.offset();
-    dom.css('left', offset.left);
-    dom.css('top', offset.top + trigger.outerHeight());
+    const bottomEdge = window.scrollY + window.innerHeight;
+    const domWidth = dom.width();
+    const domHeight = dom.height();
+    const naiveTop = offset.top + trigger.outerHeight();
+    if ((naiveTop + domHeight) > (bottomEdge - margin)) {
+      dom.css('top', bottomEdge - margin - domHeight);
+      const triggerWidth = trigger.outerWidth();
+      const squirtRight = offset.left + triggerWidth;
+      if ((squirtRight + domWidth) > (window.innerWidth - margin))
+        dom.css('left', offset.left - domWidth);
+      else
+        dom.css('left', squirtRight);
+    } else {
+      dom.css('top', naiveTop);
+      dom.css('left', min(offset.left, $(window).width() - dom.outerWidth() - margin));
+    }
   }
 }
 
