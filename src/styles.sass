@@ -38,6 +38,7 @@ $z-toc-toplevel-entry: 3
 $z-header-base: 100
 $z-header: 101
 $z-repl: 150
+$z-flyout: 200
 
 $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
@@ -476,6 +477,10 @@ header
       transform: translateX(0)
       transition: transform 0.1s $ease-extreme-out, opacity 0.2s
 
+#flyouts .flyout
+  position: absolute
+  z-index: $z-flyout
+
 footer
   display: none // for now
 
@@ -537,9 +542,23 @@ footer
       font-size: 1.5em
 
 
+////////////////////////////////////////
+// LAYOUT: flyouts
+
+.flyout
+  .janus-inspect-panel
+    min-width: 30em
+
+    &.janus-inspect-varying
+      min-width: 40em
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // CONTENT
+
+////////////////////////////////////////
+// CONTENT: main article
 
 .article
   h1, h2
@@ -1074,8 +1093,15 @@ footer
     .janus-inspect-panel
       clear: left
 
+.flyout
+  box-shadow: 0 0.3em 0.5em rgba(0, 0, 0, 0.12)
+
 ////////////////////////////////////////
 // COMPONENTS: inspect
+
+.janus-inspect-entity
+  .entity-title
+    cursor: default
 
 .janus-inspect-panel
   background-color: #fff

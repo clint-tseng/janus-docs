@@ -1,11 +1,15 @@
-const { App, Varying, attribute, dēfault, types, from, Request, Resolver } = require('janus');
+const { App, Varying, attribute, dēfault, types, from, Request, Resolver, List } = require('janus');
 const { Article } = require('./article');
+const { Flyout } = require('./flyout');
 const { Repl } = require('./repl');
 
 class DocsApp extends App.build(
   attribute('article', attribute.Reference.to(
     from('path').map((path) => new ArticleRequest(path)))
   ),
+  attribute('flyouts', class extends attribute.List {
+    default() { return new List(); }
+  }),
 
   dēfault.writing('cache.articles', []),
   dēfault.writing('repl', new Repl())
@@ -25,6 +29,16 @@ class DocsApp extends App.build(
         if (request.path === cached.path)
           return new Varying(types.result.success(cached.article.shadow()));
     };
+  }
+
+  flyout(trigger, target, context = 'default') {
+    const triggerNode = trigger[0];
+    const flyouts = this.get_('flyouts');
+    for (const flyout of flyouts)
+      if (flyout.get_('trigger')[0] === triggerNode)
+        return;
+
+    flyouts.add(new Flyout({ trigger, target, context }));
   }
 }
 

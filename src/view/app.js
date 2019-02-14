@@ -10,7 +10,9 @@ class AppView extends DomView.build($('body').clone(), template(
 
   find('#repl')
     .render(from('repl'))
-    .classed('active', from('active.repl'))
+    .classed('active', from('active.repl')),
+
+  find('#flyouts').render(from('flyouts'))
 )) {
   dom() { return $('body'); }
 
@@ -18,7 +20,10 @@ class AppView extends DomView.build($('body').clone(), template(
     const dom = this.artifact();
     const app = this.subject;
 
-    // global events:
+    ////////////////////////////////////////
+    // GLOBAL EVENTS
+
+    // page navigation:
 
     dom.on('click', 'a', (event) => {
       if (event.isDefaultPrevented()) return;
@@ -37,6 +42,12 @@ class AppView extends DomView.build($('body').clone(), template(
       app.set('path', pathname);
     });
 
+    $(window).on('popstate', (event) => {
+      app.set('path', location.pathname);
+    });
+
+    // highlight code samples:
+
     dom.on('click', 'code', (event) => {
       if (window.getSelection == null) return;
       const selection = window.getSelection();
@@ -44,11 +55,21 @@ class AppView extends DomView.build($('body').clone(), template(
         selection.selectAllChildren(event.target);
     });
 
-    $(window).on('popstate', (event) => {
-      app.set('path', location.pathname);
+    // inspector events:
+
+    dom.on('mouseenter', '.entity-title', (event) => {
+      const trigger = $(event.target);
+      const timer = setTimeout(_ => {
+        const target = trigger.closest('.janus-inspect-entity').data('view').subject;
+        app.flyout(trigger, target, 'panel');
+      }, 300);
+      trigger.one('mouseleave', _ => { clearTimeout(timer); });
     });
 
-    // header events:
+
+    ////////////////////////////////////////
+    // HEADER EVENTS
+
     dom.find('#repl-link').on('click', (event) => {
       event.preventDefault();
       const active = !app.get_('active.repl');
