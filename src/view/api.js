@@ -22,8 +22,12 @@ const anyMatch = anyByAttr('match');
 
 const findMatch = (input, name) => {
   const caseSensitive = input.match(/[A-Z]/);
-  const regex = new RegExp(input.replace('.', '\\.'), caseSensitive ? '' : 'i');
-  return name.match(regex) != null;
+  try {
+    const regex = new RegExp(input.replace('.', '\\.'), caseSensitive ? '' : 'i');
+    return regex.test(name);
+  } catch(_) {
+    return name.includes(input);
+  }
 };
 
 ////////////////////////////////////////
