@@ -59,6 +59,18 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// COMMON
+
+@mixin custom-scrollbar($color-thumb: $color-accent, $color-gutter: rgba(0, 0, 10, 0.8))
+  &::-webkit-scrollbar
+    background: $color-gutter
+    width: 0.9em
+
+  &::-webkit-scrollbar-thumb
+    background: $color-thumb
+
+
+////////////////////////////////////////////////////////////////////////////////
 // RESET
 
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
@@ -223,17 +235,10 @@ header
 
   nav
     @include fill
+    @include custom-scrollbar
     overflow-x: hidden
     overflow-y: auto
     top: $header-height - 1rem
-
-    $scrollbar-width: 0.9em
-    &::-webkit-scrollbar
-      background: rgba(0, 0, 10, 0.8)
-      width: $scrollbar-width
-
-    &::-webkit-scrollbar-thumb
-      background: $color-accent
 
     > ul
       padding-top: $main-padding
@@ -448,34 +453,30 @@ header
   padding: $main-padding
     top: $header-height + $main-padding
 
-#repl
-  @include fill
-  left: auto
-  max-width: 100%
-  min-width: 40rem
-  overflow: hidden
-  pointer-events: none
-  position: fixed
-  width: 40%
-  z-index: $z-repl
+#repl .repl
+  display: none
+
+#repl.activated
+  $repl-width: 40vw
 
   .repl
+    animation-duration: 0.3s
+    animation-name: "right-motion"
+    animation-timing-function: $ease-extreme-out
+    animation-iteration-count: 1
     background: rgba(244, 244, 244, 0.98)
-    box-shadow: inset 12rem 0 0 #eee, -5px 0 0 rgba(0, 0, 0, 0.45)
-    opacity: 0
-    position: absolute
+    bottom: 0
+    box-shadow: inset 16.4rem 0 0 #eee, -5px 0 0 rgba(0, 0, 0, 0.45)
+    display: block
+    position: fixed
+    right: -1 * $repl-width
+    top: 0
+    width: $repl-width
+    z-index: $z-repl
+
+  &.active .repl
+    animation-name: "left-motion"
     right: 0
-    transform: translateX(5em)
-    transition: transform 0.3s ease-in, opacity 0.2s
-    width: calc(100% - 1em)
-
-  &.active
-    pointer-events: auto
-
-    .repl
-      opacity: 1
-      transform: translateX(0)
-      transition: transform 0.1s $ease-extreme-out, opacity 0.2s
 
 #flyouts .flyout
   position: absolute
@@ -1000,12 +1001,37 @@ footer
       padding: 0.1em 0 0.5em
 
 .repl
-  overflow-x: auto
-  overflow-y: auto
+  $chrome-padding: 1em
+  $chrome-width: 2.4em
+
+  .repl-chrome
+    background: #d4d4d4
+    bottom: 0
+    left: 0
+    padding: $chrome-padding
+    position: absolute
+    top: 0
+    width: $chrome-width
+
+    h2
+      color: #666
+      font-family: $font-monospace
+      margin-bottom: 4em
+      margin-left: 1.5em
+      text-transform: lowercase
+      transform: rotate(90deg)
+      transform-origin: left top
 
   .repl-main
+    @include custom-scrollbar(#777, #ccc)
+    bottom: 0
     cursor: text
-    min-height: 100vh
+    left: (2 * $chrome-padding) + $chrome-width
+    overflow-x: auto
+    overflow-y: auto
+    position: absolute
+    right: 0
+    top: 0
 
   .repl-statement
     border-bottom: 1px dotted #ddd
@@ -1313,6 +1339,18 @@ $thinker-effect-height: 60em
     top: -1 * $thinker-effect-height - $thinker-size
   to
     top: $thinker-size
+
+@keyframes left-motion
+  from
+    transform: translateX(60px)
+  to
+    transform: translateX(0)
+
+@keyframes right-motion
+  from
+    transform: translateX(-60px)
+  to
+    transform: translateX(0)
 
 ////////////////////////////////////////////////////////////////////////////////
 // IMPORTS

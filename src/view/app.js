@@ -76,6 +76,7 @@ class AppView extends DomView.build($('body').clone(), template(
       app.set('active.repl', active);
       if (active)
         dom.find('#repl .repl').data('view').focusLast();
+      dom.find('#repl').addClass('activated');
     });
 
     dom.find('#show-toc').on('click', (event) => {
