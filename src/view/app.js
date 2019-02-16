@@ -2,6 +2,7 @@ const { DomView, template, find, from } = require('janus');
 const { filter } = require('janus-stdlib').varying;
 const { exists } = require('../util/util');
 const { App } = require('../model/app');
+const { asPanel } = require('./context');
 const $ = require('janus-dollar');
 
 class AppView extends DomView.build($('body').clone(), template(
@@ -9,8 +10,9 @@ class AppView extends DomView.build($('body').clone(), template(
   find('#main').render(from('article').pipe(filter(exists))),
 
   find('#repl')
-    .render(from('repl'))
-    .classed('active', from('active.repl')),
+    .render(from('repl.obj'))
+    .classed('active', from('repl.active'))
+    .classed('activated', from('repl.activated')),
 
   find('#flyouts').render(from('flyouts'))
 )) {
@@ -72,16 +74,20 @@ class AppView extends DomView.build($('body').clone(), template(
 
     dom.find('#repl-link').on('click', (event) => {
       event.preventDefault();
-      const active = !app.get_('active.repl');
-      app.set('active.repl', active);
-      if (active)
-        dom.find('#repl .repl').data('view').focusLast();
-      dom.find('#repl').addClass('activated');
+      app.toggleRepl();
     });
 
     dom.find('#show-toc').on('click', (event) => {
       event.preventDefault();
       dom.toggleClass('show-toc');
+    });
+
+
+    ////////////////////////////////////////
+    // REPL MANAGEMENT
+
+    this.reactTo(app.get('repl.active'), false, (active) => {
+      if (active) dom.find('#repl .repl').data('view').focusLast();
     });
   }
 }

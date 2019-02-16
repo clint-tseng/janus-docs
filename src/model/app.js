@@ -1,4 +1,5 @@
-const { App, Varying, attribute, dēfault, types, from, Request, Resolver, List } = require('janus');
+const { App, Varying, attribute, bind, dēfault, types, from, Request, Resolver, List } = require('janus');
+const { filter } = require('janus-stdlib').varying
 const { Article } = require('./article');
 const { Flyout } = require('./flyout');
 const { Repl } = require('./repl');
@@ -12,8 +13,14 @@ class DocsApp extends App.build(
   }),
 
   dēfault.writing('cache.articles', []),
-  dēfault.writing('repl', new Repl())
+  dēfault.writing('repl.obj', new Repl()),
+
+  bind('repl.activated', from('repl.active').pipe(filter((x) => x === true)))
 ) {
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // RESOLVER / REQUEST
+
   resolver() {
     return Resolver.caching(new Resolver.MemoryCache(),
       Resolver.oneOf(this.articleCache(), Resolver.fromLibrary(this.resolvers)));
@@ -31,6 +38,9 @@ class DocsApp extends App.build(
     };
   }
 
+  ////////////////////////////////////////////////////////////////////////////////
+  // APP UI
+
   flyout(trigger, target, context = 'default') {
     const triggerNode = trigger[0];
     const flyouts = this.get_('flyouts');
@@ -40,6 +50,10 @@ class DocsApp extends App.build(
 
     flyouts.add(new Flyout({ trigger, target, context }));
   }
+
+  showRepl() { this.set('repl.active', true); }
+  hideRepl() { this.set('repl.active', false); }
+  toggleRepl() { this.set('repl.active', !this.get_('repl.active')); }
 }
 
 class ArticleRequest extends Request {

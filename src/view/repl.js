@@ -62,7 +62,7 @@ class ReplView extends DomView.build($(`
 
   find('.repl-pins').render(from('statements').map((stmts) => stmts.filter((stmt) => stmt.get('pinned')))),
 
-  find('.repl-close').on('click', (e, s, view) => { view.options.app.set('active.repl', false); }),
+  find('.repl-close').on('click', (e, s, view) => { view.options.app.hideRepl(); }),
   find('.repl-main')
     .on('click', (event, _, view) => {
       if (event.target === view.artifact().find('.repl-main')[0])
