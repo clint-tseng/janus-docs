@@ -40,6 +40,17 @@ $z-header: 101
 $z-repl: 150
 $z-flyout: 200
 
+$icon-arrow-right: '\e900'
+$icon-delete: '\e901'
+$icon-close: '\e902'
+$icon-close-circle: '\e903'
+$icon-pencil: '\e904'
+$icon-replay-all: '\e905'
+$icon-pin: '\e906'
+$icon-play: '\e907'
+$icon-back-arrow: '\e908'
+$icon-window: '\e909'
+
 $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
 
@@ -68,6 +79,39 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
   &::-webkit-scrollbar-thumb
     background: $color-thumb
+
+@mixin icon($which)
+  content: $which
+  font-family: 'icons' !important
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  font-style: normal
+  font-variant: normal
+  font-weight: normal
+  line-height: 1
+  speak: none
+  text-transform: none
+
+@mixin no-appearance
+  background: none
+  border: none
+  margin: 0
+  outline: none
+  padding: 0
+
+
+////////////////////////////////////////////////////////////////////////////////
+// IMPORTS / EXTERNS
+
+@import '../node_modules/codemirror/lib/codemirror'
+@import '../node_modules/janus-inspect/src/inspect'
+
+@font-face
+  font-family: 'icons';
+  src: url('/assets/janus-docs.eot?2n7kic')
+  src: url('/assets/janus-docs.eot?2n7kic#iefix') format('embedded-opentype'), url('/assets/janus-docs.ttf?2n7kic') format('truetype'), url('/assets/janus-docs.woff?2n7kic') format('woff'), url('/assets/janus-docs.svg?2n7kic#icomoon') format('svg')
+  font-weight: normal
+  font-style: normal
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,13 +196,9 @@ header
     z-index: $z-header
 
   #show-toc
-    background: none
-    border: none
+    @include no-appearance
     cursor: pointer
     display: none
-    margin: 0
-    outline: none
-    padding: 0
     position: absolute
     right: 3em
     top: 4.3em
@@ -313,12 +353,11 @@ header
       z-index: $z-api-find
 
       input
+        @include no-appearance
         background: $color-sidebar-background2
-        border: none
         color: #fff
         font-family: $font-body
         font-size: 1.3em
-        outline: none
         padding: 0.8em 1em
           left: $sidebar-padding
         width: 100%
@@ -340,10 +379,8 @@ header
 
     .api-section
       .api-section-header
-        background: none
-        border: none
+        @include no-appearance
         color: #fff
-        outline: none
         padding: 0.9em 0 1rem $sidebar-padding
         position: relative
         text-align: left
@@ -888,28 +925,17 @@ footer
         background-color: $color-error
 
 .context-view .context-switcher button
-  background: none
-  border: none
-  outline: none
-  padding: 0
+  @include no-appearance
   position: absolute
   right: 0
-  text-indent: -9999px
   top: 0
 
   &:after
-    $size: 0.8em
-    $title: 0.3em
-
-    @include reify
-    border: 0.1em solid #666
-      top-width: $title
-    float: left
-    height: $size - $title
-    width: $size
+    @include icon($icon-window)
+    font-size: 1.2em
 
   &:hover:after
-    border-color: $color-accent
+    color: $color-accent
 
 .CodeMirror.cm-s-default
   .CodeMirror-activeline-background
@@ -953,9 +979,7 @@ footer
 
 
   .exception-expando button
-    background: none
-    border: none
-    outline: none
+    @include no-appearance
     padding: 0.2em
 
     &:before
@@ -1003,6 +1027,7 @@ footer
 .repl
   $chrome-padding: 1em
   $chrome-width: 2.4em
+  $chrome-color: #666
 
   .repl-chrome
     background: #d4d4d4
@@ -1013,11 +1038,21 @@ footer
     top: 0
     width: $chrome-width
 
+    button
+      @include no-appearance
+      margin-bottom: 1em
+      padding: 0.1em
+      &:before
+        @include icon($icon-close-circle)
+        color: $chrome-color
+        font-size: 2em
+
     h2
-      color: #666
+      color: $chrome-color
       font-family: $font-monospace
       margin-bottom: 4em
-      margin-left: 1.5em
+      margin-left: 1.45em
+      text-align: center
       text-transform: lowercase
       transform: rotate(90deg)
       transform-origin: left top
@@ -1064,11 +1099,9 @@ footer
     width: $repl-left-gutter
 
     input
-      background: none
-      border: none
+      @include no-appearance
       font-family: $font-monospace
       margin-right: 0.4em
-      outline: none
       text-align: right
       width: calc(100% - 3em)
       &::placeholder
@@ -1231,6 +1264,9 @@ footer
       .reaction
         padding: 0.3em 0.6em
 
+.varying-delta .separator:before
+  @include icon($icon-arrow-right)
+
 
 ////////////////////////////////////////
 // COMPONENT: thinker
@@ -1351,10 +1387,4 @@ $thinker-effect-height: 60em
     transform: translateX(-60px)
   to
     transform: translateX(0)
-
-////////////////////////////////////////////////////////////////////////////////
-// IMPORTS
-
-@import '../node_modules/codemirror/lib/codemirror'
-@import '../node_modules/janus-inspect/lib/inspect'
 

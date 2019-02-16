@@ -10,11 +10,16 @@ HTML = $(MARKDOWN:docs/%.md=dist/%.html)
 API = $(shell find docs/api -type f -name '*.md' | sort)
 API_INTERMEDIATE = $(API:docs/api/%.md=dist/api/%.json)
 
+ASSETS_IN = $(shell find assets -type f | sort)
+ASSETS_OUT = $(ASSETS_IN:assets/%=dist/assets/%)
+
 node_modules: package-lock.json
 	npm install
 
 dist:
 	@mkdir -p dist/
+dist/assets:
+	@mkdir -p dist/assets/
 
 
 dist/_api.json: $(API_INTERMEDIATE) dist node_modules
@@ -31,8 +36,11 @@ dist/client.js: src/client.js dist node_modules $(CODE)
 dist/styles.css: src/styles.sass dist node_modules
 	node node_modules/node-sass/bin/node-sass --output-style compressed $< > $@
 
+dist/assets/%: assets/% dist/assets
+	cp $< $@
 
-all: $(JSON) dist/_api.json $(HTML) dist/client.js dist/styles.css
+
+all: $(JSON) dist/_api.json $(HTML) dist/client.js dist/styles.css $(ASSETS_OUT)
 
 clean:
 	rm -rf dist/*

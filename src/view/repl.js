@@ -48,8 +48,8 @@ const StatementView = DomView.build($(`
 class ReplView extends DomView.build($(`
   <div class="repl">
     <div class="repl-chrome">
+      <button class="repl-close" title="Close Console"/>
       <h2>Console</h2>
-      <button class="repl-close" title="Close Console">Close</button>
     </div>
     <div class="repl-main"/>
     <div class="repl-pins"/>
