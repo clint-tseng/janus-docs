@@ -4,13 +4,13 @@
 
 $color-accent: #0b9a9a
 $color-accent2: #057d7d
-$color-background: #f7f7f7
-$color-header-background-left: $color-accent
-$color-header-background-right: $color-accent2
-$color-sidebar-background-active: #44444b
-$color-sidebar-background: #33333b
-$color-sidebar-background2: #2d2d31
-$color-sidebar-background3: #1c1c22
+$color-bg: #f7f7f7
+$color-header-bg-left: $color-accent
+$color-header-bg-right: $color-accent2
+$color-sidebar-bg-active: #44444b
+$color-sidebar-bg: #33333b
+$color-sidebar-bg2: #2d2d31
+$color-sidebar-bg3: #1c1c22
 $color-splash: #085b5b
 $color-heading: #000
 $color-text: #333
@@ -26,9 +26,9 @@ $main-padding: 4rem
 $main-max-width: 65rem
 $repl-left-gutter: 12rem
 
-$font-title: 'malaga-narrow', "Helvetica Neue", Helvetica, Arial, sans-serif
-$font-heading: malaga, "Helvetica Neue", Helvetica, Arial, sans-serif
-$font-body: ratio, "Helvetica Neue", Helvetica, Arial, sans-serif
+$font-title: 'malaga-narrow', 'Helvetica Neue', Helvetica, Arial, sans-serif
+$font-heading: malaga, 'Helvetica Neue', Helvetica, Arial, sans-serif
+$font-body: ratio, 'Helvetica Neue', Helvetica, Arial, sans-serif
 $font-monospace: menlo, monaco, inconsolata, consolas, monospace
 
 $z-mobile-toc: 1
@@ -139,7 +139,7 @@ html
   font-size: 62.5%
 
 body
-  background-color: $color-sidebar-background
+  background-color: $color-sidebar-bg
 
 ul, ol
   list-style-type: none
@@ -173,7 +173,7 @@ header
     transform-origin: left center
 
   &:before
-    background: $color-header-background-left
+    background: $color-header-bg-left
     box-shadow: 0 0 1.2em rgba(0, 0, 0, 0.8)
     left: 0
     height: $header-height + $header-overdraw + 2rem
@@ -182,7 +182,7 @@ header
     z-index: $z-header
 
   &:after
-    background: $color-header-background-right
+    background: $color-header-bg-right
     height: $header-height + $header-overdraw
     left: $sidebar-width
     right: 0
@@ -271,7 +271,7 @@ header
 
 #left
   @include fill
-  background: $color-sidebar-background
+  background: $color-sidebar-bg
   box-shadow: 0 -0.6em 0.6em rgba(0, 0, 0, 0.45)
   position: fixed
   right: auto
@@ -296,7 +296,7 @@ header
         background: $color-accent
 
     a
-      border-bottom: 1px solid $color-sidebar-background2
+      border-bottom: 1px solid $color-sidebar-bg2
       color: #fff
       display: block
       font-family: $font-title
@@ -306,7 +306,7 @@ header
       transition: 0.2s background
 
       &:hover
-        background: $color-sidebar-background-active
+        background: $color-sidebar-bg-active
         transition: none
 
     > a
@@ -320,7 +320,7 @@ header
     .toc-entry
       a
         background: #2d2d31
-        border-bottom-color: $color-sidebar-background
+        border-bottom-color: $color-sidebar-bg
         font-family: $font-body
         font-size: 1.5rem
         padding: $vpadding 1rem
@@ -328,7 +328,7 @@ header
 
         // TODO: these layered overrides are incredibly irritating.
         &:hover
-          background: $color-sidebar-background-active
+          background: $color-sidebar-bg-active
 
       &.active
         a, a:hover
@@ -343,12 +343,12 @@ header
       display: block
 
   .api-browser
-    background: $color-sidebar-background3
+    background: $color-sidebar-bg3
     color: #fff
 
     .api-find
       $overdraw: 2rem
-      background: $color-sidebar-background
+      background: $color-sidebar-bg
       border-bottom: 1px solid $color-accent2
       margin-top: -$overdraw
       padding-top: $overdraw
@@ -358,7 +358,7 @@ header
 
       input
         @include no-appearance
-        background: $color-sidebar-background2
+        background: $color-sidebar-bg2
         color: #fff
         font-family: $font-body
         font-size: 1.3em
@@ -417,10 +417,10 @@ header
 
     .api-object
       .api-object-name
-        background: $color-sidebar-background3
+        background: $color-sidebar-bg3
         border-bottom: 0
-        border-top: 3px solid $color-sidebar-background
-        box-shadow: 0 0.3rem 0 transparentize($color-sidebar-background3, 0.6)
+        border-top: 3px solid $color-sidebar-bg
+        box-shadow: 0 0.3rem 0 transparentize($color-sidebar-bg3, 0.6)
         font-family: $font-monospace
         font-size: 1.6em
         font-weight: normal
@@ -430,7 +430,7 @@ header
         z-index: $z-toc-api-object
 
         &:hover
-          background: $color-sidebar-background-active
+          background: $color-sidebar-bg-active
 
       ul
         padding-bottom: 0
@@ -488,7 +488,7 @@ header
           display: block
 
 #main
-  background: $color-background
+  background: $color-bg
   margin-left: $sidebar-width
   min-height: calc(100vh - #{2 * $main-padding + $header-height})
   padding: $main-padding
@@ -503,7 +503,7 @@ header
 
   .repl
     animation-duration: 0.3s
-    animation-name: "right-motion"
+    animation-name: 'right-motion'
     animation-timing-function: $ease-extreme-out
     animation-iteration-count: 1
     background: rgba(244, 244, 244, 0.98)
@@ -522,7 +522,7 @@ header
       width: $repl-full-width
 
   &.active .repl
-    animation-name: "left-motion"
+    animation-name: 'left-motion'
     right: 0
 
 
@@ -1415,14 +1415,14 @@ $thinker-effect-height: 60em
     position: absolute
     width: 100%
 
-  $transparent: transparentize($color-background, 1)
+  $transparent: transparentize($color-bg, 1)
   &:before
     animation-duration: 2s
-    background: linear-gradient($transparent, $color-background, $transparent)
+    background: linear-gradient($transparent, $color-bg, $transparent)
 
   &:after
     animation-duration: 0.8s
-    background: linear-gradient($transparent, transparentize($color-background, 0.6), $transparent)
+    background: linear-gradient($transparent, transparentize($color-bg, 0.6), $transparent)
 
 .thinker-1, .thinker-2
   top: $thinker-size * -0.12
