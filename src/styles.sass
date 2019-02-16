@@ -41,8 +41,11 @@ $z-repl: 150
 $z-flyout: 200
 
 $icon-arrow-right: '\e900'
+$icon-chevron-down: '\e90a'
+$icon-chevron-right: '\e90b'
 $icon-delete: '\e901'
 $icon-close: '\e902'
+$icon-close-small: '\e90c'
 $icon-close-circle: '\e903'
 $icon-pencil: '\e904'
 $icon-replay-all: '\e905'
@@ -80,8 +83,9 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
   &::-webkit-scrollbar-thumb
     background: $color-thumb
 
-@mixin icon($which)
-  content: $which
+@mixin icon($which: null)
+  @if $which
+    content: $which
   font-family: 'icons' !important
   -webkit-font-smoothing: antialiased
   -moz-osx-font-smoothing: grayscale
@@ -104,12 +108,12 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 // IMPORTS / EXTERNS
 
 @import '../node_modules/codemirror/lib/codemirror'
-@import '../node_modules/janus-inspect/src/inspect'
+@import '../node_modules/janus-inspect/lib/inspect'
 
 @font-face
   font-family: 'icons';
-  src: url('/assets/janus-docs.eot?2n7kic')
-  src: url('/assets/janus-docs.eot?2n7kic#iefix') format('embedded-opentype'), url('/assets/janus-docs.ttf?2n7kic') format('truetype'), url('/assets/janus-docs.woff?2n7kic') format('woff'), url('/assets/janus-docs.svg?2n7kic#icomoon') format('svg')
+  src: url('/assets/icons.eot?b')
+  src: url('/assets/icons.eot?b#iefix') format('embedded-opentype'), url('/assets/icons.ttf?b') format('truetype'), url('/assets/icons.woff?b') format('woff'), url('/assets/icons.svg?b#icomoon') format('svg')
   font-weight: normal
   font-style: normal
 
@@ -495,6 +499,7 @@ header
 
 #repl.activated
   $repl-width: 40vw
+  $repl-full-width: 70vw
 
   .repl
     animation-duration: 0.3s
@@ -508,12 +513,18 @@ header
     position: fixed
     right: -1 * $repl-width
     top: 0
+    transition: width 0.2s $ease-extreme-out
     width: $repl-width
     z-index: $z-repl
+
+    &.has-pins
+      right: -1 * $repl-full-width
+      width: $repl-full-width
 
   &.active .repl
     animation-name: "left-motion"
     right: 0
+
 
 #flyouts .flyout
   position: absolute
@@ -1024,19 +1035,30 @@ footer
     .exception-message
       padding: 0.1em 0 0.5em
 
+
+////////////////////////////////////////
+// COMPONENTS: repl
+
+$repl-chrome-padding: 1em
+$repl-chrome-width: 2.4em
+$repl-chrome-outer-width: (2 * $repl-chrome-padding) + $repl-chrome-width
+$repl-chrome-color-fg: #666
+$repl-chrome-color-bg: #d4d4d4
+$pin-color-bg: #ddd
+$pin-chrome-padding: 0.4em
+$pin-chrome-width: 1.6em
+$pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
+
 .repl
-  $chrome-padding: 1em
-  $chrome-width: 2.4em
-  $chrome-color: #666
 
   .repl-chrome
-    background: #d4d4d4
+    background: $repl-chrome-color-bg
     bottom: 0
     left: 0
-    padding: $chrome-padding
+    padding: $repl-chrome-padding
     position: absolute
     top: 0
-    width: $chrome-width
+    width: $repl-chrome-width
 
     button
       @include no-appearance
@@ -1044,11 +1066,12 @@ footer
       padding: 0.1em
       &:before
         @include icon($icon-close-circle)
-        color: $chrome-color
+        color: $repl-chrome-color-fg
         font-size: 2em
 
     h2
-      color: $chrome-color
+      color: $repl-chrome-color-fg
+      cursor: default
       font-family: $font-monospace
       margin-bottom: 4em
       margin-left: 1.45em
@@ -1056,12 +1079,13 @@ footer
       text-transform: lowercase
       transform: rotate(90deg)
       transform-origin: left top
+      white-space: nowrap
 
   .repl-main
     @include custom-scrollbar(#777, #ccc)
     bottom: 0
     cursor: text
-    left: (2 * $chrome-padding) + $chrome-width
+    left: $repl-chrome-outer-width
     overflow-x: auto
     overflow-y: auto
     position: absolute
@@ -1071,6 +1095,37 @@ footer
   .repl-statement
     border-bottom: 1px dotted #ddd
     overflow: hidden
+
+  .repl-pins
+    @include fill
+    background-color: $pin-color-bg
+    border-left: 1px solid #c4c4c4
+    display: none
+    left: auto
+
+    .repl-chrome
+      border-right: 1px dotted #e6e6e6
+
+      button:before
+        content: $icon-close
+
+    .repl-pins-list
+      margin-left: $repl-chrome-outer-width
+      overflow-y: auto
+
+    .janus-inspect-panel .panel-title .janus-inspect-pin
+      display: none
+
+  &.has-pins
+    $pins-width: 45em
+
+    .repl-main
+      right: $pins-width
+
+    .repl-pins
+      box-shadow: #{$repl-chrome-outer-width + $pin-chrome-outer-width} 0 0 $repl-chrome-color-bg inset
+      display: block
+      width: $pins-width
 
   li:last-child .repl-statement
     border-bottom: none
@@ -1152,6 +1207,45 @@ footer
     .janus-inspect-panel
       clear: left
 
+.pin
+  overflow: hidden
+  position: relative
+
+  .pin-chrome
+    @include fill
+    padding: 1em $pin-chrome-padding
+    right: auto
+    width: $pin-chrome-width
+
+    button
+      @include no-appearance
+      &:before
+        @include icon
+        color: $repl-chrome-color-fg
+        font-size: 1.6em
+
+    .pin-remove:before
+      content: $icon-close-small
+
+    .pin-expand button
+      &:before
+        content: $icon-chevron-right
+      &.checked:before
+        content: $icon-chevron-down
+
+  .pin-contents
+    animation-duration: 1s
+    animation-name: 'contract-margin'
+    animation-iteration-count: 1
+    animation-timing-function: $ease-extreme-out
+    margin-left: $pin-chrome-outer-width
+    max-height: 3em
+    padding: 1em
+
+  &.expanded .pin-contents
+    animation-name: 'expand-margin'
+    max-height: none
+
 .flyout
   box-shadow: 0 0.3em 0.5em rgba(0, 0, 0, 0.12)
 
@@ -1176,6 +1270,19 @@ footer
     font-weight: bold
     padding: 0.5em
       bottom: 0.6em
+
+    .janus-inspect-pin
+      @include no-appearance
+      display: block
+      right: 0.6em
+      position: absolute
+      top: 0.85em
+      z-index: 1
+
+      &:before
+        @include icon($icon-pin)
+        color: #fff
+        font-size: 1.2em
 
   .panel-content
     padding: 1em

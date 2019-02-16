@@ -21,6 +21,8 @@ class AppView extends DomView.build($('body').clone(), template(
   _wireEvents() {
     const dom = this.artifact();
     const app = this.subject;
+    const repl = app.get_('repl.obj');
+    const pins = repl.get_('pins');
 
     ////////////////////////////////////////
     // GLOBAL EVENTS
@@ -66,6 +68,15 @@ class AppView extends DomView.build($('body').clone(), template(
         app.flyout(trigger, target, 'panel');
       }, 300);
       trigger.one('mouseleave', _ => { clearTimeout(timer); });
+    });
+
+    dom.on('click', '.janus-inspect-pin', (event) => {
+      const trigger = $(event.target);
+      const panelView = trigger.closest('.janus-inspect-panel').data('view').subject;
+      const target = panelView.get_('subject');
+      if (trigger.closest('flyout').length > 0) target.tap();
+      pins.add(asPanel(target));
+      app.showRepl();
     });
 
 

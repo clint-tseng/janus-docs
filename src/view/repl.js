@@ -1,4 +1,4 @@
-const { DomView, template, find, from, match } = require('janus');
+const { DomView, template, find, from, match, Model, attribute, dēfault } = require('janus');
 const $ = require('janus-dollar');
 
 const { Statement, Repl } = require('../model/repl');
@@ -7,6 +7,9 @@ const { blank, not, give } = require('../util/util');
 const { withPanelSwitch } = require('../view/context');
 const { inspect } = require('../util/inspect');
 
+
+////////////////////////////////////////////////////////////////////////////////
+// STATEMENTS
 
 const inspectWithSwitch = (x) => withPanelSwitch(inspect(x))
 
@@ -45,6 +48,43 @@ const StatementView = DomView.build($(`
     })))
 ));
 
+
+////////////////////////////////////////////////////////////////////////////////
+// PINS
+
+const Pin = Model.build(
+  dēfault('expanded', true, attribute.Boolean)
+);
+
+const PinView = DomView.build($(`
+  <div class="pin">
+    <div class="pin-chrome">
+      <div class="pin-expand"/>
+      <button class="pin-remove"/>
+    </div>
+    <div class="pin-contents"/>
+  </div>
+`), template(
+  find('.pin-contents').render(from('subject')),
+
+  find('.pin').classed('expanded', from('expanded')),
+  find('.pin-expand').render(from.attribute('expanded'))
+    .criteria({ context: 'edit', style: 'button' }).options({ stringify: give('') }),
+
+  find('.pin-remove').on('click', (e, subject) => {
+    // we do this by index on the parent list in case multiple instances of this
+    // item exist. TODO: awkward reference. what to do?
+    const item = $(event.target).closest('li');
+    const idx = item.prevAll().length;
+    const list = item.closest('.janus-list').data('view').subject.parent;
+    list.removeAt(idx);
+  }),
+));
+
+
+////////////////////////////////////////////////////////////////////////////////
+// REPL
+
 class ReplView extends DomView.build($(`
   <div class="repl">
     <div class="repl-chrome">
@@ -52,7 +92,13 @@ class ReplView extends DomView.build($(`
       <h2>Console</h2>
     </div>
     <div class="repl-main"/>
-    <div class="repl-pins"/>
+    <div class="repl-pins">
+      <div class="repl-chrome">
+        <button class="repl-pins-clear" title="Clear Pins"/>
+        <h2>Pinned Objects</h2>
+      </div>
+      <div class="repl-pins-list"/>
+    </div>
   </div>
 `), template(
   find('.repl-main').render(from('statements'))
@@ -60,14 +106,16 @@ class ReplView extends DomView.build($(`
       renderItem: (render) => render.options({ onCommit: () => { view.commit(); } })
     }))),
 
-  find('.repl-pins').render(from('statements').map((stmts) => stmts.filter((stmt) => stmt.get('pinned')))),
-
   find('.repl-close').on('click', (e, s, view) => { view.options.app.hideRepl(); }),
   find('.repl-main')
     .on('click', (event, _, view) => {
       if (event.target === view.artifact().find('.repl-main')[0])
         view.focusLast();
-    })
+    }),
+
+  find('.repl').classed('has-pins', from('pins').flatMap((pins) => pins.nonEmpty())),
+  find('.repl-pins-clear').on('click', (e, subject) => subject.get_('pins').removeAll()),
+  find('.repl-pins-list').render(from('pins').map((pins) => pins.map((subject) => new Pin({ subject }))))
 )) {
   commit() {
     this.subject.commit();
@@ -82,9 +130,11 @@ class ReplView extends DomView.build($(`
 
 module.exports = {
   ReplView,
+  PinView,
   StatementView,
   registerWith: (library) => {
     library.register(Statement, StatementView);
+    library.register(Pin, PinView);
     library.register(Repl, ReplView);
   }
 };

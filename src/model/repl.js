@@ -67,7 +67,11 @@ class Statement extends Model.build(
 }
 
 class Repl extends Model.build(
-  dēfault.writing('statements', new List()) // ref immutative
+  dēfault.writing('statements', new List()), // ref immutative
+
+  attribute('pins', class extends attribute.List {
+    default() { return new List(); }
+  })
 ) {
   _initialize() {
     this.createStatement();
