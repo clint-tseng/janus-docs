@@ -1113,6 +1113,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       margin-left: $repl-chrome-outer-width
       overflow-y: auto
 
+      > .janus-list > li
+        border-top: 1px dotted #c4c4c4
+        &:first-child
+          border-top: none
+
     .janus-inspect-panel .panel-title .janus-inspect-pin
       display: none
 
