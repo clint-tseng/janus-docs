@@ -1374,6 +1374,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .varying-delta .separator:before
   @include icon($icon-arrow-right)
 
+.janus-inspect-function.janus-inspect-entity
+  > .entity-content
+    // TODO: will probably cause sizing problems with nested entities later.
+    font-size: 1.2em
+
 
 ////////////////////////////////////////
 // COMPONENT: thinker
