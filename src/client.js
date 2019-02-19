@@ -1,4 +1,4 @@
-window.$ = require('jquery');
+window.$ = require('janus-dollar');
 const { mutators } = require('janus');
 const { baseApp } = require('./base');
 
