@@ -1379,10 +1379,37 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .varying-delta .separator:before
   @include icon($icon-arrow-right)
 
-.janus-inspect-function.janus-inspect-entity
-  > .entity-content
-    // TODO: will probably cause sizing problems with nested entities later.
-    font-size: 1.2em
+.janus-inspect-function
+  &.janus-inspect-entity
+    > .entity-content
+      // TODO: will probably cause sizing problems with nested entities later.
+      font-size: 1.2em
+
+  &.janus-inspect-panel
+    .function-args
+      padding-bottom: 0.6em
+
+      &.inline > ul > li
+        display: inline
+        &:after
+          content: ', '
+        &:last-child:after
+          content: none
+
+      .janus-inspect-applicant
+        font-size: 1.2em
+
+    .function-body
+      $padding-h: 0.8em
+      background-color: #f4f4f4
+      display: block
+      font-family: $font-monospace
+      font-size: 1.2em
+      max-height: 30em
+      min-width: calc(100% - #{$padding-h * 2})
+      overflow-x: auto
+      overflow-y: auto
+      padding: 0.6em $padding-h
 
 
 ////////////////////////////////////////
