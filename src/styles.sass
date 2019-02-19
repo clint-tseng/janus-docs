@@ -1332,6 +1332,13 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   padding-bottom: 0.15em
   .kvPair-valueBlock
     line-height: 1.4em
+  .kvPair-clear
+    cursor: default
+    &:before
+      @include icon($icon-delete)
+      color: #999
+    &:hover:before
+      color: $color-error
 
 .janus-inspect-varying.janus-inspect-panel
   .varying-snapshot
