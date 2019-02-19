@@ -72,8 +72,9 @@ class AppView extends DomView.build($('body').clone(), template(
 
     dom.on('click', '.janus-inspect-pin', (event) => {
       const trigger = $(event.target);
-      const panelView = trigger.closest('.janus-inspect-panel').data('view').subject;
-      const target = panelView.get_('subject');
+      const panelSubject = trigger.closest('.janus-inspect-panel').data('view').subject;
+      // TODO: this is sort of messy ;/
+      const target = panelSubject.isInspector ? panelSubject : panelSubject.get_('subject');
       pins.add(asPanel(target));
       app.showRepl();
     });
