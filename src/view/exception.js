@@ -1,23 +1,11 @@
 const { Model, attribute, bind, List, DomView, template, find, from } = require('janus');
+const { isNumber } = require('janus').util;
 const $ = require('janus-dollar');
-const { give } = require('../util/util');
+const ESP = require('error-stack-parser')
+const { give, blank } = require('../util/util');
 
-const lineRegex = /^ *at ([^ ]+)(?:[^<]+<anonymous>:(\d+):(\d+))?/;
 
-class StackLine extends Model {
-  constructor(line) {
-    const parsed = lineRegex.exec(line);
-    if (parsed == null) return super();
-
-    const [ , context, lineStr, colStr ] = parsed;
-    super({
-      context,
-      line: parseInt(lineStr) - 3, // TODO: why? i'd expect 1 or maybe 2 but not 3.
-      col: parseInt(colStr)
-    });
-  }
-}
-
+class StackLine extends Model {}
 const StackLineView = DomView.build($(`
   <div class="stack-line">at
     <span class="stack-line-context"/>
@@ -26,7 +14,9 @@ const StackLineView = DomView.build($(`
     </a>
   </div>`), template(
 
-  find('.stack-line-context').text(from('context')),
+  find('.stack-line-context')
+    .classed('no-context', from('context').map(blank))
+    .text(from('context').map((x) => x || 'anonymous')),
   find('.stack-line-line').text(from('line')),
   find('.stack-line-col').text(from('col')),
 
@@ -47,8 +37,25 @@ const ExceptionViewModel = Model.build(
 
   bind('message', from('subject').map((error) => error.message)),
   bind('name', from('subject').map((error) => error.name)),
-  bind('stack', from('subject').map((error) =>
-    new List(error.stack.split('\n').slice(1).map((x) => new StackLine(x)))))
+  bind('stack', from('subject').map((error) => {
+    const frames = ESP.parse(error);
+
+    // we have to do some nasty work to extract eval/anon information, since
+    // ESP doesn't generally do it for us. (TODO: IE/Edge?)
+    if ((frames[0].functionName != null) && frames[0].functionName.startsWith('anonymous')) { // firefox
+      frames[0].functionName = frames[0].functionName.replace(/<$/, '');
+      frames[0].navigable = true;
+    } else if (isNumber(error.line) && isNumber(error.column)) { // safari
+      frames.unshift({ functionName: 'anonymous', lineNumber: error.line + 1, columnNumber: error.column, isNative: false, navigable: true });
+    } else {
+      const fromChrome = /\(eval.*<anonymous>:(\d+):(\d+)\)\n/i.exec(error.stack); // yeah it's chrome
+      if (fromChrome != null)
+        frames.unshift({ functionName: 'anonymous', lineNumber: parseInt(fromChrome[1]), columnNumber: parseInt(fromChrome[2]), isNative: false, navigable: true });
+    }
+    frames[0].lineNumber -= 3; // adjust for our injection boilerplate. (TODO: why 3?)
+    return new List(frames.map(({ functionName, lineNumber, columnNumber, isNative, navigable }) =>
+      new StackLine({ context: functionName, line: lineNumber, col: columnNumber, isNative, navigable })));
+  }))
 );
 
 const ExceptionView = DomView.withOptions({ viewModelClass: ExceptionViewModel }).build($(`
