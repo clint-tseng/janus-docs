@@ -1,5 +1,6 @@
 const { Model, attribute, bind, List, DomView, template, find, from } = require('janus');
 const { isNumber } = require('janus').util;
+const { filter } = require('janus-stdlib').varying;
 const $ = require('janus-dollar');
 const ESP = require('error-stack-parser')
 const { give, blank } = require('../util/util');
@@ -34,6 +35,7 @@ const StackLineView = DomView.build($(`
 
 const ExceptionViewModel = Model.build(
   attribute('expanded', attribute.Boolean),
+  bind('has_expanded', from('expanded').pipe(filter((x) => x === true))),
 
   bind('message', from('subject').map((error) => error.message)),
   bind('name', from('subject').map((error) => error.name)),
@@ -74,10 +76,8 @@ const ExceptionView = DomView.withOptions({ viewModelClass: ExceptionViewModel }
     find('.exception-stack').render(from('stack')),
 
     find('.exception-expando').render(from.attribute('expanded'))
-      .context('edit')
-      .criteria({ attributes: { style: 'button' } })
+      .criteria({ context: 'edit', style: 'button' })
       .options({ stringify: give('') })
-      .on('click', (_, subject) => { subject.set('has_expanded', true); })
   ));
 
 
