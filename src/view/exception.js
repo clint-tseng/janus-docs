@@ -22,9 +22,11 @@ const StackLineView = DomView.build($(`
   find('.stack-line-col').text(from('col')),
 
   find('.stack-line-location')
+    .classed('navigable', from('navigable'))
     .classed('hide', from('line').map(Number.isNaN))
     .on('click', (event, subject) => {
       event.preventDefault();
+      if (subject.get_('navigable') !== true) return;
       $(event.target).trigger('code-navigate', {
         line: subject.get_('line'),
         col: subject.get_('col')

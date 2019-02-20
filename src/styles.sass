@@ -894,11 +894,9 @@ footer
         display: none
 
     .exception
-      position: relative
-
+      padding: 0
       .exception-expando
         bottom: 0
-        position: absolute
         right: 0
 
     h1
@@ -934,7 +932,6 @@ footer
 
     .sample-error
       max-height: 9em
-
       .exception
         background-color: $color-error
 
@@ -979,6 +976,10 @@ footer
   animation-duration: 1s
   animation-timing-function: $ease-extreme-out
   animation-iteration-count: 1
+  background-color: $color-error
+  color: #fff
+  padding: 1em
+  position: relative
 
   .exception-message
     font-family: $font-monospace
@@ -990,25 +991,34 @@ footer
 
     a
       color: #fff
+      cursor: text
+      text-decoration: none
+      &.navigable
+        cursor: pointer
+        text-decoration: underline
 
+  .exception-expando
+    bottom: 1em
+    position: absolute
+    right: 1em
 
-  .exception-expando button
-    @include no-appearance
-    padding: 0.2em
+    button
+      @include no-appearance
+      padding: 0.2em
 
-    &:before
-      $size: 7px
-      @include reify
-      border-right: 2px solid #fff
-      border-bottom: 2px solid #fff
-      cursor: pointer
-      height: $size
-      transform: rotate(45deg)
-      transition: 1s transform $ease-extreme-out
-      width: $size
+      &:before
+        $size: 7px
+        @include reify
+        border-right: 2px solid #fff
+        border-bottom: 2px solid #fff
+        cursor: pointer
+        height: $size
+        transform: rotate(45deg)
+        transition: 1s transform $ease-extreme-out
+        width: $size
 
-    &.checked:before
-      transform: rotate(-135deg)
+      &.checked:before
+        transform: rotate(-135deg)
 
   &.exception-name-SyntaxError
     .exception-stack, .exception-expando
@@ -1022,6 +1032,10 @@ footer
 
     .exception-stack li ~ li
       display: block
+
+.stack-line
+  .stack-line-context.no-context
+    opacity: 0.3
 
 .view
   .view-error.has-error
