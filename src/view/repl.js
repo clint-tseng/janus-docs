@@ -32,7 +32,7 @@ const StatementView = DomView.build($(`
     .classed('no-status', from('has_code').map(not)),
 
   find('.repl-statement-result').render(from('active')
-    .and('result').map((result) => result.mapSuccess(inspectWithSwitch))
+    .and('result').map((result) => result.mapSuccess(inspectWithSwitch).get())
     .all.map((active, result) => active ? result : null)),
 
   find('.repl-statement-code').render(from.attribute('code'))
