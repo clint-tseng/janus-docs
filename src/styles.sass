@@ -1448,6 +1448,33 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   .janus-inspect-kvPair
     font-size: 1.2rem
 
+.janus-inspect-domview.janus-inspect-panel
+  .domview-mutations > ul > li
+    padding-bottom: 0.8em
+    &:last-child
+      padding-bottom: 0
+
+  .mutation-selector
+    color: $color-accent2
+    font-family: $font-monospace
+    font-size: 1.2rem
+
+  .mutation-type
+    font-size: 1.2rem
+    padding-left: 0.5em
+  .mutation-operation
+    font-weight: bold
+  .mutation-param.has-param
+    &:before
+      content: '('
+      font-weight: bold
+    &:after
+      content: ')'
+      font-weight: bold
+
+  .mutation-binding
+    font-size: 1.1rem
+
 
 ////////////////////////////////////////
 // COMPONENT: thinker
