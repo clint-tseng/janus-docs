@@ -23,24 +23,24 @@ const StatementView = DomView.build($(`
 `), template(
   find('.repl-statement').classed('named', from('named')),
   find('.repl-statement-name').render(from.attribute('name'))
-    .context('edit')
-    .options(from('seqId').map((seqId) => ({ placeholder: `line ${seqId + 1}` }))),
+    .context('edit'),
 
   find('.repl-statement-status')
     .classGroup('status-', from('result').map(match(
       success(give('success')), fail(give('error')))))
     .classed('no-status', from('has_code').map(not)),
 
-  find('.repl-statement-result').render(from('active')
-    .and('result').map((result) => result.mapSuccess(inspectWithSwitch).get())
-    .all.map((active, result) => active ? result : null)),
+  find('.repl-statement-result').render(from('result')
+    .map((result) => (result == null) ? null : result.mapSuccess(inspectWithSwitch).get())),
 
   find('.repl-statement-code').render(from.attribute('code'))
     .criteria({ context: 'edit', style: 'code' })
     .options(from.self().map((view) => ({
       onCommit: () => {
+        const hadResultAlready = (view.subject.get_('result') != null);
         if (view.subject.commit() === true) {
-          if (typeof view.options.onCommit === 'function') view.options.onCommit();
+          if (!hadResultAlready && (typeof view.options.onCommit === 'function'))
+            view.options.onCommit();
           return true;
         }
         return false;
