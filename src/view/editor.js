@@ -61,6 +61,7 @@ class EditorView extends DomView {
   }
 
   focus() {
+    this._cm.refresh();
     this._cm.focus();
   };
 }
