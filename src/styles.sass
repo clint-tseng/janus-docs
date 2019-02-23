@@ -1109,6 +1109,13 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     right: 0
     top: 0
 
+    > .janus-list
+      counter-reset: line-number
+      > li
+        counter-increment: line-number
+        .repl-statement-placeholder:after
+          content: counter(line-number)
+
   .repl-statement
     border-bottom: 1px dotted #ddd
     overflow: hidden
@@ -1167,32 +1174,44 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     left: 0.8rem + $repl-left-gutter
   position: relative
 
+  .repl-statement-placeholder
+    // TODO: sort of a mess but i just want this to work.
+    color: $placeholder-color
+    font-family: $font-monospace
+    font-size: 1.1em
+    left: 0
+    padding: 0.5em 0
+    pointer-events: none
+    position: absolute
+    text-align: right
+    width: calc(#{$repl-left-gutter} - 2.5em)
+    &:after
+      padding-left: 0.3em
+
   .repl-statement-name
-    float: left
     font-family: $font-monospace
     font-size: 1.4em
-    margin-left: -1 * $repl-left-gutter
+    left: 0
     padding-top: 0.15em
+    position: absolute
     width: $repl-left-gutter
 
     input
       @include no-appearance
+      color: $color-text
       font-family: $font-monospace
       margin-right: 0.4em
       text-align: right
-      width: calc(100% - 3em)
-      &::placeholder
-        color: $placeholder-color
+      width: calc(100% - 2.5em)
 
     &:after
       color: $placeholder-color
       content: '>'
 
-  &.named .repl-statement-name
-    input
-      color: $color-text
-
-    &:after
+  &.named
+    .repl-statement-placeholder
+      display: none
+    .repl-statement-name:after
       color: $color-text
       content: '='
 

@@ -15,6 +15,7 @@ const inspectWithSwitch = (x) => withPanelSwitch(inspect(x))
 
 const StatementView = DomView.build($(`
   <div class="repl-statement">
+    <div class="repl-statement-placeholder">line</div>
     <div class="repl-statement-name"/>
     <div class="repl-statement-code"/>
     <div class="repl-statement-status"/>
@@ -22,8 +23,7 @@ const StatementView = DomView.build($(`
   </div>
 `), template(
   find('.repl-statement').classed('named', from('named')),
-  find('.repl-statement-name').render(from.attribute('name'))
-    .context('edit'),
+  find('.repl-statement-name').render(from.attribute('name')).context('edit'),
 
   find('.repl-statement-status')
     .classGroup('status-', from('result').map(match(
