@@ -1486,6 +1486,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       .janus-inspect-applicant
         font-size: 1.2rem
 
+        .applicant-name
+          color: $color-accent2
+
     .function-body
       $padding-h: 0.8em
       background-color: #f4f4f4
@@ -1512,6 +1515,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     color: $color-accent2
     font-family: $font-monospace
     font-size: 1.2rem
+    &.repeated
+      display: none
 
   .mutation-type
     font-size: 1.2rem
