@@ -47,11 +47,12 @@ $icon-delete: '\e901'
 $icon-close: '\e902'
 $icon-close-small: '\e90c'
 $icon-close-circle: '\e903'
+$icon-console-add: '\e90d'
 $icon-pencil: '\e904'
 $icon-replay-all: '\e905'
 $icon-pin: '\e906'
 $icon-play: '\e907'
-$icon-back-arrow: '\e908'
+$icon-revert: '\e908'
 $icon-window: '\e909'
 
 $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
@@ -112,8 +113,8 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
 @font-face
   font-family: 'icons';
-  src: url('/assets/icons.eot?b')
-  src: url('/assets/icons.eot?b#iefix') format('embedded-opentype'), url('/assets/icons.ttf?b') format('truetype'), url('/assets/icons.woff?b') format('woff'), url('/assets/icons.svg?b#icomoon') format('svg')
+  src: url('/assets/icons.eot?c')
+  src: url('/assets/icons.eot?c#iefix') format('embedded-opentype'), url('/assets/icons.ttf?c') format('truetype'), url('/assets/icons.woff?c') format('woff'), url('/assets/icons.svg?c#icomoon') format('svg')
   font-weight: normal
   font-style: normal
 
@@ -902,7 +903,41 @@ footer
     h1
       font-size: 1.8em
 
+  .sample-toolbar
+    clear: left
+    display: none
+    float: left
+    padding: 0.6em
+
+    button
+      @include no-appearance
+      color: #666
+      margin-right: 1.2em
+      transition: color 0.3s
+      &:hover
+        color: $color-accent
+        transition: none
+      &:before
+        font-size: 1.4em
+      &.disabled
+        color: #d4d4d4
+        &:hover
+          color: #d4d4d4
+
+    .sample-revert:before
+      @include icon($icon-revert)
+    .sample-transfer:before
+      @include icon($icon-console-add)
+
+  &.activated .sample-toolbar
+    animation-duration: 1s
+    animation-name: 'expand-margin'
+    animation-timing-function: $ease-extreme-out
+    animation-iteration-count: 1
+    display: block
+
   &.noexec .sample-result,
+  &.noexec.activated .sample-toolbar,
   &.custom-view.error .sample-result
     display: none
 

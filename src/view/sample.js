@@ -2,12 +2,16 @@ const { List, DomView, template, find, from } = require('janus');
 const { Sample } = require('../model/sample');
 const $ = require('janus-dollar');
 const { filter } = require('janus-stdlib').varying;
-const { exists } = require('../util/util');
+const { exists, blank, equals } = require('../util/util');
 const { success, fail } = require('../util/eval');
 
 class SampleView extends DomView.build($(`
   <div class="sample">
     <div class="sample-code"></div>
+    <div class="sample-toolbar">
+      <button class="sample-revert" title="Revert to Original"/>
+      <button class="sample-transfer" title="Copy to Console"/>
+    </div>
     <div class="sample-result"></div>
     <div class="sample-error"></div>
     <style class="sample-styles"></style>
@@ -24,6 +28,25 @@ class SampleView extends DomView.build($(`
   find('.sample-result').render(from('result.final').pipe(filter(success.match))
     .and('env.view').all.map((result, customView) => customView || result)),
 
+  find('.sample-revert')
+    .classed('disabled', from('main').and('initial').all.map(equals))
+    .on('click', (e, subject) => { subject.set('main', subject.get_('initial')); }),
+
+  find('.sample-transfer')
+    .classed('disabled', from('result.final').map(fail.match))
+    .on('click', (e, subject, view) => {
+      if ($(e.target).hasClass('disabled')) return;
+      const app = view.options.app;
+      const repl = app.get_('repl.obj');
+      const last = repl.get_('statements').get_(-1);
+      const target = blank(last.get_('code')) ? last : repl.createStatement();
+      const code = subject.get_('main').replace(/(?:\n|^)(?:\s*)return ([^\n]+)(?:$|\n)/, '$1');
+
+      app.set('repl.active', true);
+      target.set('code', code);
+      target.commit();
+    }),
+
   find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
   find('.sample-styles').text(from('styles'))
 )) {
@@ -33,6 +56,8 @@ class SampleView extends DomView.build($(`
     dom.on('code-navigate', (_, { line, col }) => {
       dom.find('.code-editor').data('view').setCursor(line, col);
     });
+
+    dom.on('code-focus', _ => { dom.addClass('activated'); });
   }
 }
 

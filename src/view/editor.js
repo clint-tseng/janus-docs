@@ -53,6 +53,8 @@ class EditorView extends DomView {
       this.subject.setValue(cm.getValue());
       this._lock = false;
     });
+
+    this._cm.on('focus', _ => { this.artifact().trigger('code-focus'); });
   }
 
   setCursor(line, col) {

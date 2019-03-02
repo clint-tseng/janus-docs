@@ -34,7 +34,7 @@ const htmlView = (html) => {
 ////////////////////////////////////////////////////////////////////////////////
 // SAMPLE MODEL,
 // which handles the actual inteprertation of sample code.
-const Sample = Model.build(
+class Sample extends Model.build(
   attribute('main', attribute.Text),
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,11 @@ const Sample = Model.build(
       (inspectWith === 'entity') ? result.mapSuccess(inspect) :
       (inspectWith === 'panel') ? result.flatMap((x) => success(inspect.panel(x))) :
       result))
-);
+) {
+  _initialize() {
+    this.set('initial', this.get_('main'));
+  }
+};
 
 const Samples = List.of(Sample);
 
