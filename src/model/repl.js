@@ -118,7 +118,9 @@ class Statement extends Model.build(
     // build an environment, and compile and run our final code:
     const env = new Env(context);
     const compiled = compile(env, `return ${this.get_('code')};`);
-    this.set('result', compiled.flatMap((f) => f()));
+
+    try { this.set('result', compiled.flatMap((f) => f())); }
+    catch(ex) { this.set('result', fail(ex)); }
   }
 }
 
