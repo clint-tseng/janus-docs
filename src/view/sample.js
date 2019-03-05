@@ -42,10 +42,10 @@ class SampleView extends DomView.build($(`
       const target = blank(last.get_('code')) ? last : repl.createStatement();
       const code = subject.get_('main').replace(/(?:\n|^)(?:\s*)return ([^\n]+)(?:$|\n)/, '$1');
 
-      app.set('repl.active', true);
       target.set('code', code);
       target.commit();
       repl.createStatement();
+      app.set('repl.active', true);
     }),
 
   find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
