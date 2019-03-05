@@ -45,6 +45,7 @@ class SampleView extends DomView.build($(`
       app.set('repl.active', true);
       target.set('code', code);
       target.commit();
+      repl.createStatement();
     }),
 
   find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
