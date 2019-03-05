@@ -10,6 +10,7 @@ const { think } = require('./view/thinker');
 window.init = (tocData, apiData, articleData) => {
   const path = window.location.pathname;
   const app = baseApp(path, apiData);
+  window.app = app;
 
   app.set('toc', Tocs.deserialize(tocData));
   app.cacheArticle(path, Article.deserialize(articleData));
