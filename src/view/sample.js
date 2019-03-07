@@ -37,15 +37,9 @@ class SampleView extends DomView.build($(`
     .on('click', (e, subject, view) => {
       if ($(e.target).hasClass('disabled')) return;
       const app = view.options.app;
-      const repl = app.get_('repl.obj');
-      const last = repl.get_('statements').get_(-1);
-      const target = blank(last.get_('code')) ? last : repl.createStatement();
-      const code = subject.get_('main').replace(/(?:\n|^)(?:\s*)return ([^\n]+)(?:$|\n)/, '$1');
-
-      target.set('code', code);
-      target.commit();
-      repl.createStatement();
-      app.set('repl.active', true);
+      app.set('repl.active', true); // we do this first to resolve initial display redraw
+      app.get_('repl.obj').transfer(subject.get_('main'));
+      $('#repl .repl').data('view').focusLast(); // TODO: cleaner access/copy+pasta
     }),
 
   find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
