@@ -18,7 +18,6 @@ const StatementView = DomView.build($(`
     <div class="repl-statement-placeholder">line</div>
     <div class="repl-statement-name"/>
     <div class="repl-statement-code"/>
-    <div class="repl-statement-status"/>
     <div class="repl-statement-result"/>
   </div>
 `), template(
