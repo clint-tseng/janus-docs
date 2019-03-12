@@ -19,7 +19,7 @@ const ValuatorLineView = DomView.build($(`
 ));
 
 
-const ValuatorView = DomView.build($(`
+class ValuatorView extends DomView.build($(`
   <div class="valuator"/>`), template(
 
   find('.valuator')
@@ -38,7 +38,14 @@ const ValuatorView = DomView.build($(`
       const lastEditorView = view.artifact().find('li:last-child .code-editor').data('view');
       lastEditorView.focus();
     })
-));
+)) {
+  _wireEvents() {
+    // TODO: same copypasta+hack as above only actually it's worse.
+    window.setTimeout(() => {
+      this.artifact().find('.code-editor').data('view').focus();
+    });
+  }
+}
 
 
 module.exports = {
