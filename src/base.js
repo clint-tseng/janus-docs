@@ -22,6 +22,7 @@ const baseViews = () => {
   require('./view/sample').registerWith(views);
   require('./view/sheet').registerWith(views);
   require('./view/toc').registerWith(views);
+  require('./view/valuator').registerWith(views);
   require('./view/view').registerWith(views);
 
   if (typeof window !== 'undefined') {

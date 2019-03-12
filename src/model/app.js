@@ -4,6 +4,7 @@ const { Article } = require('./article');
 const { Flyout } = require('./flyout');
 const { Sheet } = require('./sheet');
 const { Repl } = require('./repl');
+const { Valuator } = require('./valuator');
 
 
 class GlobalList extends attribute.List.withDefault() {
@@ -19,6 +20,7 @@ class DocsApp extends App.build(
 
   dēfault.writing('cache.articles', []),
   dēfault.writing('repl.obj', new Repl()),
+  dēfault.writing('eval.env', {}),
 
   bind('repl.activated', from('repl.active').pipe(filter((x) => x === true)))
 ) {
@@ -60,6 +62,17 @@ class DocsApp extends App.build(
     const sheet = new Sheet({ title, target });
     this.get_('sheets').add(sheet);
     return sheet;
+  }
+
+  popValuator(title, callback) {
+    const valuator = new Valuator({ env: this.get_('eval.env') });
+    const sheet = this.sheet(title, valuator);
+    valuator.destroyWith(sheet);
+    valuator.get('result').react(false, (result) => { // no point in reactTo
+      callback(result);
+      sheet.destroy();
+    });
+    return valuator;
   }
 
   showRepl() { this.set('repl.active', true); }

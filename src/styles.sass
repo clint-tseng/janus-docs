@@ -1218,6 +1218,12 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   li:last-child .repl-statement
     border-bottom: none
 
+.repl-statement
+  $placeholder-color: #888
+  padding: 0.8em 1.3em
+    left: 0.8rem + $repl-left-gutter
+  position: relative
+
   .CodeMirror
     background: transparent
     font-family: $font-monospace
@@ -1226,12 +1232,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
     .CodeMirror-scroll
       height: auto
-
-.repl-statement
-  $placeholder-color: #888
-  padding: 0.8em 1.3em
-    left: 0.8rem + $repl-left-gutter
-  position: relative
 
   .repl-statement-placeholder
     // TODO: sort of a mess but i just want this to work.
@@ -1339,6 +1339,54 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     top: auto
   &.expanded:after
     display: none
+
+.valuator
+  box-shadow: 12em 0 #eee inset
+  max-height: 80vh
+  overflow-y: auto
+
+  .repl-statement-placeholder
+    display: none
+
+  .valuator-line
+    border-bottom: 1px dotted #ddd
+    position: relative
+
+    .valuator-statement
+      margin-right: 2em
+
+    .code-editor
+      min-height: 2.5em // TODO: not sure why this is necessary.
+
+  li:last-child .valuator-line
+    border-bottom: none
+
+  .valuator-accept
+    @include no-appearance
+    @include fill
+    background: #eee
+    border-left: 1px dotted #ddd
+    left: auto
+    width: 2em
+
+    &:before
+      @include icon($icon-chevron-right)
+      bottom: 0.3em
+      color: $color-accent2
+      font-size: 1.5em
+      left: 0.2em
+      position: absolute
+    &.disabled:before
+      color: #ccc
+
+    &:hover
+      background: #f7f7f7
+      &:before
+        color: $color-accent2
+    &.disabled:hover
+      background: #eee
+      &:before
+        color: $color-accent
 
 
 ////////////////////////////////////////
