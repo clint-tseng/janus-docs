@@ -65,7 +65,11 @@ class AppView extends DomView.build($('body').clone(), template(
     dom.on('mouseenter', '.entity-title', (event) => {
       const trigger = $(event.target);
       const timer = setTimeout(_ => {
-        const target = trigger.closest('.janus-inspect-entity').data('view').subject;
+        // need to delve in if the entity is backed by a ViewModel.
+        // TODO: something more elegant.
+        const entityView = trigger.closest('.janus-inspect-entity').data('view');
+        const target = (entityView.constructor.viewModelClass != null)
+          ? entityView.subject.get_('subject') : entityView.subject;
         app.flyout(trigger, target, 'panel');
       }, 300);
       trigger.one('mouseleave', _ => { clearTimeout(timer); });
