@@ -8,7 +8,7 @@ const { compile, success, fail, inert, Env } = require('../util/eval');
 const { blank, nonblank } = require('../util/util');
 const { inspect } = require('../util/inspect');
 
-const baseEnv = Object.assign({ $, stdlib, inspect }, janus);
+const rootEnv = Object.assign({ $, stdlib, inspect }, janus);
 
 
 // one case we don't (yet?) account for is sequence expressions mixing assignment
@@ -59,7 +59,7 @@ class Statement extends Model.build(
     try {
       tree = parse(code, { ranges: 'index' });
     } catch(ex) {
-      //this.set('result', fail(ex));
+      //this.set('result', fail(ex)); // TODO: give the option of showing this
       return false; // if we don't compile, bail and allow newline.
     }
 
@@ -85,8 +85,9 @@ class Statement extends Model.build(
       // this one, and assign the name/code bindings appropriately as we do so.
       for (const [ left, right ] of atomized) {
         const name = (left == null) ? null : code.substring(left.start, left.end);
+        const env = { base: this.get_('env.base') };
         additional.push(new Statement({
-          statements, name, code: code.substring(right.start, right.end)
+          statements, name, env, code: code.substring(right.start, right.end)
         }));
       }
       statements.add(additional, statements.list.indexOf(this) + 1);
@@ -104,7 +105,7 @@ class Statement extends Model.build(
 
   run() {
     // build a context of previous statement bindings.
-    const context = Object.assign({}, baseEnv);
+    const context = Object.assign({}, this.get_('env.base'));
     for (const statement of this.get_('statements')) {
       if (statement === this) break;
 
@@ -117,27 +118,28 @@ class Statement extends Model.build(
 
     // build an environment, and compile and run our final code:
     const env = new Env(context);
-    const compiled = compile(env, `return ${this.get_('code')};`);
+    this.set('env.final', env); // save this for other purposes.
 
+    const compiled = compile(env, `return ${this.get_('code')};`);
     try { this.set('result', compiled.flatMap((f) => f())); }
     catch(ex) { this.set('result', fail(ex)); }
   }
 }
 
 class Repl extends Model.build(
-  dēfault.writing('statements', new List()), // ref immutative
+  attribute('statements', attribute.List.withDefault()), // ref immutative
+  dēfault.writing('env.inject', {}),
 
-  attribute('pins', class extends attribute.List {
-    default() { return new List(); }
-  })
+  attribute('pins', attribute.List.withDefault())
 ) {
   _initialize() {
+    this.set('env.base', new Env(rootEnv, this.get_('env.inject')));
     this.createStatement();
   }
 
   createStatement() {
     const statements = this.get_('statements');
-    const statement = new Statement({ statements });
+    const statement = new Statement({ statements, env: { base: this.get_('env.base') } });
     statements.add(statement);
     return statement;
   }

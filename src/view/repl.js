@@ -29,16 +29,18 @@ const StatementView = DomView.build($(`
       success(give('success')), fail(give('error')))))
     .classed('no-status', from('has_code').map(not)),
 
-  find('.repl-statement-result').render(from('result')
-    .map((result) => (result == null) ? null : result.mapSuccess(inspectWithSwitch).get())),
+  find('.repl-statement-result')
+    .render(from('result').map((result) =>
+      (result == null) ? null : result.mapSuccess(inspectWithSwitch).get()))
+      .options(from.app().and('env.final').all.map((app, env) =>
+        ({ app: app.with({ eval: { env } }) }))),
 
   find('.repl-statement-code').render(from.attribute('code'))
     .criteria({ context: 'edit', style: 'code' })
     .options(from.self().map((view) => ({
       onCommit: () => {
-        const hadResultAlready = (view.subject.get_('result') != null);
         if (view.subject.commit() === true) {
-          if (!hadResultAlready && (typeof view.options.onCommit === 'function'))
+          if (typeof view.options.onCommit === 'function')
             view.options.onCommit();
           return true;
         }
@@ -126,6 +128,7 @@ class ReplView extends DomView.build($(`
     lastEditorView.focus();
   }
 }
+
 
 module.exports = {
   ReplView,
