@@ -2,7 +2,13 @@ const { App, Varying, attribute, bind, dēfault, types, from, Request, Resolver,
 const { filter } = require('janus-stdlib').varying
 const { Article } = require('./article');
 const { Flyout } = require('./flyout');
+const { Sheet } = require('./sheet');
 const { Repl } = require('./repl');
+
+
+class GlobalList extends attribute.List.withDefault() {
+  get shadow() { return false; }
+}
 
 class DocsApp extends App.build(
   attribute('article', attribute.Reference.to(
@@ -11,6 +17,7 @@ class DocsApp extends App.build(
   attribute('flyouts', class extends attribute.List {
     default() { return new List(); }
   }),
+  attribute('sheets', GlobalList),
 
   dēfault.writing('cache.articles', []),
   dēfault.writing('repl.obj', new Repl()),
@@ -49,6 +56,12 @@ class DocsApp extends App.build(
         return;
 
     flyouts.add(new Flyout({ trigger, target, context }));
+  }
+
+  sheet(title, target) {
+    const sheet = new Sheet({ title, target });
+    this.get_('sheets').add(sheet);
+    return sheet;
   }
 
   showRepl() { this.set('repl.active', true); }

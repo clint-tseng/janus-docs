@@ -38,6 +38,7 @@ $z-toc-toplevel-entry: 3
 $z-header-base: 100
 $z-header: 101
 $z-repl: 150
+$z-sheets: 199
 $z-flyout: 200
 
 $icon-add-circle: '\e90e'
@@ -58,6 +59,8 @@ $icon-revert: '\e908'
 $icon-swap: '\e911'
 $icon-window: '\e909'
 $icon-window-up: '\e90f'
+
+$subtle-shadow: 0 0.3em 0.5em rgba(0, 0, 0, 0.12)
 
 $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
@@ -534,6 +537,23 @@ header
 #flyouts .flyout
   position: absolute
   z-index: $z-flyout
+
+#sheets
+  bottom: 0
+  left: 0
+  padding: 2em
+  position: fixed
+  max-width: 75vw
+  z-index: $z-sheets
+
+  .sheet
+    animation-duration: 0.2s
+    animation-name: 'up-motion'
+    animation-timing-function: $ease-extreme-out
+    animation-iteration-count: 1
+    float: left
+    margin: 2em
+    width: 42rem
 
 footer
   display: none // for now
@@ -1320,8 +1340,37 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   &.expanded:after
     display: none
 
+
+////////////////////////////////////////
+// COMPONENTS: misc
+
 .flyout
-  box-shadow: 0 0.3em 0.5em rgba(0, 0, 0, 0.12)
+  box-shadow: $subtle-shadow
+
+// we end up redoing the panel styles a little here, but we don't want to actually
+// inherit all of panel's particular quirks so we sort of have to.
+.sheet
+  background-color: #f7f7f7
+  box-shadow: $subtle-shadow
+  position: relative
+
+  .sheet-header
+    background-color: $color-accent
+    color: #fff
+    font-size: 1.3em
+    font-weight: bold
+    padding: 0.5em
+
+    .sheet-close
+      @include no-appearance
+      color: #fff
+      position: absolute
+      right: 0.8em
+      top: 0.8em
+
+      &:before
+        @include icon($icon-close)
+
 
 ////////////////////////////////////////
 // COMPONENTS: inspect
@@ -1658,4 +1707,10 @@ $thinker-effect-height: 60em
     transform: translateX(-60px)
   to
     transform: translateX(0)
+
+@keyframes up-motion
+  from
+    transform: translateY(20px)
+  to
+    transform: translateY(0)
 

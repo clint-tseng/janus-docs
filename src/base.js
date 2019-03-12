@@ -20,6 +20,7 @@ const baseViews = () => {
   require('./view/flyout').registerWith(views);
   require('./view/repl').registerWith(views);
   require('./view/sample').registerWith(views);
+  require('./view/sheet').registerWith(views);
   require('./view/toc').registerWith(views);
   require('./view/view').registerWith(views);
 

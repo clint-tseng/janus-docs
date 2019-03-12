@@ -14,7 +14,8 @@ class AppView extends DomView.build($('body').clone(), template(
     .classed('active', from('repl.active'))
     .classed('activated', from('repl.activated')),
 
-  find('#flyouts').render(from('flyouts'))
+  find('#flyouts').render(from('flyouts')),
+  find('#sheets').render(from('sheets'))
 )) {
   dom() { return $('body'); }
 
