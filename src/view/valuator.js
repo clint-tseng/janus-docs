@@ -26,10 +26,17 @@ class ValuatorView extends DomView.build($(`
     .render(from('repl').get('statements'))
       .options({ renderItem: (r) => r.context('valuator') })
 
-    .on('click', '.valuator-accept', (event, subject) => {
-      const statement = $(event.target).closest('.valuator-line').data('view').subject;
+    .on('click', '.valuator-accept', (event, subject, view) => {
+      const button = $(event.target);
+      const statement = button.closest('.valuator-line').data('view').subject;
       const result = statement.get_('result');
-      if (success.match(result)) subject.set('result', result.get());
+      if (success.match(result)) {
+        try {
+          subject.set('result', result.get());
+        } catch (ex) {
+          view.options.app.flyout(button, ex);
+        }
+      }
     })
 
     .on('commit', 'li:last-child .valuator-line', (e, subject, view) => {
