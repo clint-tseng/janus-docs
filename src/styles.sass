@@ -552,7 +552,7 @@ header
     animation-timing-function: $ease-extreme-out
     animation-iteration-count: 1
     float: left
-    margin: 2em
+    margin: 1em
     width: 42rem
 
 footer
@@ -1364,15 +1364,18 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   .valuator-accept
     @include no-appearance
     @include fill
-    background: #eee
+    background: #3dafaf
     border-left: 1px dotted #ddd
     left: auto
     width: 2em
 
+    &.disabled
+      background: transparent
+
     &:before
       @include icon($icon-chevron-right)
       bottom: 0.3em
-      color: $color-accent2
+      color: #fff
       font-size: 1.5em
       left: 0.2em
       position: absolute
@@ -1380,13 +1383,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       color: #ccc
 
     &:hover
-      background: #f7f7f7
-      &:before
-        color: $color-accent2
+      background: $color-accent2
     &.disabled:hover
-      background: #eee
-      &:before
-        color: $color-accent
+      background: transparent
 
 
 ////////////////////////////////////////
