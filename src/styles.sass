@@ -1486,6 +1486,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   padding-bottom: 0.15em
   .kvPair-valueBlock
     line-height: 1.4em
+    margin-right: 1em // make room for the list + button
   .kvPair-clear
     cursor: default
     &:before
@@ -1590,6 +1591,48 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .janus-inspect-model.janus-inspect-panel
   .janus-inspect-kvPair
     font-size: 1.2rem
+
+.janus-inspect-list.janus-inspect-panel
+  .list-entry
+    padding-bottom: 0.2em
+
+    hr
+      border: none
+        top: 1px dotted #999
+      left: 0
+      margin-top: -0.3em
+      position: absolute
+      right: 3em
+
+  .list-insert
+    @include no-appearance
+    color: #666
+    margin-top: -0.8rem
+    opacity: 0
+    position: absolute
+    right: 1em
+    transition: 0.4s opacity
+    &:before
+      @include icon($icon-add)
+    &:after
+      @include reify
+      border-top: 1px soild #eee
+      position: absolute
+      right: 0
+      width: 100%
+    &:hover, &.valuating
+      color: $color-accent2
+      opacity: 1
+      + hr
+        display: block
+
+  .list-list
+    cursor: default
+
+    > ul > li:hover
+      .list-insert, + li .list-insert
+        opacity: 1
+        transition-duration: 0
 
 .janus-inspect-domview.janus-inspect-panel
   .domview-mutations > ul > li
