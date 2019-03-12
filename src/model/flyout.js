@@ -2,9 +2,7 @@ const { Model, attribute, bind, from, List } = require('janus');
 const { sticky, fromEvents } = require('janus-stdlib').varying;
 
 class Flyout extends Model.build(
-  attribute('children', class extends attribute.List {
-    default() { return new List(); }
-  }),
+  attribute('children', attribute.List.withDefault()),
 
   bind('hover.trigger', from('trigger').flatMap((trigger) =>
     fromEvents(trigger, true, { mouseenter: true, mouseleave: false }))),

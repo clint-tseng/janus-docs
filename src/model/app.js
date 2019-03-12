@@ -14,9 +14,7 @@ class DocsApp extends App.build(
   attribute('article', attribute.Reference.to(
     from('path').map((path) => new ArticleRequest(path)))
   ),
-  attribute('flyouts', class extends attribute.List {
-    default() { return new List(); }
-  }),
+  attribute('flyouts', GlobalList),
   attribute('sheets', GlobalList),
 
   dēfault.writing('cache.articles', []),
@@ -51,7 +49,7 @@ class DocsApp extends App.build(
   flyout(trigger, target, context = 'default') {
     const triggerNode = trigger[0];
     const flyouts = this.get_('flyouts');
-    for (const flyout of flyouts)
+    for (const flyout of flyouts) // don't retrigger the same flyout twice.
       if (flyout.get_('trigger')[0] === triggerNode)
         return;
 
