@@ -548,7 +548,7 @@ header
   z-index: $z-sheets
 
   .sheet
-    animation-duration: 0.2s
+    animation-duration: 0.5s
     animation-name: 'up-motion'
     animation-timing-function: $ease-extreme-out
     animation-iteration-count: 1
@@ -1503,6 +1503,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     line-height: 1.4em
     margin-right: 1em // make room for the list + button
   .kvPair-clear
+    @include no-appearance
     cursor: default
     opacity: 0
     transition: 0.4s opacity
@@ -1511,6 +1512,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       color: #aaa
     &:hover:before
       color: $color-error
+  &.primitive .janus-literal
+    cursor: text
   &:hover .kvPair-clear
     opacity: 1
     transition-duration: 0
@@ -1842,7 +1845,7 @@ $thinker-effect-height: 60em
 
 @keyframes up-motion
   from
-    transform: translateY(20px)
+    transform: translateY(12px)
   to
     transform: translateY(0)
 
