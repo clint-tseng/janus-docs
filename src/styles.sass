@@ -1661,6 +1661,20 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   li:nth-child(10n+1) .kvPair-key
     color: #666
 
+  .list-more
+    margin: 0.3em 0 0.8em
+
+  .list-last-item
+    cursor: default
+
+.janus-inspect-list
+  .list-more
+    @include no-appearance
+    border-bottom: 1px dotted #777
+    display: none
+    &.has-more
+      display: inline
+
 .janus-inspect-domview.janus-inspect-panel
   .domview-mutations > ul > li
     padding-bottom: 0.8em
