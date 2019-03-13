@@ -40,6 +40,7 @@ $z-header: 101
 $z-repl: 150
 $z-sheets: 199
 $z-flyout: 200
+$z-tooltip: 500
 
 $icon-add-circle: '\e90e'
 $icon-add: '\e910'
@@ -562,7 +563,9 @@ header
   font-size: 1.2em
   margin: 0.6em 0
   padding: 0.3em 0.5em 0.4em
+  pointer-events: none
   position: absolute
+  z-index: $z-tooltip
   &.disabled
     border-top-color: #999
     color: #aaa
