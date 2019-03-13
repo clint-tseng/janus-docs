@@ -1,6 +1,7 @@
 const { DomView, template, find, from } = require('janus');
 const { filter } = require('janus-stdlib').varying;
 const { exists } = require('../util/util');
+const { positionFlyout } = require('../util/dom');
 const { App } = require('../model/app');
 const { asPanel } = require('./context');
 const $ = require('janus-dollar');
@@ -51,7 +52,7 @@ class AppView extends DomView.build($('body').clone(), template(
       app.set('path', location.pathname);
     });
 
-    // highlight code samples:
+    // select paragraph-inline code on click:
 
     dom.on('click', 'code', (event) => {
       if (window.getSelection == null) return;
@@ -82,6 +83,26 @@ class AppView extends DomView.build($('body').clone(), template(
       const target = panelSubject.isInspector ? panelSubject : panelSubject.get_('subject');
       pins.add(asPanel(target));
       app.showRepl();
+    });
+
+    // instant tooltips:
+
+    const tooltip = $('#tooltip');
+    dom.on('mouseenter', '[title]', (event) => {
+      const target = $(event.target);
+      const text = target.prop('title');
+      tooltip.text(text).show();
+
+      const disabled = target.hasClass('disabled') || (target.parents('.disabled').length !== 0);
+      tooltip.toggleClass('disabled', disabled);
+
+      positionFlyout(target, tooltip);
+      target.prop('title', '');
+
+      target.one('mouseleave click', () => {
+        target.prop('title', text);
+        tooltip.hide();
+      });
     });
 
 
