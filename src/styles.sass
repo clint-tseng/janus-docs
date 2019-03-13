@@ -1482,17 +1482,23 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       margin-right: $sidebar-width
 
 .janus-inspect-kvPair
+  font-size: 1.2rem
   padding-bottom: 0.15em
   .kvPair-valueBlock
     line-height: 1.4em
     margin-right: 1em // make room for the list + button
   .kvPair-clear
     cursor: default
+    opacity: 0
+    transition: 0.4s opacity
     &:before
       @include icon($icon-delete)
-      color: #999
+      color: #aaa
     &:hover:before
       color: $color-error
+  &:hover .kvPair-clear
+    opacity: 1
+    transition-duration: 0
 
 .janus-inspect-varying.janus-inspect-panel
   .varying-snapshot
@@ -1587,10 +1593,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       overflow-y: auto
       padding: 0.6em $padding-h
 
-.janus-inspect-model.janus-inspect-panel
-  .janus-inspect-kvPair
-    font-size: 1.2rem
-
 .janus-inspect-list.janus-inspect-panel
   .list-entry
     padding-bottom: 0.2em
@@ -1606,32 +1608,43 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   .list-insert
     @include no-appearance
     color: #666
-    margin-top: -0.8rem
-    opacity: 0
-    position: absolute
-    right: 1em
-    transition: 0.4s opacity
     &:before
       @include icon($icon-add)
-    &:after
-      @include reify
-      border-top: 1px soild #eee
-      position: absolute
-      right: 0
-      width: 100%
     &:hover, &.valuating
       color: $color-accent2
-      opacity: 1
-      + hr
-        display: block
+
+    &.list-insert-last
+      margin-top: 0.5em
 
   .list-list
     cursor: default
+
+    .list-insert
+      margin-top: -0.8rem
+      opacity: 0
+      position: absolute
+      right: 1em
+      transition: 0.4s opacity
+      &:hover, &.valuating
+        opacity: 1
+        + hr
+          display: block
 
     > ul > li:hover
       .list-insert, + li .list-insert
         opacity: 1
         transition-duration: 0
+
+  .kvPair-key
+    color: #bbb
+    font-size: 1rem
+    font-weight: normal
+    line-height: 1.6em
+    vertical-align: bottom
+    &:after
+      content: none
+  li:nth-child(10n+1) .kvPair-key
+    color: #666
 
 .janus-inspect-domview.janus-inspect-panel
   .domview-mutations > ul > li
