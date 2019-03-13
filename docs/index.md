@@ -106,57 +106,16 @@ Data Structures and Models
 
 Janus provides a unique data structure library. All collection transformations
 in Janus handle changes over time, so that you don't have to. Here is a simple
-example:
+example. Here also you get a taste of `janus-inspect`, a visual debugging tool:
 
 ~~~
 const list = new List([ 4, 8, 15, 16, 23, 42 ]);
 const mapped = list.map(x => x * 2);
-return [ list, mapped ];
 
-// add: list.add(list.at(-1) + list.at(-2))
-// remove: list.removeAt(-1)
-~~~
-
-~~~ postprocess
-const SampleView = DomView.build($(`
-  <div id="list-sample-1">
-    <div class="list-container"/>
-    <div class="list-controls">
-      <a class="list-add" href="#add">Add</a>
-      <a class="list-remove" href="#remove">Remove</a>
-    </div>
-    <hr/>
-    <div class="mapped-container">
-  </div>`), template(
-
-  find('.list-container').render(from('list')),
-  find('.mapped-container').render(from('mapped')),
-
-  find('.list-add').on('click', (event, subject) => {
-    event.preventDefault();
-    const list = subject.get('list');
-    if (list.length >= 2)
-      list.add(list.at(-1) + list.at(-2));
-    else
-      list.add(1);
-  }),
-
-  find('.list-remove').on('click', (event, subject) => {
-    event.preventDefault();
-    subject.get('list').removeAt(-1);
-  })
-));
-
-const [ list, mapped ] = __arg;
-return new SampleView(new Model({ list, mapped }));
-~~~
-
-~~~ styles
-#list-sample-1 { overflow: hidden; }
-#list-sample-1 li {
-  float: left;
-  padding: 0 0.5em;
-}
+return [
+  inspect.panel(list),
+  inspect(mapped)
+];
 ~~~
 
 Common array operations are all supported, such as `.filter()`, as shown here.

@@ -84,12 +84,8 @@ class Sample extends Model.build(
   // EVAL EXEC
   // actual compilation and computation of the final code block:
 
-  bind('compiled.main', from('env.final').and('main').all.map(compile)),
-  bind('compiled.postprocess', from('env.default').and('postprocess').all.map((env, code) =>
-    (code == null) ? noop : compile(env, code).successOrElse(noop))),
-
-  bind('result.raw', from('compiled.main').and('compiled.postprocess')
-    .all.flatMap((main, post) => main.flatMap((f) => f().flatMap(post)))),
+  bind('compiled', from('env.final').and('main').all.map(compile)),
+  bind('result.raw', from('compiled').flatMap((proc) => proc.flatMap((f) => f()))),
 
   // apply noexec and inspect flags.
   bind('result.final', from('result.raw').and('noexec').and('inspect')
