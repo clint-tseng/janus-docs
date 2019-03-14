@@ -62,15 +62,13 @@ class AppView extends DomView.build($('body').clone(), template(
     });
 
     // inspector events:
+    // TODO: having to delve through viewmodels to the real inspector is messy.
 
     dom.on('mouseenter', '.entity-title', (event) => {
       const trigger = $(event.target);
       const timer = setTimeout(_ => {
-        // need to delve in if the entity is backed by a ViewModel.
-        // TODO: something more elegant.
-        const entityView = trigger.closest('.janus-inspect-entity').data('view');
-        const target = (entityView.constructor.viewModelClass != null)
-          ? entityView.subject.get_('subject') : entityView.subject;
+        const entity = trigger.closest('.janus-inspect-entity').data('view').subject;
+        const target = entity.isInspector ? entity : entity.get_('subject');
         app.flyout(trigger, target, 'panel');
       }, 300);
       trigger.one('mouseleave', _ => { clearTimeout(timer); });
@@ -78,9 +76,8 @@ class AppView extends DomView.build($('body').clone(), template(
 
     dom.on('click', '.janus-inspect-pin', (event) => {
       const trigger = $(event.target);
-      const panelSubject = trigger.closest('.janus-inspect-panel').data('view').subject;
-      // TODO: this is sort of messy ;/
-      const target = panelSubject.isInspector ? panelSubject : panelSubject.get_('subject');
+      const panel = trigger.closest('.janus-inspect-panel').data('view').subject;
+      const target = panel.isInspector ? panel : panel.get_('subject');
       pins.add(asPanel(target));
       app.showRepl();
     });
