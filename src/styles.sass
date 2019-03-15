@@ -1612,6 +1612,12 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       padding: 0.6em $padding-h
 
 .janus-inspect-list.janus-inspect-panel
+  .list-derivation
+    font-size: 1.2rem
+    margin-bottom: 0.5em
+    ~ .list-derivation
+      padding-left: 1em
+
   .list-entry
     padding-bottom: 0.2em
 
@@ -1637,6 +1643,10 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   .list-list
     cursor: default
 
+    li:nth-child(10n+1)
+      .kvPair-key, .list-index
+        color: #666
+
     .list-insert
       margin-top: -0.8rem
       opacity: 0
@@ -1653,7 +1663,21 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
         opacity: 1
         transition-duration: 0
 
-  .kvPair-key
+  .list-more
+    margin: 0.3em 0 0.8em
+
+  .list-last-item
+    cursor: default
+
+  .list-inspect-plain
+    border-bottom: 1px dotted #777
+    text-align: right
+
+.list-entry
+  .list-value
+    font-size: 1.2rem
+
+  .kvPair-key, .list-index
     color: #bbb
     font-size: 1rem
     font-weight: normal
@@ -1661,14 +1685,36 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     vertical-align: bottom
     &:after
       content: none
-  li:nth-child(10n+1) .kvPair-key
-    color: #666
 
-  .list-more
-    margin: 0.3em 0 0.8em
+  .list-function
+    background: #f4f4f4
+    border-bottom: 1px dotted #ccc
+    margin: 0 0.5em
+    padding: 0 0.3em
+    &:before
+      content: 'λ'
+      font-size: 1.2em
+    &:after
+      @include icon($icon-arrow-right)
 
-  .list-last-item
-    cursor: default
+.list-filtered .list-list
+  counter-reset: filter-index -1
+  .filter-pass
+    counter-increment: filter-index
+.entry-filtered
+  .filter-intermediate
+    font-size: 1.1rem
+  .index-child
+    padding-left: 0.4em
+
+  &.filter-pass .filter-child-index
+    color: $color-success
+    &:before
+      @include icon($icon-arrow-right)
+      padding-right: 0.3em
+    &:after
+      content: counter(filter-index)
+      font-size: 1.2rem
 
 .janus-inspect-list
   .list-more
