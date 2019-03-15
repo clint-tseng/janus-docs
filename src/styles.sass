@@ -1616,6 +1616,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     font-size: 1.2rem
     margin-bottom: 0.5em
     ~ .list-derivation
+      margin-top: -0.5em
       padding-left: 1em
 
   .list-entry
@@ -1639,6 +1640,15 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
     &.list-insert-last
       margin-top: 0.5em
+
+  .kvPair-key, .list-index
+    color: #bbb
+    font-size: 1rem
+    font-weight: normal
+    line-height: 1.6em
+    vertical-align: bottom
+    &:after
+      content: none
 
   .list-list
     cursor: default
@@ -1676,15 +1686,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .list-entry
   .list-value
     font-size: 1.2rem
-
-  .kvPair-key, .list-index
-    color: #bbb
-    font-size: 1rem
-    font-weight: normal
-    line-height: 1.6em
-    vertical-align: bottom
-    &:after
-      content: none
 
   .list-function
     background: #f4f4f4
