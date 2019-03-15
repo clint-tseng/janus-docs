@@ -39,9 +39,9 @@ const ExceptionViewModel = Model.build(
   attribute('expanded', attribute.Boolean),
   bind('has_expanded', from('expanded').pipe(filter((x) => x === true))),
 
-  bind('message', from('subject').map((error) => error.message)),
-  bind('name', from('subject').map((error) => error.name)),
-  bind('stack', from('subject').map((error) => {
+  bind('message', from.subject().map((error) => error.message)),
+  bind('name', from.subject().map((error) => error.name)),
+  bind('stack', from.subject().map((error) => {
     const frames = ESP.parse(error);
 
     // we have to do some nasty work to extract eval/anon information, since
@@ -71,13 +71,13 @@ const ExceptionView = DomView.withOptions({ viewModelClass: ExceptionViewModel }
 
   template(
     find('.exception')
-      .classGroup('exception-name-', from('name'))
-      .classed('expanded', from('expanded'))
-      .classed('has-expanded', from('has_expanded')),
-    find('.exception-message').text(from('message')),
-    find('.exception-stack').render(from('stack')),
+      .classGroup('exception-name-', from.vm('name'))
+      .classed('expanded', from.vm('expanded'))
+      .classed('has-expanded', from.vm('has_expanded')),
+    find('.exception-message').text(from.vm('message')),
+    find('.exception-stack').render(from.vm('stack')),
 
-    find('.exception-expando').render(from.attribute('expanded'))
+    find('.exception-expando').render(from.vm().attribute('expanded'))
       .criteria({ context: 'edit', style: 'button' })
       .options({ stringify: give('') })
   ));

@@ -4,11 +4,11 @@ const { Toc } = require('../model/toc');
 const { ApiBrowser } = require('./api');
 
 const TocViewModel = Model.build(
-  bind('active', from('subject').get('path')
+  bind('active', from.subject('path')
     .and.app('path').map((path) => path.replace(/^(.+)\/$/, '\1'))
     .all.map((own, current) => own === current)),
 
-  bind('prefix', from('subject').get('path')
+  bind('prefix', from.subject('path')
     .and.app('path')
     .all.map((own, current) => current.startsWith(own) ||
       ((current === '/') && (own === '/intro')))) // special case: show getting started on homepage
@@ -21,16 +21,16 @@ const TocView = DomView.withOptions({ viewModelClass: TocViewModel }).build($(`
   </div>`), template(
 
   find('.toc-entry')
-    .classed('active', from('active'))
-    .classed('prefix', from('prefix')),
+    .classed('active', from.vm('active'))
+    .classed('prefix', from.vm('prefix')),
 
   find('a')
-    .text(from('subject').get('title'))
-    .attr('href', from('subject').get('path')),
+    .text(from('title'))
+    .attr('href', from('path')),
 
-  find('.toc-children').render(from('subject').get('api')
-    .and('subject').get('children')
-    .and('subject').get('sections')
+  find('.toc-children').render(from('api')
+    .and('children')
+    .and('sections')
     .and.app()
     .and.app('api')
     .all.map((isApiToc, children, sections, app, api) => (isApiToc === true)
