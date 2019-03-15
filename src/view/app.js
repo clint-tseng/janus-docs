@@ -63,6 +63,7 @@ class AppView extends DomView.build($('body').clone(), template(
 
     // inspector events:
     // TODO: having to delve through viewmodels to the real inspector is messy.
+    // TODO: repetitive.
 
     dom.on('mouseenter', '.entity-title', (event) => {
       const trigger = $(event.target);

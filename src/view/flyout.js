@@ -13,13 +13,11 @@ class FlyoutView extends DomView.build(
     .on('mouseleave', (_, subject) => { subject.set('hover.target', false); })
 ) {
   _wireEvents() {
-    // position ourselves on screen. we do this here instead of _render because
-    // here we are guaranteed to be attached to the document, which we need in
-    // order to measure ourselves.
+    // we do this here instead of _render because here we are guaranteed to be
+    // attached to the document, which we need in order to measure ourselves.
     positionFlyout(this.subject.get_('trigger'), this.artifact());
   }
 }
-
 
 module.exports = {
   FlyoutView,
