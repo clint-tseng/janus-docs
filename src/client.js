@@ -7,6 +7,15 @@ const { Article } = require('./model/article');
 
 const { think } = require('./view/thinker');
 
+$.fn.view = function() {
+  let ptr = this;
+  while (ptr.length > 0) {
+    const view = ptr.data('view')
+    if (view != null) return view;
+    ptr = ptr.parent();
+  }
+};
+
 window.init = (tocData, apiData, articleData) => {
   const path = window.location.pathname;
   const app = baseApp(path, apiData);

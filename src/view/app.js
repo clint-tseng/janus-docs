@@ -68,14 +68,14 @@ class AppView extends DomView.build($('body').clone(), template(
     dom.on('mouseenter', '.entity-title', (event) => {
       const trigger = $(event.target);
       const timer = setTimeout(_ => {
-        const target = trigger.closest('.janus-inspect-entity').data('view').subject;
+        const target = trigger.closest('.janus-inspect-entity').view().subject;
         app.flyout(trigger, target, 'panel');
       }, 300);
       trigger.one('mouseleave', _ => { clearTimeout(timer); });
     });
 
     dom.on('click', '.janus-inspect-pin', (event) => {
-      const target = $(event.target).closest('.janus-inspect-panel').data('view').subject;
+      const target = $(event.target).closest('.janus-inspect-panel').view().subject;
       pins.add(asPanel(target));
       app.showRepl();
     });
@@ -119,7 +119,7 @@ class AppView extends DomView.build($('body').clone(), template(
     // REPL MANAGEMENT
 
     this.reactTo(app.get('repl.active'), false, (active) => {
-      if (active) dom.find('#repl .repl').data('view').focusLast();
+      if (active) dom.find('#repl .repl').view().focusLast();
     });
   }
 }

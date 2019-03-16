@@ -28,8 +28,7 @@ class ValuatorView extends DomView.build($(`
 
     .on('click', '.valuator-accept', (event, subject, view) => {
       const button = $(event.target);
-      const statement = button.closest('.valuator-line').data('view').subject;
-      const result = statement.get_('result');
+      const result = button.view().subject.get_('result');
       if (success.match(result)) {
         try {
           subject.set('result', result.get());

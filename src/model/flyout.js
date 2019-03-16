@@ -19,10 +19,10 @@ class Flyout extends Model.build(
       if (!active) this.destroy();
     });
 
-    // then, add ourselves to our parent to prevent its destruction.
+    // then, add ourselves to our trigger's flyout parent to prevent its destruction.
     const parentDom = this.get_('trigger').closest('.flyout');
     if (parentDom.length > 0)
-      parentDom.data('view').subject.get_('children').add(this);
+      parentDom.view().subject.get_('children').add(this);
   }
 }
 
