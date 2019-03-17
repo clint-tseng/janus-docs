@@ -65,7 +65,7 @@ class DocsApp extends App.build(
   }
 
   popValuator(title, callback) {
-    const valuator = new Valuator({ env: this.get_('eval.env') });
+    const valuator = new Valuator({ env: { inject: this.get_('eval.env') } });
     const sheet = this.sheet(title, valuator);
     valuator.destroyWith(sheet);
     valuator.get('result').react(false, (result) => { // no point in reactTo

@@ -23,7 +23,7 @@ class ValuatorView extends DomView.build($(`
   <div class="valuator"/>`), template(
 
   find('.valuator')
-    .render(from('repl').get('statements'))
+    .render(from('statements'))
       .options({ renderItem: (r) => r.context('valuator') })
 
     .on('click', '.valuator-accept', (event, subject, view) => {
@@ -40,17 +40,19 @@ class ValuatorView extends DomView.build($(`
 
     .on('commit', 'li:last-child .valuator-line', (e, subject, view) => {
       subject.get_('repl').createStatement();
-      // TODO: copypasta AND a hack.
-      const lastEditorView = view.artifact().find('li:last-child .code-editor').data('view');
-      lastEditorView.focus();
+      view.into('repl').into('statements').into(-1).into(EditorView).last().get_().focus();
     })
 )) {
   _wireEvents() {
-    // TODO: same copypasta+hack as above only actually it's worse.
-    window.setTimeout(() => {
-      this.artifact().find('.code-editor').data('view').focus();
+    // any time a new statement is created, focus it.
+    const { EditorView } = require('./editor');
+    this.into('statements').into(-1).last().get().react((statementView) => {
+      if (statementView == null) return;
+      statementView.into().into(EditorView).last().get_().focus();
     });
   }
+
+  commit() { this.subject.createStatement(); }
 }
 
 

@@ -3,6 +3,7 @@ const { filter } = require('janus-stdlib').varying;
 const { exists } = require('../util/util');
 const { positionFlyout } = require('../util/dom');
 const { App } = require('../model/app');
+const { Repl } = require('../model/repl');
 const { asPanel } = require('./context');
 const $ = require('janus-dollar');
 
@@ -25,6 +26,10 @@ class AppView extends DomView.build($('body').clone(), template(
     const app = this.subject;
     const repl = app.get_('repl.obj');
     const pins = repl.get_('pins');
+
+    // save off the repl view to our model since there are cases where we need
+    // it and it is essentially singleton.
+    app.set('repl.view', this.into(Repl).first().get_());
 
     ////////////////////////////////////////
     // GLOBAL EVENTS
@@ -119,7 +124,7 @@ class AppView extends DomView.build($('body').clone(), template(
     // REPL MANAGEMENT
 
     this.reactTo(app.get('repl.active'), false, (active) => {
-      if (active) dom.find('#repl .repl').view().focusLast();
+      if (active) app.get_('repl.view').focusLast();
     });
   }
 }

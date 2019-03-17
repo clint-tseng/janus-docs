@@ -39,17 +39,17 @@ class SampleView extends DomView.build($(`
       const app = view.options.app;
       app.set('repl.active', true); // we do this first to resolve initial display redraw
       app.get_('repl.obj').transfer(subject.get_('main'));
-      $('#repl .repl').data('view').focusLast(); // TODO: cleaner access/copy+pasta
+      app.get_('repl.view').focusLast();
     }),
 
   find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
   find('.sample-styles').text(from('styles'))
 )) {
   _wireEvents() {
-    // TODO: less haphazard way to plumb this action through.
     const dom = this.artifact();
     dom.on('code-navigate', (_, { line, col }) => {
-      dom.find('.code-editor').data('view').setCursor(line, col);
+      const { EditorView } = require('./editor');
+      this.into(EditorView).first().get_().setCursor(line, col);
     });
 
     dom.on('code-focus', _ => { dom.addClass('activated'); });

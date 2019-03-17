@@ -1,4 +1,4 @@
-const { DomView, template, find, from, match, Model, attribute, dēfault } = require('janus');
+const { DomView, template, find, from, match, Model, attribute, dēfault, List } = require('janus');
 const $ = require('janus-dollar');
 
 const { Statement, Repl } = require('../model/repl');
@@ -40,8 +40,7 @@ const StatementView = DomView.build($(`
     .options(from.self().map((view) => ({
       onCommit: () => {
         if (view.subject.commit() === true) {
-          if (typeof view.options.onCommit === 'function')
-            view.options.onCommit();
+          view.closest(Repl).first().get_().commit();
           return true;
         }
         return false;
@@ -72,13 +71,11 @@ const PinView = DomView.build($(`
   find('.pin-expand').render(from.attribute('expanded'))
     .criteria({ context: 'edit', style: 'button' }).options({ stringify: give('') }),
 
-  find('.pin-remove').on('click', (e, subject) => {
+  find('.pin-remove').on('click', (e, subject, view) => {
     // we do this by index on the parent list in case multiple instances of this
-    // item exist. TODO: awkward reference. what to do?
-    const item = $(event.target).closest('li');
-    const idx = item.prevAll().length;
-    const list = item.closest('.janus-list').data('view').subject.parent;
-    list.removeAt(idx);
+    // item exist.
+    const idx = $(event.target).closest('li').prevAll().length;
+    view.closest(List).first().get_().subject.parent.removeAt(idx);
   }),
 ));
 
@@ -102,10 +99,7 @@ class ReplView extends DomView.build($(`
     </div>
   </div>
 `), template(
-  find('.repl-main').render(from('statements'))
-    .options(from.self().map((view) => ({
-      renderItem: (render) => render.options({ onCommit: () => { view.commit(); } })
-    }))),
+  find('.repl-main').render(from('statements')),
 
   find('.repl-close').on('click', (e, s, view) => { view.options.app.hideRepl(); }),
   find('.repl-main')
@@ -119,13 +113,12 @@ class ReplView extends DomView.build($(`
   find('.repl-pins-list').render(from('pins').map((pins) => pins.map((subject) => new Pin({ subject }))))
 )) {
   commit() {
-    this.subject.commit();
+    this.subject.createStatement();
     this.focusLast();
   }
   focusLast() {
-    // TODO: still feels like a hack.
-    const lastEditorView = this.artifact().find('.repl-main > ul > li:last-child .code-editor').data('view');
-    lastEditorView.focus();
+    const { EditorView } = require('./editor');
+    this.into('statements').into(-1).into(EditorView).last().get_().focus();
   }
 }
 

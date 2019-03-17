@@ -144,8 +144,6 @@ class Repl extends Model.build(
     return statement;
   }
 
-  commit() { this.createStatement(); }
-
   transfer(code) {
     const last = this.get_('statements').get_(-1);
     const target = blank(last.get_('code')) ? last : this.createStatement();
