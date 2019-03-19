@@ -24,11 +24,6 @@ const StatementView = DomView.build($(`
   find('.repl-statement').classed('named', from('named')),
   find('.repl-statement-name').render(from.attribute('name')).context('edit'),
 
-  find('.repl-statement-status')
-    .classGroup('status-', from('result').map(match(
-      success(give('success')), fail(give('error')))))
-    .classed('no-status', from('has_code').map(not)),
-
   find('.repl-statement-result')
     .render(from('result').map((result) =>
       (result == null) ? null : result.mapSuccess(inspectWithSwitch).get()))
