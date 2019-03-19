@@ -78,11 +78,11 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 // UTIL
 
 @mixin fill($buffer: 0)
-  bottom: 0
-  left: 0
+  bottom: $buffer
+  left: $buffer
   position: absolute
-  right: 0
-  top: 0
+  right: $buffer
+  top: $buffer
 
 @mixin reify
   content: ''
