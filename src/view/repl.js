@@ -1,7 +1,7 @@
 const { DomView, template, find, from, match, Model, attribute, dēfault, List } = require('janus');
 const $ = require('janus-dollar');
 
-const { Statement, Repl } = require('../model/repl');
+const { Statement, Reference, Repl } = require('../model/repl');
 const { success, fail } = require('../util/eval');
 const { blank, not, give } = require('../util/util');
 const { withPanelSwitch } = require('../view/context');
@@ -46,6 +46,19 @@ const StatementView = DomView.build($(`
         return false;
       }
     })))
+));
+
+// TODO: repetitive with above; sort of awaiting janus#138
+const ReferenceView = DomView.build($(`
+  <div class="repl-statement">
+    <div class="repl-statement-placeholder">line</div>
+    <div class="repl-statement-name"/>
+    <div class="repl-statement-result"/>
+  </div>`), template(
+  find('.repl-statement').classed('named', from('named')),
+  find('.repl-statement-name').render(from.attribute('name')).context('edit'),
+  find('.repl-statement-result')
+    .render(from('result').map((result) => result.mapSuccess(inspectWithSwitch).getSuccess()))
 ));
 
 
@@ -99,10 +112,9 @@ class ReplView extends DomView.build($(`
     </div>
   </div>
 `), template(
-  find('.repl-main').render(from('statements')),
-
   find('.repl-close').on('click', (e, s, view) => { view.options.app.hideRepl(); }),
   find('.repl-main')
+    .render(from('statements'))
     .on('click', (event, _, view) => {
       if (event.target === view.artifact().find('.repl-main')[0])
         view.focusLast();
@@ -129,6 +141,7 @@ module.exports = {
   StatementView,
   registerWith: (library) => {
     library.register(Statement, StatementView);
+    library.register(Reference, ReferenceView);
     library.register(Pin, PinView);
     library.register(Repl, ReplView);
   }

@@ -126,6 +126,11 @@ class Statement extends Model.build(
   }
 }
 
+class Reference extends Statement {
+  commit() {}
+  run() {}
+}
+
 class Repl extends Model.build(
   attribute('statements', attribute.List.withDefault()), // ref immutative
   dēfault.writing('env.inject', {}),
@@ -155,7 +160,18 @@ class Repl extends Model.build(
     target.commit();
     this.createStatement();
   }
+
+  reference(obj) {
+    const ref = new Reference({ result: success(obj) });
+    const statements = this.get_('statements');
+    if (blank(statements.get_(-1).get_('code'))) {
+      statements.add(ref, -1);
+    } else {
+      statements.add(ref);
+      this.createStatement();
+    }
+  }
 }
 
-module.exports = { Statement, Repl };
+module.exports = { Statement, Reference, Repl };
 
