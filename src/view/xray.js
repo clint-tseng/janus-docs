@@ -6,6 +6,7 @@ const { inspect } = require('../util/inspect');
 const { identity } = require('../util/util');
 
 const px = (x) => `${x}px`;
+const cache = new WeakMap();
 
 const XRayEntry = Model.build(
   bind('selected', from('selection').flatMap(identity).and('view')
@@ -35,12 +36,21 @@ class XRayEntryView extends DomView.build($(`
     const subject = this.subject;
     const target = subject.get_('view');
     const targetDom = target.artifact();
+    const resize = () => {
+      if (cache.has(targetDom)) {
+        subject.set(cache.get(targetDom));
+      } else {
+        const layout = { offset: targetDom.offset(),
+          size: { width: targetDom.width(), height: targetDom.height() } };
+        subject.set(layout);
+        cache.set(targetDom, layout);
+      }
+    };
 
     const layout = fromEvent(targetDom.parents(), 'scroll', ({ timeStamp }) => timeStamp);
     this.reactTo(layout, _ => {
-      subject.set('offset', targetDom.offset());
-      subject.set('size.width', targetDom.width());
-      subject.set('size.height', targetDom.height());
+      cache.delete(targetDom);
+      resize();
     });
   }
 }
