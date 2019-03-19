@@ -96,6 +96,10 @@ class ReplView extends DomView.build($(`
     <div class="repl-chrome">
       <button class="repl-close" title="Close Console"/>
       <h2>Console</h2>
+
+      <div class="repl-toolbar">
+        <button class="repl-xray" title="Inspect via X-Ray"/>
+      </div>
     </div>
     <div class="repl-main"/>
     <div class="repl-pins">
@@ -108,6 +112,10 @@ class ReplView extends DomView.build($(`
   </div>
 `), template(
   find('.repl-close').on('click', (e, s, view) => { view.options.app.hideRepl(); }),
+  find('.repl-xray').on('click', (e, repl, view) => {
+    view.options.app.xray((result) => { repl.reference(result); });
+  }),
+
   find('.repl-main')
     .render(from('statements'))
     .on('click', (event, _, view) => {

@@ -25,6 +25,7 @@ const baseViews = () => {
   require('./view/toc').registerWith(views);
   require('./view/valuator').registerWith(views);
   require('./view/view').registerWith(views);
+  require('./view/xray').registerWith(views);
 
   if (typeof window !== 'undefined') {
     require('./view/editor').registerWith(views);

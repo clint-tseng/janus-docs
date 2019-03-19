@@ -5,6 +5,7 @@ const { Flyout } = require('./flyout');
 const { Sheet } = require('./sheet');
 const { Repl } = require('./repl');
 const { Valuator } = require('./valuator');
+const { XRay } = require('./xray');
 
 
 class GlobalList extends attribute.List.withDefault() {
@@ -73,6 +74,16 @@ class DocsApp extends App.build(
       sheet.destroy();
     });
     return valuator;
+  }
+
+  xray(callback) {
+    const xray = new XRay();
+    this.set('xray', xray);
+    xray.get('result').react(false, (result) => {
+      callback(result);
+      xray.destroy();
+    });
+    return xray;
   }
 
   showRepl() { this.set('repl.active', true); }
