@@ -46,7 +46,7 @@ const StatementView = DomView.build($(`
 // TODO: repetitive with above; sort of awaiting janus#138
 const ReferenceView = DomView.build($(`
   <div class="repl-statement">
-    <div class="repl-statement-placeholder">line</div>
+    <div class="repl-statement-placeholder">value</div>
     <div class="repl-statement-name"/>
     <div class="repl-statement-result"/>
   </div>`), template(
