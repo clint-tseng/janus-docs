@@ -544,6 +544,7 @@ header
 
 
 #flyouts .flyout
+  max-width: 80vw
   position: absolute
   z-index: $z-flyout
 
@@ -1231,6 +1232,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
     .repl-pins-list
       margin-left: $repl-chrome-outer-width
+      max-height: 100%
       overflow-y: auto
 
       > .janus-list > li
@@ -1611,22 +1613,13 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     font-size: 0.8rem
     margin-left: 0.3em
     padding: 0.2em 0.4em
-      right: 1.8em
 
     .varying-snapshot-close
-      color: $color-text
-      display: inline-block
-      font-size: 1.6em
-      line-height: 0.9em
-      margin-left: 0.2em
-      overflow: hidden
-      position: absolute
-      text-decoration: none
-      width: 0.6em
+      @include no-appearance
+      font-size: 0.8em
 
       &:before
-        content: '×'
-        padding-right: 1em
+        @include icon($icon-close)
 
   .panel-content > .varying-tree
     padding-top: 0.4em
