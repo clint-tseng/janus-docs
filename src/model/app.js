@@ -1,5 +1,6 @@
 const { App, Varying, attribute, bind, dēfault, types, from, Request, Resolver, List } = require('janus');
 const { filter } = require('janus-stdlib').varying
+const { compile, fail } = require('../util/eval');
 const { Article } = require('./article');
 const { Flyout } = require('./flyout');
 const { Sheet } = require('./sheet');
@@ -49,6 +50,7 @@ class DocsApp extends App.build(
   ////////////////////////////////////////////////////////////////////////////////
   // APP UI
 
+  // also interop (expected by janus-inspect)
   flyout(trigger, target, context = 'default') {
     const triggerNode = trigger[0];
     const flyouts = this.get_('flyouts');
@@ -65,17 +67,6 @@ class DocsApp extends App.build(
     return sheet;
   }
 
-  popValuator(title, callback) {
-    const valuator = new Valuator({ env: { inject: this.get_('eval.env') } });
-    const sheet = this.sheet(title, valuator);
-    valuator.destroyWith(sheet);
-    valuator.get('result').react(false, (result) => { // no point in reactTo
-      callback(result);
-      sheet.destroy();
-    });
-    return valuator;
-  }
-
   xray(callback) {
     const xray = new XRay();
     this.set('xray', xray);
@@ -89,6 +80,26 @@ class DocsApp extends App.build(
   showRepl() { this.set('repl.active', true); }
   hideRepl() { this.set('repl.active', false); }
   toggleRepl() { this.set('repl.active', !this.get_('repl.active')); }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // EVAL INTEROP
+
+  popValuator(title, callback) {
+    const valuator = new Valuator({ env: { inject: this.get_('eval.env') } });
+    const sheet = this.sheet(title, valuator);
+    valuator.destroyWith(sheet);
+    valuator.get('result').react(false, (result) => { // no point in reactTo
+      callback(result);
+      sheet.destroy();
+    });
+    return valuator;
+  }
+
+  evaluate(expr) {
+    const result = compile(this.get_('eval.env'), expr).flatMap((f) => f());
+    if (fail.match(result)) throw result.get();
+    else return result.get();
+  }
 }
 
 class ArticleRequest extends Request {
