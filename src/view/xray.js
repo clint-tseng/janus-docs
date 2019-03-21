@@ -11,9 +11,30 @@ const { identity } = require('../util/util');
 
 const XRayEntry = Model.build(
   bind('idx.delta', from('idx.own').and('idx.selection').flatMap(identity)
-    .all.map((x, y) => x - y)),
-  bind('selected', from('idx.delta').map((x) => x === 0))
+    .all.map((x, y) => x - y))
 );
+
+////////////////////////////////////////
+// ENTRY LIST VIEW
+
+const XRayListView = DomView.build($(`
+  <div class="xray-entry">
+    <span class="xray-entity xray-view"/>
+    <span class="xray-entity xray-subject"/>
+    <span class="xray-hint hint-prev">
+      <span class="key">[</span> or <span class="key">,</span> to select
+    </span>
+    <span class="xray-hint hint-sel">
+      <span class="key">Enter</span> to inspect
+    </span>
+    <span class="xray-hint hint-next">
+      <span class="key">]</span> or <span class="key">.</span> to select
+    </span>
+  </div>`), template(
+  find('.xray-entry').classGroup('delta', from('idx.delta')),
+  find('.xray-view').render(from('view').map(inspect)),
+  find('.xray-subject').render(from('view').map((view) => inspect(view.subject)))
+));
 
 ////////////////////////////////////////
 // ENTRY BOXED VIEW
@@ -30,7 +51,6 @@ class XRayEntryView extends DomView.build($(`
   </div>`), template(
   find('.xray-entry')
     .classGroup('delta', from('idx.delta'))
-    .classed('selected', from('selected'))
 
     .classed('tall', from('size.height').map((x) => x > 100))
 
@@ -68,29 +88,33 @@ class XRayEntryView extends DomView.build($(`
 ////////////////////////////////////////////////////////////////////////////////
 // XRAY PRIMARY VIEW
 
-class XRayView extends DomView.build($(`
+const XRayVM = Model.build(
+  bind('entries', from.subject('stack').and.subject('sizing').and.subject('select.index').asVarying()
+    .all.map((stack, sizing, selection) =>
+      stack.mapPairs((own, view) => new XRayEntry({ view, sizing, idx: { own, selection } })))));
+
+class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
   <div class="xray">
     <div class="xray-chrome"><label>X-Ray</label></div>
+    <div class="xray-boxes"/>
     <div class="xray-stack"/>
   </div>`), template(
-  find('.xray-stack')
-    .render(from('stack').and('sizing').and('select.index').asVarying().all.map((stack, sizing, selection) =>
-      stack.mapPairs((own, view) => new XRayEntry({ view, sizing, idx: { own, selection } }))))
+  find('.xray-boxes').render(from.vm('entries')).criteria({ wrap: false }),
+  find('.xray-stack').render(from.vm('entries'))
     .criteria({ wrap: false })
+    .options({ renderItem: (r) => r.context('list') })
 )) {
   _wireEvents() {
     const dom = this.artifact();
     const xray = this.subject;
-    const vm = this.vm;
     const body = $(document.body);
 
     this.listenTo(body, 'mouseover', (event) => { xray.set('dom', $(event.target).view()); });
-    this.listenTo(body, 'click', (event) => { xray.set('result', xray.get_('select.view')); });
-
     this.listenTo(body, 'keypress', (event) => {
-      if ((event.which === 91) || (event.which === 44)) xray.stepIn(); // [ ,
-      if ((event.which === 93) || (event.which === 46)) xray.stepOut(); // ] .
-      if (event.which === 27) xray.destroy(); // esc
+      if (event.which === 13) xray.set('result', xray.get_('select.view')); // enter
+      else if ((event.which === 91) || (event.which === 44)) xray.stepIn(); // [ ,
+      else if ((event.which === 93) || (event.which === 46)) xray.stepOut(); // ] .
+      else if (event.which === 27) xray.destroy(); // esc
     });
 
     this.destroyWith(xray);
@@ -102,6 +126,7 @@ module.exports = {
   XRayView,
   registerWith(library) {
     library.register(XRayEntry, XRayEntryView);
+    library.register(XRayEntry, XRayListView, { context: 'list' });
     library.register(XRay, XRayView);
   }
 }

@@ -44,8 +44,9 @@ $z-sheets: 199
 $z-flyout: 200
 $z-tooltip: 500
 $z-xray: 1000
-$z-xray-selected: $z-xray + 2
 $z-xray-next: $z-xray + 1
+$z-xray-selected: $z-xray + 2
+$z-xray-stack: $z-xray + 3
 
 $icon-add-circle: '\e90e'
 $icon-add: '\e910'
@@ -655,7 +656,6 @@ footer
 
 #xray
   left: 0
-  pointer-events: none
   position: absolute
   top: 0
   z-index: $z-xray
@@ -1427,11 +1427,12 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       background: transparent
 
 .xray
+  pointer-events: none
+
   .xray-chrome
     @include fill(4px)
     border: 4px solid $color-xray
     box-shadow: 0 0 0 1em transparentize($color-xray, 0.2)
-    pointer-events: none
     position: fixed
 
     label
@@ -1444,29 +1445,72 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       top: 0
 
   .xray-stack
-    pointer-events: none
+    bottom: 5px
+    left: 8px
+    position: fixed
+    z-index: $z-xray-stack
 
 @mixin xray-box($color, $width: 2px)
   box-shadow: 0 0 0 $width $color inset
 
-.xray-entry
+.xray-entry .xray-entity
+  background-color: $color-xray-selected
+  color: #fff
+  font-family: $font-monospace
+  padding: 0.3em 0.5em
+  white-space: nowrap
+
+  &.xray-subject
+    background-color: #444
+
+.xray-stack .xray-entry 
+  min-height: 1.7em
+  white-space: nowrap
+
+  .xray-entity
+    max-width: 30vw
+    text-overflow: ellipsis
+
+    .model-pairs
+      color: #ccc
+
+  .xray-hint
+    background: rgba(0, 0, 0, 0.7)
+    color: #fff
+    display: none
+    font-family: $font-monospace
+    margin-left: 0.8em
+    padding: 0.2em
+
+    .key
+      background-color: #ccc
+      color: #444
+      padding: 0 0.2em
+
+  .xray-view
+    background: #666
+  .xray-subject
+    background: #888
+
+  &.delta1 .hint-prev
+    display: inline
+  &.delta-1 .hint-next
+    display: inline
+
+  &.delta0
+    .xray-view
+      background: $color-xray-selected
+    .xray-subject
+      background: #444
+    .hint-sel
+      display: inline
+      background: $color-accent2
+
+.xray-box
   background: rgba(187, 187, 187, 0.1)
   @include xray-box(transparentize(#555, 0.4), 1px)
   position: absolute
 
-  .xray-entity
-    background-color: $color-xray-selected
-    clear: left
-    color: #fff
-    float: left
-    font-family: $font-monospace
-    padding: 0.3em 0.5em
-    white-space: nowrap
-
-    &.xray-subject
-      background-color: #444
-
-.xray-box
   .xray-entities
     display: none
     left: 0
@@ -1479,7 +1523,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     left: 2px
     top: 0
 
-  &.selected
+  .xray-entity
+    clear: left
+    float: left
+
+  &.delta0
     background: transparentize($color-xray-selected, 0.3)
     @include xray-box($color-xray-selected)
     z-index: $z-xray-selected
