@@ -5,21 +5,31 @@ const { XRay } = require('../model/xray');
 const { inspect } = require('../util/inspect');
 const { identity } = require('../util/util');
 
+
+////////////////////////////////////////////////////////////////////////////////
+// XRAY ENTRY
+
+const XRayEntry = Model.build(
+  bind('idx.delta', from('idx.own').and('idx.selection').flatMap(identity)
+    .all.map((x, y) => x - y)),
+  bind('selected', from('idx.delta').map((x) => x === 0))
+);
+
+////////////////////////////////////////
+// ENTRY BOXED VIEW
+
 const px = (x) => `${x}px`;
 const cache = new WeakMap();
 
-const XRayEntry = Model.build(
-  bind('selected', from('selection').flatMap(identity).and('view')
-    .all.map((x, y) => x === y))
-);
 class XRayEntryView extends DomView.build($(`
-  <div class="xray-entry">
+  <div class="xray-entry xray-box">
     <div class="xray-entities">
       <div class="xray-entity xray-view"/>
       <div class="xray-entity xray-subject"/>
     </div>
   </div>`), template(
   find('.xray-entry')
+    .classGroup('delta', from('idx.delta'))
     .classed('selected', from('selected'))
 
     .classed('tall', from('size.height').map((x) => x > 100))
@@ -55,14 +65,17 @@ class XRayEntryView extends DomView.build($(`
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// XRAY PRIMARY VIEW
+
 class XRayView extends DomView.build($(`
   <div class="xray">
     <div class="xray-chrome"><label>X-Ray</label></div>
     <div class="xray-stack"/>
   </div>`), template(
   find('.xray-stack')
-    .render(from('stack').and('sizing').and('select.view').asVarying().all.map((stack, sizing, selection) =>
-      stack.map((view) => new XRayEntry({ view, sizing, selection }))))
+    .render(from('stack').and('sizing').and('select.index').asVarying().all.map((stack, sizing, selection) =>
+      stack.mapPairs((own, view) => new XRayEntry({ view, sizing, idx: { own, selection } }))))
     .criteria({ wrap: false })
 )) {
   _wireEvents() {
