@@ -118,6 +118,7 @@ class ReplView extends DomView.build($(`
 
   find('.repl-main')
     .render(from('statements'))
+      .criteria({ wrap: false })
     .on('click', (event, _, view) => {
       if (event.target === view.artifact().find('.repl-main')[0])
         view.focusLast();
@@ -125,7 +126,9 @@ class ReplView extends DomView.build($(`
 
   find('.repl').classed('has-pins', from('pins').flatMap((pins) => pins.nonEmpty())),
   find('.repl-pins-clear').on('click', (e, subject) => subject.get_('pins').removeAll()),
-  find('.repl-pins-list').render(from('pins').map((pins) => pins.map((subject) => new Pin({ subject }))))
+  find('.repl-pins-list')
+    .render(from('pins').map((pins) => pins.map((subject) => new Pin({ subject }))))
+    .criteria({ wrap: false })
 )) {
   commit() {
     this.subject.createStatement();

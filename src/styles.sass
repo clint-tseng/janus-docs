@@ -1206,16 +1206,16 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     right: 0
     top: 0
 
-    > .janus-list
-      counter-reset: line-number
-      > li
-        counter-increment: line-number
-        .repl-statement-placeholder:after
-          content: counter(line-number)
-
   .repl-statement
     border-bottom: 1px dotted #ddd
-    overflow: hidden
+    &:last-child
+      border-bottom: none
+
+    counter-increment: line-number
+    &:first-child
+      counter-reset: line-number
+    .repl-statement-placeholder:after
+      content: counter(line-number)
 
   .repl-pins
     @include fill
@@ -1235,7 +1235,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       max-height: 100%
       overflow-y: auto
 
-      > .janus-list > li
+      .pin
         border-top: 1px dotted #c4c4c4
         &:first-child
           border-top: none
@@ -1253,9 +1253,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       box-shadow: #{$repl-chrome-outer-width + $pin-chrome-outer-width} 0 0 $repl-chrome-color-bg inset
       display: block
       width: $pins-width
-
-  li:last-child .repl-statement
-    border-bottom: none
 
 .repl-statement
   $placeholder-color: #888
