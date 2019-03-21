@@ -73,6 +73,7 @@ class DocsApp extends App.build(
     xray.get('result').react(false, (result) => {
       callback(result);
       xray.destroy();
+      this.showRepl();
     });
     return xray;
   }

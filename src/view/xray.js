@@ -111,8 +111,11 @@ class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
 
     this.listenTo(body, 'mouseover', (event) => { xray.set('dom', $(event.target).view()); });
     this.listenTo(body, 'keypress', (event) => {
-      if (event.which === 13) xray.set('result', xray.get_('select.view')); // enter
-      else if ((event.which === 91) || (event.which === 44)) xray.stepIn(); // [ ,
+      if (event.which === 13) {
+        xray.set('result', xray.get_('select.view')); // enter
+        event.preventDefault();
+      }
+      if ((event.which === 91) || (event.which === 44)) xray.stepIn(); // [ ,
       else if ((event.which === 93) || (event.which === 46)) xray.stepOut(); // ] .
       else if (event.which === 27) xray.destroy(); // esc
     });
