@@ -120,7 +120,7 @@ class ReplView extends DomView.build($(`
     .render(from('statements'))
       .criteria({ wrap: false })
     .on('click', (event, _, view) => {
-      if (event.target === view.artifact().find('.repl-main')[0])
+      if ($(event.target).is('.repl-main, .repl-statement, .repl-statement-result'))
         view.focusLast();
     }),
 
