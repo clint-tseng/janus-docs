@@ -1825,10 +1825,14 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     color: #bbb
     font-size: 1rem
     font-weight: normal
-    line-height: 1.6em
-    vertical-align: bottom
     &:after
       content: none
+
+  // this is really annoying but because of the way the double-click kvpair-value
+  // editor works we have to style this separately for alignment.
+  .kvPair-key
+    line-height: 1.6em
+    vertical-align: bottom
 
   .list-list
     cursor: default
