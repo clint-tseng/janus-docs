@@ -23,6 +23,17 @@ const StatementVM = Model.build(
     .all.map((x, y, z) => (x || y || z) ? 'panel' : null))
 );
 
+// TODO: janus#138
+const toolbox = template(
+  find('.statement-pin').on('click', (e, statement, view) => {
+    // TODO: yeah this is definitely still awkwardfest.
+    view.closest(Repl).first().get_().subject.get_('pins').add(statement);
+  }),
+  find('.statement-panel').render(from.vm().attribute('panel.direct'))
+    .criteria({ context: 'edit', style: 'button' })
+    .options({ stringify: give('') })
+);
+
 const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
   <div class="statement">
     <div class="statement-placeholder">line</div>
@@ -38,14 +49,7 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
 `), template(
   find('.statement').classed('named', from('named')),
   find('.statement-name').render(from.attribute('name')).context('edit'),
-
-  find('.statement-pin').on('click', (e, statement, view) => {
-    // TODO: yeah this is definitely still awkwardfest.
-    view.closest(Repl).first().get_().subject.get_('pins').add(statement);
-  }),
-  find('.statement-panel').render(from.vm().attribute('panel.direct'))
-    .criteria({ context: 'edit', style: 'button' })
-    .options({ stringify: give('') }),
+  toolbox,
 
   find('.statement-result').render(from.vm('result'))
     .context(from.vm('context'))
@@ -70,10 +74,15 @@ const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build
   <div class="statement">
     <div class="statement-placeholder">value</div>
     <div class="statement-name"/>
+    <div class="statement-toolbox">
+      <button class="statement-pin" title="Pin statement"/>
+      <span class="statement-panel" title="View as panel"/>
+    </div>
     <div class="statement-result"/>
   </div>`), template(
   find('.statement').classed('named', from('named')),
   find('.statement-name').render(from.attribute('name')).context('edit'),
+  toolbox,
   find('.statement-result').render(from.vm('result')).context(from.vm('context'))
 ));
 
@@ -86,8 +95,8 @@ const Pin = Model.build(dēfault('expanded', true, attribute.Boolean));
 const PinView = DomView.build($(`
   <div class="pin">
     <div class="pin-chrome">
-      <div class="pin-expand"/>
-      <button class="pin-remove"/>
+      <div class="pin-expand" title="Expand/Collapse"/>
+      <button class="pin-remove" title="Unpin"/>
     </div>
     <div class="pin-contents"/>
   </div>
