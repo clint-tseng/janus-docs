@@ -1,6 +1,7 @@
 const { DomView, template, find, from } = require('janus');
 const { filter } = require('janus-stdlib').varying;
 const { exists } = require('../util/util');
+const { highlight } = require('./highlighter');
 const { positionFlyout } = require('../util/dom');
 const { App } = require('../model/app');
 const { Repl } = require('../model/repl');
@@ -27,6 +28,9 @@ class AppView extends DomView.build($('body').clone(), template(
     const app = this.subject;
     const repl = app.get_('repl.obj');
     const pins = repl.get_('pins');
+
+    // set up entity highlighting.
+    highlight(app);
 
     // save off the repl view to our model since there are cases where we need
     // it and it is essentially singleton.

@@ -1617,11 +1617,26 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   .entity-title
     cursor: default
 
+  &.highlight
+    .entity-title, .entity-content:before, .entity-content:after
+      color: red
+    &:hover
+      .entity-title, .entity-content:before, .entity-content:after
+        color: inherit
+
 .janus-inspect-panel
   background-color: #fff
   border-radius: 0.2em
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif
   position: relative
+
+  &.highlight
+    box-shadow: 0 0 0 2px red
+    &:hover
+      box-shadow: none
+
+  .flyout &.highlight
+    box-shadow: none
 
   .panel-title
     background-color: $color-accent
