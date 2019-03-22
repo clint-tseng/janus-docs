@@ -1171,17 +1171,22 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
     button
       @include no-appearance
+      color: $repl-chrome-color-fg
       margin-bottom: 1em
       padding: 0.1em
       &:before
         @include icon
-        color: $repl-chrome-color-fg
         font-size: 2em
 
       &.repl-close:before
         content: $icon-close-circle
       &.repl-xray:before
         content: $icon-target
+    .repl-autopanel button
+      &:before
+        content: $icon-window
+      &.checked
+        color: $color-accent2
 
     h2
       color: $repl-chrome-color-fg
@@ -1195,6 +1200,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       transform-origin: left top
       white-space: nowrap
 
+    .repl-toolbar
+      padding-top: 2em
+
   .repl-main
     @include custom-scrollbar(#777, #ccc)
     bottom: 0
@@ -1206,7 +1214,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     right: 0
     top: 0
 
-  .repl-statement
+  .statement
     border-bottom: 1px dotted #ddd
     &:last-child
       border-bottom: none
@@ -1214,8 +1222,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     counter-increment: line-number
     &:first-child
       counter-reset: line-number
-    .repl-statement-placeholder:after
+    .statement-placeholder:after
       content: counter(line-number)
+
+  &.autopaneled .statement-panel
+    display: none
 
   .repl-pins
     @include fill
@@ -1254,8 +1265,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       display: block
       width: $pins-width
 
-.repl-statement
+.statement
   $placeholder-color: #888
+  min-height: 4.2em
   padding: 0.8em 1.3em
     left: 0.8rem + $repl-left-gutter
   position: relative
@@ -1269,7 +1281,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     .CodeMirror-scroll
       height: auto
 
-  .repl-statement-placeholder
+  $left-gutter-zone: calc(#{$repl-left-gutter} - 2.5em)
+  .statement-placeholder
     // TODO: sort of a mess but i just want this to work.
     color: $placeholder-color
     font-family: $font-monospace
@@ -1279,11 +1292,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     pointer-events: none
     position: absolute
     text-align: right
-    width: calc(#{$repl-left-gutter} - 2.5em)
+    width: $left-gutter-zone
     &:after
       padding-left: 0.3em
 
-  .repl-statement-name
+  .statement-name
     font-family: $font-monospace
     font-size: 1.4em
     left: 0
@@ -1303,14 +1316,38 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       color: $placeholder-color
       content: '>'
 
+  .statement-toolbox
+    left: 0
+    position: absolute
+    text-align: right
+    top: 3.5em
+    width: $left-gutter-zone
+
+    button
+      @include no-appearance
+      opacity: 0
+      transition: 0.4s opacity
+      &:before
+        @include icon($icon-window)
+      &.checked
+        color: $color-accent2
+        opacity: 1
+
+    .statement-panel button:before
+      content: $icon-window
+
+  &:hover .statement-toolbox button
+    opacity: 1
+    transition-duration: 0
+
   &.named
-    .repl-statement-placeholder
+    .statement-placeholder
       display: none
-    .repl-statement-name:after
+    .statement-name:after
       color: $color-text
       content: '='
 
-  .repl-statement-result
+  .statement-result
     padding-top: 0.6em
     position: relative
 
@@ -1381,7 +1418,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   max-height: 80vh
   overflow-y: auto
 
-  .repl-statement-placeholder
+  .statement-placeholder
     display: none
 
   .valuator-line

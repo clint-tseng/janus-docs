@@ -1,36 +1,51 @@
-const { DomView, template, find, from, match, Model, attribute, dēfault, List } = require('janus');
+const { DomView, template, find, from, match, Model, bind, attribute, dēfault, List } = require('janus');
 const $ = require('janus-dollar');
 
 const { Statement, Reference, Repl } = require('../model/repl');
 const { success, fail } = require('../util/eval');
-const { blank, not, give } = require('../util/util');
-const { withPanelSwitch } = require('../view/context');
+const { blank, not, give, ifExists } = require('../util/util');
 const { inspect } = require('../util/inspect');
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // STATEMENTS
 
-const inspectWithSwitch = (x) => withPanelSwitch(inspect(x))
+const StatementVM = Model.build(
+  bind('result', from.subject('result').map(ifExists((result) => result.mapSuccess(inspect).get()))),
 
-const StatementView = DomView.build($(`
-  <div class="repl-statement">
-    <div class="repl-statement-placeholder">line</div>
-    <div class="repl-statement-name"/>
-    <div class="repl-statement-code"/>
-    <div class="repl-statement-result"/>
+  attribute('panel.direct', attribute.Boolean),
+  bind('panel.repl', from('view').flatMap((view) => {
+    const replView = view.closest(Repl).first().get_();
+    return (replView == null) ? false : replView.subject.get('autopanel');
+  })),
+  bind('context', from('panel.direct').and('panel.repl').all.map((x, y) => (x || y) ? 'panel' : null))
+);
+
+const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
+  <div class="statement">
+    <div class="statement-placeholder">line</div>
+    <div class="statement-name"/>
+    <div class="statement-toolbox">
+      <span class="statement-panel" title="View as panel"/>
+    </div>
+
+    <div class="statement-code"/>
+    <div class="statement-result"/>
   </div>
 `), template(
-  find('.repl-statement').classed('named', from('named')),
-  find('.repl-statement-name').render(from.attribute('name')).context('edit'),
+  find('.statement').classed('named', from('named')),
+  find('.statement-name').render(from.attribute('name')).context('edit'),
 
-  find('.repl-statement-result')
-    .render(from('result').map((result) =>
-      (result == null) ? null : result.mapSuccess(inspectWithSwitch).get()))
-      .options(from.app().and('env.final').all.map((app, env) =>
-        ({ app: app.with({ eval: { env } }) }))),
+  find('.statement-panel').render(from.vm().attribute('panel.direct'))
+    .criteria({ context: 'edit', style: 'button' })
+    .options({ stringify: give('') }),
 
-  find('.repl-statement-code').render(from.attribute('code'))
+  find('.statement-result').render(from.vm('result'))
+    .context(from.vm('context'))
+    .options(from.app().and('env.final').all.map((app, env) =>
+      ({ app: app.with({ eval: { env } }) }))),
+
+  find('.statement-code').render(from.attribute('code'))
     .criteria({ context: 'edit', style: 'code' })
     .options(from.self().map((view) => ({
       onCommit: () => {
@@ -44,25 +59,22 @@ const StatementView = DomView.build($(`
 ));
 
 // TODO: repetitive with above; sort of awaiting janus#138
-const ReferenceView = DomView.build($(`
-  <div class="repl-statement">
-    <div class="repl-statement-placeholder">value</div>
-    <div class="repl-statement-name"/>
-    <div class="repl-statement-result"/>
+const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
+  <div class="statement">
+    <div class="statement-placeholder">value</div>
+    <div class="statement-name"/>
+    <div class="statement-result"/>
   </div>`), template(
-  find('.repl-statement').classed('named', from('named')),
-  find('.repl-statement-name').render(from.attribute('name')).context('edit'),
-  find('.repl-statement-result')
-    .render(from('result').map((result) => result.mapSuccess(inspectWithSwitch).getSuccess()))
+  find('.statement').classed('named', from('named')),
+  find('.statement-name').render(from.attribute('name')).context('edit'),
+  find('.statement-result').render(from.vm('result')).context(from.vm('context'))
 ));
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // PINS
 
-const Pin = Model.build(
-  dēfault('expanded', true, attribute.Boolean)
-);
+const Pin = Model.build(dēfault('expanded', true, attribute.Boolean));
 
 const PinView = DomView.build($(`
   <div class="pin">
@@ -99,6 +111,7 @@ class ReplView extends DomView.build($(`
 
       <div class="repl-toolbar">
         <button class="repl-xray" title="Inspect via X-Ray"/>
+        <span class="repl-autopanel" title="View all as panel"/>
       </div>
     </div>
     <div class="repl-main"/>
@@ -111,10 +124,14 @@ class ReplView extends DomView.build($(`
     </div>
   </div>
 `), template(
+  find('.repl').classed('autopaneled', from('autopanel')),
   find('.repl-close').on('click', (e, s, view) => { view.options.app.hideRepl(); }),
   find('.repl-xray').on('click', (e, repl, view) => {
     view.options.app.xray((result) => { repl.reference(result); });
   }),
+  find('.repl-autopanel').render(from.attribute('autopanel'))
+    .criteria({ context: 'edit', style: 'button' })
+    .options({ stringify: give('') }),
 
   find('.repl-main')
     .render(from('statements'))
