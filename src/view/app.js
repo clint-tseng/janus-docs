@@ -90,7 +90,7 @@ class AppView extends DomView.build($('body').clone(), template(
 
     const tooltip = $('#tooltip');
     dom.on('mouseenter', '[title]', (event) => {
-      const target = $(event.target);
+      const target = $(event.currentTarget);
       const text = target.prop('title');
       tooltip.text(text).show();
 
