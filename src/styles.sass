@@ -1027,19 +1027,6 @@ footer
       .exception
         background-color: $color-error
 
-.context-view .context-switcher button
-  @include no-appearance
-  position: absolute
-  right: 0
-  top: 0
-
-  &:after
-    @include icon($icon-window)
-    font-size: 1.2em
-
-  &:hover:after
-    color: $color-accent
-
 .CodeMirror.cm-s-default
   .CodeMirror-activeline-background
     background: #f7f7f7
@@ -1225,6 +1212,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     .statement-placeholder:after
       content: counter(line-number)
 
+    .statement-result .janus-inspect-pin
+      display: none
+
   &.autopaneled .statement-panel
     display: none
 
@@ -1325,6 +1315,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
     button
       @include no-appearance
+      margin-left: 0.5em
       opacity: 0
       transition: 0.4s opacity
       &:before
@@ -1333,6 +1324,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
         color: $color-accent2
         opacity: 1
 
+    .statement-pin:before
+      content: $icon-pin
     .statement-panel button:before
       content: $icon-window
 
@@ -1412,6 +1405,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     top: auto
   &.expanded:after
     display: none
+
+  .statement
+    padding: 0
+    .statement-placeholder, .statement-name, .statement-toolbox
+      display: none
 
 .valuator
   box-shadow: 12em 0 #eee inset

@@ -18,7 +18,9 @@ const StatementVM = Model.build(
     const replView = view.closest(Repl).first().get_();
     return (replView == null) ? false : replView.subject.get('autopanel');
   })),
-  bind('context', from('panel.direct').and('panel.repl').all.map((x, y) => (x || y) ? 'panel' : null))
+  bind('panel.pin', from('view').map((view) => (view.closest(Pin).first().get_() != null))),
+  bind('context', from('panel.direct').and('panel.repl').and('panel.pin')
+    .all.map((x, y, z) => (x || y || z) ? 'panel' : null))
 );
 
 const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
@@ -26,6 +28,7 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
     <div class="statement-placeholder">line</div>
     <div class="statement-name"/>
     <div class="statement-toolbox">
+      <button class="statement-pin" title="Pin statement"/>
       <span class="statement-panel" title="View as panel"/>
     </div>
 
@@ -36,6 +39,10 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
   find('.statement').classed('named', from('named')),
   find('.statement-name').render(from.attribute('name')).context('edit'),
 
+  find('.statement-pin').on('click', (e, statement, view) => {
+    // TODO: yeah this is definitely still awkwardfest.
+    view.closest(Repl).first().get_().subject.get_('pins').add(statement);
+  }),
   find('.statement-panel').render(from.vm().attribute('panel.direct'))
     .criteria({ context: 'edit', style: 'button' })
     .options({ stringify: give('') }),
