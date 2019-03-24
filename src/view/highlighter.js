@@ -9,15 +9,10 @@ const $ = require('janus-dollar');
 const highlight = (app) => {
   const cache = new WeakMap();
 
-  app.on('createdView', (view) => {
-    if ((view.subject != null) && (view.subject.isInspector === true)) {
-      // okay so we have an inspector of some sort for this view. get the inspector
-      // and ensure a tracker for it.
-      const target = view.subject.get_('target');
-      let tracker = cache.get(target); // ugh js
-      if (tracker == null) cache.set(target, (tracker = new Varying(0)));
-      view.reactTo(tracker, (hover) => { view.artifact().toggleClass('highlight', hover > 0); });
-    }
+  app.on('inspected', (view, target) => {
+    let tracker = cache.get(target); // ugh js
+    if (tracker == null) cache.set(target, (tracker = new Varying(0)));
+    view.reactTo(tracker, (hover) => { view.artifact().toggleClass('highlight', hover > 0); });
   });
 
   $('body').on('mouseover', '.janus-inspect-entity, .janus-inspect-panel', (event) => {

@@ -26,6 +26,15 @@ class DocsApp extends App.build(
 
   bind('repl.activated', from('repl.active').pipe(filter((x) => x === true)))
 ) {
+  _initialize() {
+    // TODO: this is sort of messy and i don't really like it but somehow we have
+    // to track one stream of these events regardless of app shadowing.
+    this.listenTo(this, 'createdView', (view) => {
+      // emit an event if we have an inspector, on the original root app.
+      if ((view.subject != null) && (view.subject.isInspector === true))
+        this.original().emit('inspected', view, view.subject.get_('target'));
+    });
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // RESOLVER / REQUEST
