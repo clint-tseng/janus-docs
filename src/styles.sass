@@ -1618,11 +1618,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     cursor: default
 
   &.highlight
-    .entity-title, .entity-content:before, .entity-content:after
+    > .entity-title, > .entity-content:before, > .entity-content:after
       color: red
-    &:hover
-      .entity-title, .entity-content:before, .entity-content:after
-        color: inherit
 
 .janus-inspect-panel
   background-color: #fff
