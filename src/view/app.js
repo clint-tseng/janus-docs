@@ -1,6 +1,6 @@
 const { DomView, template, find, from } = require('janus');
 const { filter } = require('janus-stdlib').varying;
-const { exists } = require('../util/util');
+const { exists, blank } = require('../util/util');
 const { highlight } = require('./highlighter');
 const { positionFlyout } = require('../util/dom');
 const { App } = require('../model/app');
@@ -96,6 +96,7 @@ class AppView extends DomView.build($('body').clone(), template(
     dom.on('mouseenter', '[title]', (event) => {
       const target = $(event.currentTarget);
       const text = target.prop('title');
+      if (blank(text)) return;
       tooltip.text(text).show();
 
       const disabled = target.hasClass('disabled') || (target.parents('.disabled').length !== 0);
