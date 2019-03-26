@@ -1700,6 +1700,13 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .janus-inspect-kvPair
   font-size: 1.2rem
   padding-bottom: 0.15em
+  &.bound .kvPair-delimeter
+    &:before
+      @include icon($icon-bound)
+    display: inline-block
+    overflow: hidden
+    white-space: nowrap
+    width: 1em
   .kvPair-valueBlock
     line-height: 1.4em
     margin-right: 1em // make room for the list + button
