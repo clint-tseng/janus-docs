@@ -1726,6 +1726,39 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     opacity: 1
     transition-duration: 0
 
+.janus-inspect-attribute.janus-inspect-panel
+  dl
+    font-size: 1.2rem
+    overflow: hidden
+  dt
+    clear: left
+    display: inline
+    float: left
+    font-weight: bold
+    text-transform: lowercase
+    &:after
+      content: ':'
+      font-weight: normal
+      padding: 0 0.3em
+  dd
+    display: inline
+    float: left
+
+  .attribute-pairs
+    border-top: 1px dotted #ccc
+    display: none
+    margin: 1em -1em 0
+    padding: 1em
+      bottom: 0
+    &.has-pairs
+      display: block
+
+  .attribute-enum
+    display: none
+    padding-top: 1em
+  &.type-EnumAttribute .attribute-enum
+    display: block
+
 .janus-inspect-varying.janus-inspect-panel
   .varying-snapshot
     background-color: #fadd00 // TODO: copied from -inspect
