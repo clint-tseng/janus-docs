@@ -75,7 +75,7 @@ const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build
     <div class="statement-placeholder">value</div>
     <div class="statement-name"/>
     <div class="statement-toolbox">
-      <button class="statement-pin" title="Pin statement"/>
+      <button class="statement-pin" title="Pin value"/>
       <span class="statement-panel" title="View as panel"/>
     </div>
     <div class="statement-result"/>
