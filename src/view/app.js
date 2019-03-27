@@ -72,7 +72,6 @@ class AppView extends DomView.build($('body').clone(), template(
     });
 
     // inspector events:
-    // TODO: having to delve through viewmodels to the real inspector is messy.
     // TODO: repetitive.
 
     dom.on('mouseenter', '.entity-title', (event) => {
@@ -82,6 +81,12 @@ class AppView extends DomView.build($('body').clone(), template(
         app.flyout(trigger, target, 'panel');
       }, 300);
       trigger.one('mouseleave', _ => { clearTimeout(timer); });
+    });
+
+    dom.on('mouseenter', '.varying-node', (event) => {
+      const node = $(event.currentTarget);
+      const timer = setTimeout(_ => { app.flyout(node, node.view().subject, 'panel'); }, 300);
+      node.one('mouseleave', _ => { clearTimeout(timer); });
     });
 
     dom.on('click', '.janus-inspect-pin', (event) => {

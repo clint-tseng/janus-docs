@@ -1777,6 +1777,13 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
   .panel-content > .varying-tree
     padding-top: 0.4em
+    > .varying-tree > .main .node .varying-node.highlight
+      border-color: #08a4ec // TODO: copied from janus-inspect
+
+  .varying-tree .main .node .varying-node.highlight
+    border-color: red
+    &:hover
+      border-color: #08a4ec // TODO: copied from janus-inspect
 
   .varying-inert
     color: #777
