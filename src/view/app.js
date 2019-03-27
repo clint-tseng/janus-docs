@@ -85,6 +85,7 @@ class AppView extends DomView.build($('body').clone(), template(
 
     dom.on('mouseenter', '.varying-node', (event) => {
       const node = $(event.currentTarget);
+      if (node.parents('.varying-tree').length === 2) return; // is the root node in the panel.
       const timer = setTimeout(_ => { app.flyout(node, node.view().subject, 'panel'); }, 300);
       node.one('mouseleave', _ => { clearTimeout(timer); });
     });
