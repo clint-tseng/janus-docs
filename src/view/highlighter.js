@@ -20,6 +20,7 @@ const highlight = (app) => {
     const target = dom.view().subject.get_('target');
     const tracker = cache.get(target);
     if (tracker != null) {
+      event.stopPropagation(); // TODO: maybe a lighter-touch solution?
       tracker.set(tracker.get() + 1);
       dom.one('mouseout', _ => { tracker.set(tracker.get() - 1); });
     }
