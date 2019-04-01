@@ -99,9 +99,8 @@ class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
     <div class="xray-boxes"/>
     <div class="xray-stack"/>
   </div>`), template(
-  find('.xray-boxes').render(from.vm('entries')).criteria({ wrap: false }),
+  find('.xray-boxes').render(from.vm('entries')),
   find('.xray-stack').render(from.vm('entries'))
-    .criteria({ wrap: false })
     .options({ renderItem: (r) => r.context('list') })
 )) {
   _wireEvents() {
