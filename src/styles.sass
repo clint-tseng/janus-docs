@@ -302,7 +302,7 @@ header
     overflow-y: auto
     top: $header-height - 1rem
 
-    > ul
+    > .janus-list
       padding-top: $main-padding
 
   .toc-entry
@@ -332,7 +332,7 @@ header
       position: relative
       z-index: $z-toc-toplevel-entry
 
-    ul
+    .janus-list
       padding-bottom: 1.5rem
 
     .toc-entry
@@ -450,7 +450,7 @@ header
         &:hover
           background: $color-sidebar-bg-active
 
-      ul
+      .janus-list
         padding-bottom: 0
 
       .api-object-sections
@@ -477,9 +477,6 @@ header
           background: inherit
           text-decoration: underline
 
-    .api-objsection-members li:last-child .api-member-name
-      border-bottom: none
-
     .api-member
       position: relative
 
@@ -488,6 +485,8 @@ header
         font-size: 1.2em
         padding: 0.5em
           left: $sidebar-padding
+      &:last-child .api-member-name
+        border-bottom: none
 
       .api-member-return-type
         background: #111
@@ -869,19 +868,20 @@ footer
       .eval-success
         font-family: $font-monospace
 
-        > .janus-list > li
+        > .janus-list > .janus-inspect-entity
+          display: block
           &:first-child
             padding-top: 0.3em
           &:last-child
             padding-bottom: 0.3em
 
-          > .janus-inspect-list.janus-inspect-entity > .entity-content > .list-values > ul > li
-            display: block
-            padding-left: 1em
+      .janus-inspect-list.janus-inspect-entity > .entity-content > .list-values > .janus-list > span
+        display: block
+        padding-left: 1em
 
-            &:first-child:last-child
-              display: inline
-              padding-left: 0
+        &:first-child:last-child
+          display: inline
+          padding-left: 0
 
       .janus-inspect-entity .entity-content
         margin-left: -0.5em
@@ -939,11 +939,14 @@ footer
       font-family: $font-heading
       font-size: 1.5em
 
-    .eval-success > .janus-list > li
-      border-bottom: 1px dotted #999
-      padding: 1em 0
-      &:last-child
-        border-bottom: none
+    .eval-success > .janus-list
+      > *
+        border-bottom: 1px dotted #999
+        padding: 1em 0
+        &:last-child
+          border-bottom: none
+      > .janus-list > span // TODO: maybe hack?
+        display: block
 
     .janus-inspect-panel.janus-inspect-varying
       font-size: 0.8333em
@@ -1065,7 +1068,7 @@ footer
     font-size: 1.2em
 
   .exception-stack
-    li ~ li
+    .stack-line ~ .stack-line
       display: none
 
     a
@@ -1109,7 +1112,7 @@ footer
   &.expanded
     animation-name: expand-margin
 
-    .exception-stack li ~ li
+    .exception-stack .stack-line ~ .stack-line
       display: block
 
 .stack-line
@@ -1352,7 +1355,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       font-size: 1.2rem
 
     .entity-content .janus-literal,
-    > .eval-success > .janus-list > li > .janus-literal
+    > .eval-success > .janus-list > .janus-literal
       font-family: $font-monospace
 
     .janus-inspect-panel
@@ -1429,8 +1432,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     .code-editor
       min-height: 2.5em // TODO: not sure why this is necessary.
 
-  li:last-child .valuator-line
-    border-bottom: none
+    &:last-child
+      border-bottom: none
 
   .valuator-accept
     @include no-appearance
@@ -1823,8 +1826,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     .function-args
       padding-bottom: 0.6em
 
-      &.inline > ul > li
-        display: inline
+      &.inline .janus-inspect-applicant
         &:after
           content: ', '
         &:last-child:after
@@ -1894,9 +1896,15 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   .list-list
     cursor: default
 
-    li:nth-child(10n+1)
-      .kvPair-key, .list-index
-        color: #666
+    .list-entry, .janus-inspect-kvPair
+      &:nth-child(10n+1)
+        .kvPair-key, .list-index
+          color: #666
+
+      &:hover
+        .list-insert, + .list-entry .list-insert
+          opacity: 1
+          transition-duration: 0
 
     .list-insert
       margin-top: -0.8rem
@@ -1908,11 +1916,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
         opacity: 1
         + hr
           display: block
-
-    > ul > li:hover
-      .list-insert, + li .list-insert
-        opacity: 1
-        transition-duration: 0
 
   .list-more
     margin: 0.3em 0 0.8em
@@ -1967,7 +1970,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       display: inline
 
 .janus-inspect-domview.janus-inspect-panel
-  .domview-mutations > ul > li
+  .domview-mutations .mutation
     padding-bottom: 0.8em
     &:last-child
       padding-bottom: 0
