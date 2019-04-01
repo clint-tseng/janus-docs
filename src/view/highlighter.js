@@ -15,12 +15,15 @@ const highlight = (app) => {
     view.reactTo(tracker, (hover) => { view.artifact().toggleClass('highlight', hover > 0); });
   });
 
+  let lastEvent = null; // essentially a scoped stopPropagation
   $('body').on('mouseover', '.janus-inspect-entity, .janus-inspect-panel', (event) => {
+    if (event.originalEvent === lastEvent) return;
+    lastEvent = event.originalEvent;
+
     const dom = $(event.currentTarget);
     const target = dom.view().subject.get_('target');
     const tracker = cache.get(target);
     if (tracker != null) {
-      event.stopPropagation(); // TODO: maybe a lighter-touch solution?
       tracker.set(tracker.get() + 1);
       dom.one('mouseout', _ => { tracker.set(tracker.get() - 1); });
     }
