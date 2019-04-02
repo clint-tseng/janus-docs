@@ -1700,20 +1700,22 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     ~ .panel-content
       margin-right: $sidebar-width
 
-.janus-inspect-kvPair
+.data-pair
   font-size: 1.2rem
   padding-bottom: 0.15em
-  &.bound .kvPair-delimeter
+  .pair-key
+    color: $color-accent2
+  &.bound .pair-delimeter
     &:before
       @include icon($icon-bound)
     display: inline-block
     overflow: hidden
     white-space: nowrap
     width: 1em
-  .kvPair-valueBlock
+  .pair-v
     line-height: 1.4em
     margin-right: 1em // make room for the list + button
-  .kvPair-clear
+  .pair-clear
     @include no-appearance
     cursor: default
     opacity: 0
@@ -1725,7 +1727,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       color: $color-error
   &.primitive .janus-literal
     cursor: text
-  &:hover .kvPair-clear
+  &:hover .pair-clear
     opacity: 1
     transition-duration: 0
 
@@ -1851,21 +1853,14 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       padding: 0.6em $padding-h
 
 .janus-inspect-list.janus-inspect-panel
-  .list-derivation
-    font-size: 1.2rem
-    margin-bottom: 0.5em
-    ~ .list-derivation
-      margin-top: -0.5em
-      padding-left: 1em
-
-  .list-entry
+  .data-pair
     padding-bottom: 0.2em
 
     hr
       border: none
         top: 1px dotted #999
       left: 0
-      margin-top: -0.3em
+      margin-top: -0.1em
       position: absolute
       right: 3em
 
@@ -1880,34 +1875,30 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     &.list-insert-last
       margin-top: 0.5em
 
-  .kvPair-key, .list-index
+  .pair-key
     color: #bbb
     font-size: 1rem
     font-weight: normal
-  .kvPair-delimeter
-    display: none
-
-  // this is really annoying but because of the way the double-click kvpair-value
-  // editor works we have to style this separately for alignment.
-  .kvPair-key
     line-height: 1.6em
     vertical-align: bottom
+  .pair-delimeter
+    display: none
 
   .list-list
     cursor: default
 
-    .list-entry, .janus-inspect-kvPair
+    .data-pair
       &:nth-child(10n+1)
-        .kvPair-key, .list-index
+        .pair-key
           color: #666
 
       &:hover
-        .list-insert, + .list-entry .list-insert
+        .list-insert, + .data-pair .list-insert
           opacity: 1
           transition-duration: 0
 
     .list-insert
-      margin-top: -0.8rem
+      margin-top: -0.6rem
       opacity: 0
       position: absolute
       right: 1em
@@ -1927,11 +1918,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     border-bottom: 1px dotted #777
     text-align: right
 
-.list-entry
-  .list-value
+.list-mapped .data-pair
+  .pair-value
     font-size: 1.2rem
 
-  .list-function
+  .pair-function
     background: #f4f4f4
     border-bottom: 1px dotted #ccc
     margin: 0 0.5em
@@ -1942,24 +1933,24 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     &:after
       @include icon($icon-arrow-right)
 
-.list-filtered .list-list
-  counter-reset: filter-index -1
-  .filter-pass
-    counter-increment: filter-index
-.entry-filtered
-  .filter-intermediate
-    font-size: 1.1rem
-  .index-child
-    padding-left: 0.4em
+.list-filtered
+  .list-list
+    counter-reset: filter-index -1
+    .filter-pass
+      counter-increment: filter-index
 
-  &.filter-pass .filter-child-index
-    color: $color-success
-    &:before
-      @include icon($icon-arrow-right)
-      padding-right: 0.3em
-    &:after
-      content: counter(filter-index)
-      font-size: 1.2rem
+  .data-pair
+    .filter-intermediate
+      font-size: 1.1rem
+
+    &.filter-pass .filter-child-index
+      color: $color-success
+      &:before
+        @include icon($icon-arrow-right)
+        padding-right: 0.3em
+      &:after
+        content: counter(filter-index)
+        font-size: 1.2rem
 
 .janus-inspect-list
   .list-more
