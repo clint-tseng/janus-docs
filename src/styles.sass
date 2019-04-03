@@ -1785,17 +1785,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     label, .reaction, .varying-reactions-none
       line-height: 2.2em
 
-    .janus-list-selectItem
-      position: relative
-
-      &.checked
-        background-color: $highlight-color
-
-      button
-        @include fill
-        cursor: default
-        opacity: 0
-        width: 100%
+    .reaction.checked .rxn-value
+      background-color: $highlight-color
 
   .varying-snapshot
     background-color: $highlight-color
