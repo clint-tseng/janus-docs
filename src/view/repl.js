@@ -110,7 +110,7 @@ const PinView = DomView.build($(`
   find('.pin-remove').on('click', (e, subject, view) => {
     // we do this by index on the parent list in case multiple instances of this
     // item exist.
-    const idx = $(event.target).closest('li').prevAll().length;
+    const idx = $(event.target).closest('.pin').prevAll().length;
     view.closest(List).first().get_().subject.parent.removeAt(idx);
   }),
 ));
