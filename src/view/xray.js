@@ -33,7 +33,7 @@ const XRayListView = DomView.build($(`
   </div>`), template(
   find('.xray-entry').classGroup('delta', from('idx.delta')),
   find('.xray-view').render(from('view').map(inspect)),
-  find('.xray-subject').render(from('view').map((view) => inspect(view.subject)))
+  find('.xray-subject').render(from('view').map((view) => inspect(view.subject, true)))
 ));
 
 ////////////////////////////////////////

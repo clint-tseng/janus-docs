@@ -3,14 +3,18 @@ const jInspect = require('janus-inspect');
 const { asPanel } = require('../view/context');
 
 // we make our own inspect() that prevents re-inspection.
-const inspect = (x) => {
+const inspect = (x, force = false) => {
   // this is sort of a cheat; if we inspect a View without an app, splice one in.
   // TODO: remove
   if ((x != null) && (x instanceof DomView) && (x.options.app == null))
     x.options.app = app;
 
-  return ((x != null) && ((x.isInspector === true) || (x.isContext === true)))
-    ? x : jInspect.inspect(x);
+  // we don't re-inspect inspectors and we don't try to inspect context views
+  // since they're really just wrappers, but for eg the xray we just want to
+  // force the true stack to show so we allow a passthrough flag.
+  const passthrough = (force !== true) && (x != null) &&
+    ((x.isInspector === true) || (x.isContext === true));
+  return passthrough ? x : jInspect.inspect(x);
 };
 
 // augment inspect with the ability to directly request a panel view.
