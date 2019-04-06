@@ -76,10 +76,10 @@ class AppView extends DomView.build($('body').clone(), template(
 
     dom.on('mouseenter', '.entity-title', (event) => {
       const trigger = $(event.target);
-      const timer = setTimeout(_ => {
-        const target = trigger.closest('.janus-inspect-entity').view().subject;
-        app.flyout(trigger, target, 'panel');
-      }, 300);
+      const entity = trigger.closest('.janus-inspect-entity');
+      if (entity.hasClass('no-panel')) return;
+
+      const timer = setTimeout(_ => { app.flyout(trigger, entity.view().subject, 'panel'); }, 300);
       trigger.one('mouseleave', _ => { clearTimeout(timer); });
     });
 
