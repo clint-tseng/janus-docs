@@ -61,6 +61,7 @@ $icon-close-small: '\e90c'
 $icon-close-circle: '\e903'
 $icon-console-add: '\e90d'
 $icon-pencil: '\e904'
+$icon-load: '\e916'
 $icon-replay-all: '\e905'
 $icon-pin: '\e906'
 $icon-play: '\e907'
@@ -130,8 +131,8 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
 @font-face
   font-family: 'icons';
-  src: url('/assets/icons.eot?e')
-  src: url('/assets/icons.eot?e#iefix') format('embedded-opentype'), url('/assets/icons.ttf?e') format('truetype'), url('/assets/icons.woff?e') format('woff'), url('/assets/icons.svg?e#icomoon') format('svg')
+  src: url('/assets/icons.eot?f')
+  src: url('/assets/icons.eot?f#iefix') format('embedded-opentype'), url('/assets/icons.ttf?f') format('truetype'), url('/assets/icons.woff?f') format('woff'), url('/assets/icons.svg?f#icomoon') format('svg')
   font-weight: normal
   font-style: normal
 
@@ -1975,6 +1976,12 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     display: none
     &.has-more
       display: inline
+
+  .array-update
+    @include no-appearance
+    margin-left: 0.3em
+    &:before
+      @include icon($icon-load)
 
 .janus-inspect-domview.janus-inspect-panel
   .domview-mutations .mutation
