@@ -31,8 +31,8 @@ class DocsApp extends App.build(
     // to track one stream of these events regardless of app shadowing.
     this.listenTo(this, 'createdView', (view) => {
       // emit an event if we have an inspector, on the original root app.
-      if ((view.subject != null) && (view.subject.isInspector === true))
-        this.original().emit('inspected', view, view.subject.get_('target'));
+      if (typeof view.highlight === 'function')
+        this.original().emit('inspected', view, view.highlight());
     });
   }
 

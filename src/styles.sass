@@ -1827,6 +1827,12 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     font-size: 8px
     padding: 0 0.6em
 
+  &.highlight
+    .rxn-value
+      box-shadow: 0 0 0 2px red
+    &:hover .rxn-value
+      box-shadow: none
+
 .varying-delta
   // TODO: something needs to happen here
   //text-overflow: ellipsis

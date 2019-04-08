@@ -16,13 +16,12 @@ const highlight = (app) => {
   });
 
   let lastEvent = null; // essentially a scoped stopPropagation
-  $('body').on('mouseover', '.janus-inspect-entity, .janus-inspect-panel', (event) => {
+  $('body').on('mouseover', '.highlights', (event) => {
     if (event.originalEvent === lastEvent) return;
     lastEvent = event.originalEvent;
 
     const dom = $(event.currentTarget);
-    const target = dom.view().subject.get_('target');
-    const tracker = cache.get(target);
+    const tracker = cache.get(dom.view().highlight());
     if (tracker != null) {
       tracker.set(tracker.get() + 1);
       dom.one('mouseout', _ => { tracker.set(tracker.get() - 1); });
