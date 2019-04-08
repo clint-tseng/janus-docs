@@ -1205,6 +1205,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     right: 0
     top: 0
 
+    .janus-inspect-panel
+      cursor: auto
+
   .statement
     border-bottom: 1px dotted #ddd
     &:last-child
@@ -1625,6 +1628,10 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     > .entity-title, > .entity-content:before, > .entity-content:after
       color: red
 
+  &.no-panel.highlight:hover
+    > .entity-title, > .entity-content:before, > .entity-content:after
+      color: inherit
+
 .janus-inspect-panel
   background-color: #fff
   border-radius: 0.2em
@@ -1643,6 +1650,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     background-color: $color-accent
     border-radius: 0.2em 0.2em 0 0
     color: #fff
+    cursor: default
     font-size: 1.3em
     font-weight: bold
     padding: 0.5em
@@ -1665,6 +1673,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     background: #0a8b8b
     border-top: 1px dotted #fff
     color: #fff
+    cursor: default
     font-size: 1.1rem
     padding: 0.3em 0.6em
 
