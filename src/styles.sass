@@ -1779,22 +1779,44 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .janus-inspect-varying.janus-inspect-panel
   $highlight-color: #fadd00 // TODO: copied from janus-inspect
 
-  .varying-reaction-bar
+  .varying-bar
     border-bottom: 1px dotted #ccc
-    margin: -1em
-      bottom: 0.5em
+    margin: 0 -1em
     overflow: hidden
     padding: 0.2em 0.7em
 
     label
       font-weight: bold
+      line-height: 2.2em
       padding-right: 1em
 
     label, li
       float: left
 
+  .varying-observation-bar
+    margin-top: -1em
+
+    .janus-list
+      display: inline
+
+    .janus-inspect-entity
+      line-height: 2.2em
+
+      .janus-literal, .entity-title, .entity-content:before, .entity-content, .entity-content:after
+        font-size: 1.1rem
+
+      &:after
+        content: ','
+      &:last-child:after
+        content: none
+
+    .varying-inert
+      color: #777
+
   .varying-reaction-bar
-    label, .reaction, .varying-reactions-none
+    margin-bottom: 0.5em
+
+    .reaction, .varying-reactions-none
       line-height: 2.2em
 
     .reaction.checked .rxn-value
@@ -1831,13 +1853,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
   .varying-tree .main .node .varying-node.highlight
     border-color: red
-
-  .varying-inert
-    color: #777
-    padding-bottom: 0.8em
-
-    a
-      color: $color-accent2
 
 .reaction
   &:before
