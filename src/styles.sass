@@ -60,6 +60,7 @@ $icon-close: '\e902'
 $icon-close-small: '\e90c'
 $icon-close-circle: '\e903'
 $icon-console-add: '\e90d'
+$icon-eye: '\e917'
 $icon-pencil: '\e904'
 $icon-load: '\e916'
 $icon-replay-all: '\e905'
@@ -1586,6 +1587,14 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   .xray-entity .xray-subject
     top: calc(100% + 1.7em)
 
+.xray.flash
+  .xray-box.delta0
+    animation-duration: 4s
+    animation-name: 'flash-fade'
+    animation-iteration-count: 1
+    background: transparentize(red, 0.3)
+    @include xray-box(red)
+
 ////////////////////////////////////////
 // COMPONENTS: misc
 
@@ -2029,6 +2038,15 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     position: absolute
 
 .janus-inspect-domview.janus-inspect-panel
+  .domview-flash
+    @include no-appearance
+    color: #fff
+    font-size: 1.2em
+    margin-left: 0.4em
+    position: absolute
+    &:before
+      @include icon($icon-eye)
+
   .domview-mutations .mutation
     padding-bottom: 0.8em
     &:last-child
@@ -2206,4 +2224,12 @@ $thinker-effect-height: 60em
     transform: translateY(12px)
   to
     transform: translateY(0)
+
+@keyframes flash-fade
+  0%
+    opacity: 1
+  90%
+    opacity: 1
+  100%
+    opacity: 0
 

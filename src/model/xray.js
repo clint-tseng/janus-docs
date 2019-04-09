@@ -38,5 +38,17 @@ class XRay extends Model.build(
   }
 }
 
+
+// a simplification of xray that simply displays a box around a target view for 4 seconds.
+class Flash extends Model.build(
+  bind('stack', from('target').map((t) => new List([ t ]))),
+  bind('select.index', from(0))
+) {
+  _initialize() {
+    setTimeout(() => { this.destroy(); }, 4000);
+  }
+}
+XRay.Flash = Flash;
+
 module.exports = { XRay };
 

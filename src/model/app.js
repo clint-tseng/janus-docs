@@ -86,6 +86,11 @@ class DocsApp extends App.build(
     });
     return xray;
   }
+  flash(target) {
+    const flash = new XRay.Flash({ target });
+    this.set('xray', flash); // TODO: maybe don't replace the xray?
+    return flash;
+  }
 
   showRepl() { this.set('repl.active', true); }
   hideRepl() { this.set('repl.active', false); }

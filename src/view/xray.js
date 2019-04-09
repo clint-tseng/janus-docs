@@ -123,6 +123,16 @@ class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
   }
 }
 
+////////////////////////////////////////
+// FLASH SIMPLIFIED VIEW
+
+class FlashView extends DomView.withOptions({ viewModelClass: XRayVM }).build(
+  $(`<div class="xray flash"><div class="xray-boxes"/></div>`),
+  XRayView.template
+) {
+  _initialize() { this.destroyWith(this.subject); }
+}
+
 module.exports = {
   XRayEntry, XRayEntryView,
   XRayView,
@@ -130,6 +140,7 @@ module.exports = {
     library.register(XRayEntry, XRayEntryView);
     library.register(XRayEntry, XRayListView, { context: 'list' });
     library.register(XRay, XRayView);
+    library.register(XRay.Flash, FlashView);
   }
 }
 
