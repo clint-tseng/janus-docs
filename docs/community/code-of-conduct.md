@@ -54,7 +54,7 @@ But the loss of valuable contributors to abuse and conflict surely will.
 Recognize that everybody has their own struggles and problems they are trying to
 solve, and that often they are not dissimilar to your own if only you're willing
 to listen to each other. Begin by acknowledging and validating viewpoints even
-when you disagree.
+when you disagree with the conclusions.
 
 Be the change
 -------------
