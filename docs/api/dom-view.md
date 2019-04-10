@@ -39,7 +39,7 @@ class SampleViewModel extends Model.build(
 const SampleView = DomView.withOptions({ viewModelClass: SampleViewModel });
 
 const model = new Model({ name: 'Jane' });
-const view = new SampleView(model);
+const view = new SampleView(model, { app });
 return view.subject;
 ~~~
 
@@ -75,7 +75,7 @@ const model = new Model({
     markup, among other things.`
 });
 
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ### λfind
@@ -106,7 +106,7 @@ const Link = DomView.build(
 );
 
 const resource = new Model({ name: 'API Documentation', url: '/api' });
-return new Link(resource);
+return new Link(resource, { app });
 ~~~
 
 ### λfindλbuild
@@ -137,7 +137,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ name: 'Some Name', important: true });
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ### λtemplate
@@ -176,7 +176,7 @@ const article = new Model({
   body: 'Because functional composition is pretty neat.'
 });
 
-return new ArticleView(article);
+return new ArticleView(article, { app });
 ~~~
 
 ## Mutators
@@ -220,7 +220,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ name: 'cool link', url: '/' });
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ### .prop
@@ -239,7 +239,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ name: 'cool text' });
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ### .classed
@@ -256,7 +256,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ isError: true });
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ~~~ styles
@@ -278,7 +278,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ color: 'red' }); // try blue or green
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ~~~ styles
@@ -300,7 +300,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ size: '25px' });
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ### .text
@@ -320,7 +320,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ name: '&ldquo;test name&rdquo;' });
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ### .html
@@ -340,7 +340,7 @@ const SampleView = DomView.build(
 const model = new Model({
   name: 'this is <strong>some <em>&ldquo;html&rdquo;!</em></strong>'
 });
-return new SampleView(model);
+return new SampleView(model, { app });
 ~~~
 
 ### .render
@@ -445,7 +445,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model({ count: 0 });
-const view = new SampleView(model);
+const view = new SampleView(model, { app });
 view.wireEvents(); // try commenting this line out.
 return view;
 ~~~
@@ -476,7 +476,7 @@ const SampleView = DomView.build(
 );
 
 const model = new Model();
-const view = new SampleView(model);
+const view = new SampleView(model, { app });
 return view.artifact();
 ~~~
 
@@ -511,10 +511,10 @@ const SampleView = DomView.build(
     find('p').text(from('body'))));
 
 const model = new Model({ name: 'DomView', body: 'is pretty cool' });
-const firstView = new SampleView(model);
+const firstView = new SampleView(model, { app });
 const markup = firstView.markup(); // markup is a string!
 
-const secondView = new SampleView(model);
+const secondView = new SampleView(model, { app });
 secondView.attach($(markup));
 model.set('body', 'is really cool');
 return secondView;
@@ -565,7 +565,7 @@ class SampleView extends DomView.build(
 }
 
 const model = new Model({ name: 'DomView', body: 'is pretty cool' });
-const view = new SampleView(model);
+const view = new SampleView(model, { app });
 view.wireEvents();
 return view;
 ~~~
