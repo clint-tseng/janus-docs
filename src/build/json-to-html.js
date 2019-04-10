@@ -32,6 +32,15 @@ const data = [ tocData, apiData, articleData ].join(',').replace(/<\/script>/g, 
 inlineScript.text(`init(${data});`);
 dom.find('script').after(inlineScript);
 
-// 6. Write our HTML output.
+// 6. Do some minor cache-busting.
+const dateStr = (new Date()).getTime().toString();
+const bust = (attr) => (_, node) => {
+  const $node = $(node);
+  $node.attr(attr, `${$node.attr(attr)}?${dateStr}`);
+};
+dom.find('link[rel="stylesheet"][href^="/"]').each(bust('href'));
+dom.find('script[src^="/"]').each(bust('src'));
+
+// 7. Write our HTML output.
 writeFileSync(outFile, dom.get(0).innerHTML, 'utf8');
 
