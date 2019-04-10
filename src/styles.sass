@@ -522,7 +522,7 @@ header
 
   .repl
     animation-duration: 0.3s
-    animation-name: 'right-motion'
+    animation-name: right-motion
     animation-timing-function: $ease-extreme-out
     animation-iteration-count: 1
     background: rgba(244, 244, 244, 0.98)
@@ -541,7 +541,7 @@ header
       width: $repl-full-width
 
   &.active .repl
-    animation-name: 'left-motion'
+    animation-name: left-motion
     right: 0
 
 
@@ -560,7 +560,7 @@ header
 
   .sheet
     animation-duration: 0.5s
-    animation-name: 'up-motion'
+    animation-name: up-motion
     animation-timing-function: $ease-extreme-out
     animation-iteration-count: 1
     float: left
@@ -993,7 +993,7 @@ footer
 
   &.activated .sample-toolbar
     animation-duration: 1s
-    animation-name: 'expand-margin'
+    animation-name: expand-margin
     animation-timing-function: $ease-extreme-out
     animation-iteration-count: 1
     display: block
@@ -1394,7 +1394,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
   .pin-contents
     animation-duration: 1s
-    animation-name: 'contract-margin'
+    animation-name: contract-margin
     animation-iteration-count: 1
     animation-timing-function: $ease-extreme-out
     margin-left: $pin-chrome-outer-width
@@ -1402,7 +1402,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     padding: 1em
 
   &.expanded .pin-contents
-    animation-name: 'expand-margin'
+    animation-name: expand-margin
     max-height: none
 
   &:after
@@ -1590,7 +1590,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .xray.flash
   .xray-box.delta0
     animation-duration: 4s
-    animation-name: 'flash-fade'
+    animation-name: flash-fade
     animation-iteration-count: 1
     background: transparentize(red, 0.3)
     @include xray-box(red)
