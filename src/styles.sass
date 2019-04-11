@@ -1495,14 +1495,16 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
   box-shadow: 0 0 0 $width $color inset
 
 .xray-entry .xray-entity
-  background-color: $color-xray-selected
+  background-color: #444
   color: #fff
   font-family: $font-monospace
   padding: 0.3em 0.5em
   white-space: nowrap
 
-  &.xray-subject
-    background-color: #444
+.xray-entry.delta0 .xray-entity
+  .select-view &.xray-view,
+  .select-subject &.xray-subject
+    background-color: $color-xray-selected
 
 .xray-stack .xray-entry 
   min-height: 1.7em
@@ -1539,13 +1541,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     display: inline
 
   &.delta0
-    .xray-view
-      background: $color-xray-selected
-    .xray-subject
-      background: #444
     .hint-sel
       display: inline
       background: $color-accent2
+    .xray-view, .xray-subject
+      background: #444
 
 .xray-box
   background: rgba(187, 187, 187, 0.1)

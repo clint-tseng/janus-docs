@@ -25,7 +25,7 @@ const XRayListView = DomView.build($(`
       <span class="key">[</span> or <span class="key">,</span> to select
     </span>
     <span class="xray-hint hint-sel">
-      <span class="key">Enter</span> to inspect
+      <span class="key">Enter</span> to inspect / <span class="key">Tab</span> to swap
     </span>
     <span class="xray-hint hint-next">
       <span class="key">]</span> or <span class="key">.</span> to select
@@ -91,7 +91,8 @@ class XRayEntryView extends DomView.build($(`
 const XRayVM = Model.build(
   bind('entries', from.subject('stack').and.subject('sizing').and.subject('select.index').asVarying()
     .all.map((stack, sizing, selection) =>
-      stack.mapPairs((own, view) => new XRayEntry({ view, sizing, idx: { own, selection } })))));
+      stack.mapPairs((own, view) => new XRayEntry({ view, sizing, idx: { own, selection } }))))
+);
 
 class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
   <div class="xray">
@@ -99,6 +100,7 @@ class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
     <div class="xray-boxes"/>
     <div class="xray-stack"/>
   </div>`), template(
+  find('.xray').classGroup('select-', from.vm('select-subject').map((m) => m ? 'subject' : 'view')),
   find('.xray-boxes').render(from.vm('entries')),
   find('.xray-stack').render(from.vm('entries'))
     .options({ renderItem: (r) => r.context('list') })
@@ -109,13 +111,15 @@ class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
     const body = $(document.body);
 
     this.listenTo(body, 'mouseover', (event) => { xray.set('dom', $(event.target).view()); });
-    this.listenTo(body, 'keypress', (event) => {
+    this.listenTo(body, 'keydown', (event) => {
       if (event.which === 13) {
-        xray.set('result', xray.get_('select.view')); // enter
+        const view = xray.get_('select.view');
+        xray.set('result', (this.vm.get_('select-subject') === true) ? view.subject : view); // enter
         event.preventDefault();
       }
-      if ((event.which === 91) || (event.which === 44)) xray.stepIn(); // [ ,
+      else if ((event.which === 91) || (event.which === 44)) xray.stepIn(); // [ ,
       else if ((event.which === 93) || (event.which === 46)) xray.stepOut(); // ] .
+      else if (event.which === 9) this.vm.set('select-subject', !this.vm.get_('select-subject')); // tab
       else if (event.which === 27) xray.destroy(); // esc
     });
 
