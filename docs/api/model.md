@@ -67,7 +67,7 @@ const ExampleModel = Model.build(
     default() { return 'anonymous'; }
   }),
   attribute('status', class extends attribute.Enum {
-    values() { return [ 'online', 'away', 'offline' ]; }
+    _values() { return [ 'online', 'away', 'offline' ]; }
   })
 );
 
