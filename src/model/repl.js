@@ -162,8 +162,8 @@ class Repl extends Model.build(
     this.createStatement();
   }
 
-  reference(obj) {
-    const ref = new Reference({ result: success(obj) });
+  reference(obj, name) {
+    const ref = new Reference({ result: success(obj), name });
     const statements = this.get_('statements');
     if (blank(statements.get_(-1).get_('code'))) {
       statements.add(ref, -1);

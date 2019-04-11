@@ -57,9 +57,8 @@ class DocsApp extends App.build(
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  // APP UI
+  // APP UI / INTEROP
 
-  // also interop (expected by janus-inspect)
   flyout(trigger, target, context = 'default') {
     const triggerNode = trigger[0];
     const flyouts = this.get_('flyouts');
@@ -99,8 +98,8 @@ class DocsApp extends App.build(
   ////////////////////////////////////////////////////////////////////////////////
   // EVAL INTEROP
 
-  popValuator(title, callback) {
-    const valuator = new Valuator({ env: { inject: this.get_('eval.env') } });
+  popValuator(title, callback, initial = []) { // TODO: awkward call signature.
+    const valuator = new Valuator({ env: { inject: this.get_('eval.env') }, initial });
     const sheet = this.sheet(title, valuator);
     valuator.destroyWith(sheet);
     valuator.get('result').react(false, (result) => { // no point in reactTo
