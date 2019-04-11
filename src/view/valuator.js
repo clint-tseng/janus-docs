@@ -20,9 +20,12 @@ const ValuatorLineView = DomView.build($(`
 
 
 class ValuatorView extends DomView.build($(`
-  <div class="valuator"/>`), template(
+  <div class="valuator">
+    <button class="valuator-xray" title="Inspect via X-Ray"/>
+    <div class="valuator-statements"/>
+  </div>`), template(
 
-  find('.valuator')
+  find('.valuator-statements')
     .render(from('statements'))
       .options({ renderItem: (r) => r.context('valuator') })
 
@@ -41,7 +44,11 @@ class ValuatorView extends DomView.build($(`
     .on('commit', 'li:last-child .valuator-line', (e, subject, view) => {
       subject.get_('repl').createStatement();
       view.into('repl').into('statements').into(-1).into(EditorView).last().get_().focus();
-    })
+    }),
+
+  find('.valuator-xray').on('click', (e, repl, view) => {
+    view.options.app.xray((result) => { repl.reference(result); });
+  })
 )) {
   _wireEvents() {
     // any time a new statement is created, focus it.

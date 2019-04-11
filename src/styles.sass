@@ -1422,10 +1422,22 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
 .valuator
   box-shadow: 12em 0 #eee inset
-  max-height: 80vh
-  overflow-y: auto
 
-  .statement-placeholder
+  .valuator-xray
+    @include no-appearance
+    color: #fff
+    position: absolute
+    right: 2.5em
+    top: 0.75em
+    &:before
+      @include icon($icon-target)
+      font-size: 1.1em
+
+  .valuator-statements
+    max-height: 80vh
+    overflow-y: auto
+
+  .statement-placeholder, .statement-pin
     display: none
 
   .valuator-line
