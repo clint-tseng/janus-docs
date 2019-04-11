@@ -117,8 +117,8 @@ class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
         xray.set('result', (this.vm.get_('select-subject') === true) ? view.subject : view); // enter
         event.preventDefault();
       }
-      else if ((event.which === 91) || (event.which === 44)) xray.stepIn(); // [ ,
-      else if ((event.which === 93) || (event.which === 46)) xray.stepOut(); // ] .
+      else if ((event.which === 188) || (event.which === 191)) xray.stepIn(); // [ ,
+      else if ((event.which === 187) || (event.which === 190)) xray.stepOut(); // ] .
       else if (event.which === 9) this.vm.set('select-subject', !this.vm.get_('select-subject')); // tab
       else if (event.which === 27) xray.destroy(); // esc
     });
