@@ -15,7 +15,9 @@ const { sticky, fromEvents } = require('janus-stdlib').varying;
 // somehow it still feels sort of lame.
 const holdParent = (trigger, ref) => {
   const parentDom = trigger.closest('.flyout');
-  if (parentDom.length > 0) parentDom.view().subject.get_('children').add(ref);
+  if (parentDom.length === 0) return false;
+  parentDom.view().subject.get_('children').add(ref);
+  return true;
 };
 
 // manual flyouts don't have much to do.

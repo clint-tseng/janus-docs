@@ -97,7 +97,7 @@ class DocsApp extends App.build(
 
   placehold(target) {
     const placeholder = new Placeholder({ target });
-    holdParent(target, placeholder);
+    if (!holdParent(target, placeholder)) return;
     this.get_('junk').add(placeholder);
     return placeholder;
   }
