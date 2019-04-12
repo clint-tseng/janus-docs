@@ -59,7 +59,7 @@ class DocsApp extends App.build(
   ////////////////////////////////////////////////////////////////////////////////
   // APP UI / INTEROP
 
-  flyout(trigger, target, { context = 'default', type = 'Hover' }) {
+  flyout(trigger, target, { context = 'default', type = 'Hover' } = {}) {
     const triggerNode = trigger[0];
     const flyouts = this.get_('flyouts');
     for (const flyout of flyouts) // don't retrigger the same flyout twice.
@@ -109,6 +109,7 @@ class DocsApp extends App.build(
     return valuator;
   }
 
+  // TODO: rm? this was here for contextless evaluation in j-i which no longer exists
   evaluate(expr) {
     const result = compile(this.get_('eval.env'), expr).flatMap((f) => f());
     if (fail.match(result)) throw result.get();
