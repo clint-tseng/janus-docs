@@ -2,7 +2,8 @@ const { App, Varying, attribute, bind, dēfault, types, from, Request, Resolver,
 const { filter } = require('janus-stdlib').varying
 const { compile, fail } = require('../util/eval');
 const { Article } = require('./article');
-const { Flyout } = require('./flyout');
+const { holdParent, Flyout } = require('./flyout');
+const { Placeholder } = require('../view/placeholder');
 const { Sheet } = require('./sheet');
 const { Repl } = require('./repl');
 const { Valuator } = require('./valuator');
@@ -94,6 +95,13 @@ class DocsApp extends App.build(
     return flash;
   }
 
+  placehold(target) {
+    const placeholder = new Placeholder({ target });
+    holdParent(target, placeholder);
+    this.get_('junk').add(placeholder);
+    return placeholder;
+  }
+
   showRepl() { this.set('repl.active', true); }
   hideRepl() { this.set('repl.active', false); }
   toggleRepl() { this.set('repl.active', !this.get_('repl.active')); }
@@ -103,7 +111,7 @@ class DocsApp extends App.build(
 
   valuator(trigger, { title, values = [], initial }, callback) {
     const env = { inject: this.get_('eval.env') };
-    const valuator = new Valuator({ title, values, initial, env });
+    const valuator = new Valuator({ trigger, title, values, initial, env });
     const flyout = this.flyout(trigger, valuator, { context: 'quick', type: 'Manual' });
     valuator.destroyWith(flyout);
 

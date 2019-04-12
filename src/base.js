@@ -19,6 +19,7 @@ const baseViews = () => {
   require('./view/exception').registerWith(views);
   require('./view/flyout').registerWith(views);
   require('./view/repl').registerWith(views);
+  require('./view/placeholder').registerWith(views);
   require('./view/sample').registerWith(views);
   require('./view/sheet').registerWith(views);
   require('./view/toc').registerWith(views);

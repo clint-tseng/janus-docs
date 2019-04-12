@@ -1661,6 +1661,16 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .flyout
   box-shadow: $subtle-shadow
 
+.placeholder
+  $size: 1.4em
+  background: transparentize(red, 0.3)
+  border-radius: $size
+  height: $size
+  margin-left: $size * -0.5
+  margin-top: $size * -0.5
+  position: absolute
+  width: $size
+
 // we end up redoing the panel styles a little here, but we don't want to actually
 // inherit all of panel's particular quirks so we sort of have to.
 .sheet
