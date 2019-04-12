@@ -10,13 +10,13 @@ const { sticky, fromEvents } = require('janus-stdlib').varying;
 // has left areas of interest (the original trigger, the flyout, and its
 // descendants) for a small length of time.
 
-// add ourselves to our trigger's flyout parent to prevent its destruction.
-const addToParent = (flyout) => {
-  const parentDom = flyout.get_('trigger').closest('.flyout');
-  if (parentDom.length > 0)
-    parentDom.view().subject.get_('children').add(flyout);
+// add a reference to our trigger's flyout parent to prevent its destruction.
+// TODO: this is sort of the "canonical" way to do this from elsewhere too but
+// somehow it still feels sort of lame.
+const holdParent = (trigger, ref) => {
+  const parentDom = trigger.closest('.flyout');
+  if (parentDom.length > 0) parentDom.view().subject.get_('children').add(ref);
 };
-
 
 // manual flyouts don't have much to do.
 class ManualFlyout extends Model.build(
@@ -24,7 +24,7 @@ class ManualFlyout extends Model.build(
 ) {
   _initialize() {
     this.destroyWith(this.get_('target'));
-    addToParent(this);
+    holdParent(this.get_('trigger'), this);
   }
 }
 
@@ -49,12 +49,13 @@ class HoverFlyout extends Model.build(
     });
 
     // and then add ourselves onto our flyout parent.
-    addToParent(this);
+    holdParent(this.get_('trigger'), this);
   }
 }
 
 
 module.exports = {
+  holdParent,
   Flyout: {
     manual: ManualFlyout,
     Manual: ManualFlyout,

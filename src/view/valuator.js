@@ -4,7 +4,7 @@ const { not } = require('../util/util');
 const { success } = require('../util/eval');
 const { Valuator } = require('../model/valuator');
 const { Statement } = require('../model/repl');
-const { Flyout } = require('../model/flyout');
+const { holdParent, Flyout } = require('../model/flyout');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,12 +27,8 @@ class QuickValuatorView extends DomView.build($(`
 
     // prepare to clear the flyout away, then do so:
     // first hold our parent flyout open as long as the sheet lives, if any.
-    // TODO: some sort of more canonical way to do this.
     const flyoutView = view.closest(Flyout.Manual).first().get_();
-    if (flyoutView != null) {
-      const parentFlyout = flyoutView.subject.get_('trigger').closest('.flyout');
-      if (parentFlyout.length > 0) parentFlyout.view().subject.get_('children').add(sheet);
-    }
+    if (flyoutView != null) holdParent(flyoutView.subject.get_('trigger'), sheet);
 
     valuator.tap(); // because app#valuator/flyout will try (correctly) to destroy()
     view.closest(Flyout.Manual).first().get_().destroy(); // and now gone.
