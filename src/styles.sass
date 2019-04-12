@@ -43,6 +43,7 @@ $z-repl: 150
 $z-sheets: 199
 $z-flyout: 200
 $z-tooltip: 500
+$z-junk: 900
 $z-xray: 1000
 $z-xray-next: $z-xray + 1
 $z-xray-selected: $z-xray + 2
@@ -671,6 +672,14 @@ footer
   position: absolute
   top: 0
   z-index: $z-xray
+
+////////////////////////////////////////
+// LAYOUT: junk
+#junk
+  left: 0
+  position: absolute
+  top: 0
+  z-index: $z-junk
 
 
 ////////////////////////////////////////////////////////////////////////////////

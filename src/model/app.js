@@ -19,6 +19,7 @@ class DocsApp extends App.build(
   ),
   attribute('flyouts', GlobalList),
   attribute('sheets', GlobalList),
+  attribute('junk', GlobalList),
 
   dēfault.writing('cache.articles', []),
   dēfault.writing('repl.obj', new Repl()),
@@ -89,7 +90,7 @@ class DocsApp extends App.build(
   }
   flash(target) {
     const flash = new XRay.Flash({ target });
-    this.set('xray', flash); // TODO: maybe don't replace the xray?
+    this.get_('junk').add(flash);
     return flash;
   }
 
