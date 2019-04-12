@@ -1491,6 +1491,32 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     &.disabled:hover
       background: transparent
 
+.valuator-quick
+  background-color: #e4e4e4
+  border-top: 1px solid $color-accent
+  padding-right: 4.2em
+  width: 20vw
+
+  // TODO: loosely tied to flyout close btn
+  .quick-expand
+    @include no-appearance
+    position: absolute
+    right: 2.4em
+    top: 0.6em
+    &:before
+      @include icon($icon-window-up)
+      font-size: 1.2em
+
+  .statement
+    min-height: 0
+    padding: 0.5em
+    .CodeMirror
+      background-color: #fff
+
+  .statement-placeholder, .statement-name, .statement-toolbox
+    display: none
+
+
 .xray
   pointer-events: none
 

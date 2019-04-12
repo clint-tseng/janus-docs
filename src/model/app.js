@@ -66,7 +66,9 @@ class DocsApp extends App.build(
       if (flyout.get_('trigger')[0] === triggerNode)
         return;
 
-    flyouts.add(new Flyout[type]({ trigger, target, context }));
+    const flyout = new Flyout[type]({ trigger, target, context });
+    flyouts.add(flyout);
+    return flyout;
   }
 
   sheet(title, target) {
@@ -98,13 +100,15 @@ class DocsApp extends App.build(
   ////////////////////////////////////////////////////////////////////////////////
   // EVAL INTEROP
 
-  popValuator(title, callback, initial = []) { // TODO: awkward call signature.
-    const valuator = new Valuator({ env: { inject: this.get_('eval.env') }, initial });
-    const sheet = this.sheet(title, valuator);
-    valuator.destroyWith(sheet);
+  valuator(trigger, { title, values = [], initial }, callback) {
+    const env = { inject: this.get_('eval.env') };
+    const valuator = new Valuator({ title, values, initial, env });
+    const flyout = this.flyout(trigger, valuator, { context: 'quick', type: 'Manual' });
+    valuator.destroyWith(flyout);
+
     valuator.get('result').react(false, (result) => { // no point in reactTo
       callback(result);
-      sheet.destroy();
+      valuator.destroy();
     });
     return valuator;
   }
