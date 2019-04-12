@@ -1360,7 +1360,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       content: '='
 
   .statement-result
-    padding-top: 0.6em
     position: relative
 
     .janus-literal
@@ -1376,6 +1375,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
     .janus-inspect-panel
       clear: left
+
+  &.has-result .statement-result
+    padding-top: 0.6em
 
 .pin
   overflow: hidden

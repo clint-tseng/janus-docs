@@ -3,7 +3,7 @@ const $ = require('janus-dollar');
 
 const { Statement, Reference, Repl } = require('../model/repl');
 const { success, fail } = require('../util/eval');
-const { blank, not, give, ifExists } = require('../util/util');
+const { blank, not, give, ifExists, exists } = require('../util/util');
 const { inspect } = require('../util/inspect');
 
 
@@ -47,7 +47,9 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
     <div class="statement-result"/>
   </div>
 `), template(
-  find('.statement').classed('named', from('named')),
+  find('.statement')
+    .classed('named', from('named'))
+    .classed('has-result', from('result').map(exists)),
   find('.statement-name').render(from.attribute('name')).context('edit'),
   toolbox,
 
