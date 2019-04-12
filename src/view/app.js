@@ -79,14 +79,14 @@ class AppView extends DomView.build($('body').clone(), template(
       const entity = trigger.closest('.janus-inspect-entity');
       if (entity.hasClass('no-panel')) return;
 
-      const timer = setTimeout(_ => { app.flyout(trigger, entity.view().subject, 'panel'); }, 300);
+      const timer = setTimeout(_ => { app.flyout(trigger, entity.view().subject, { context: 'panel' }); }, 300);
       trigger.one('mouseleave', _ => { clearTimeout(timer); });
     });
 
     dom.on('mouseenter', '.varying-node', (event) => {
       const node = $(event.currentTarget);
       if (node.parents('.varying-tree').length === 2) return; // is the root node in the panel.
-      const timer = setTimeout(_ => { app.flyout(node, node.view().subject, 'panel'); }, 300);
+      const timer = setTimeout(_ => { app.flyout(node, node.view().subject, { context: 'panel' }); }, 300);
       node.one('mouseleave', _ => { clearTimeout(timer); });
     });
 

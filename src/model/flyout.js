@@ -1,7 +1,13 @@
 const { Model, attribute, bind, from, List } = require('janus');
 const { sticky, fromEvents } = require('janus-stdlib').varying;
 
-class Flyout extends Model.build(
+// add ourselves to our trigger's flyout parent to prevent its destruction.
+const addToParent = (flyout) => {
+  const parentDom = flyout.get_('trigger').closest('.flyout');
+  if (parentDom.length > 0)
+    parentDom.view().subject.get_('children').add(flyout);
+};
+class HoverFlyout extends Model.build(
   attribute('children', attribute.List.withDefault()),
 
   bind('hover.trigger', from('trigger').flatMap((trigger) =>
@@ -14,17 +20,22 @@ class Flyout extends Model.build(
     .all.map((x, y, z) => x || y || z))
 ) {
   _initialize() {
-    // first, destroy ourselves if we're ever not active.
+    // first, destroy ourselves if our subject is, or we're ever not active.
+    this.destroyWith(this.subject);
     this.reactTo(this.get('active.net'), false, (active) => {
       if (!active) this.destroy();
     });
 
-    // then, add ourselves to our trigger's flyout parent to prevent its destruction.
-    const parentDom = this.get_('trigger').closest('.flyout');
-    if (parentDom.length > 0)
-      parentDom.view().subject.get_('children').add(this);
+    // and then add ourselves onto our flyout parent.
+    addToParent(this);
   }
 }
 
-module.exports = { Flyout };
+
+module.exports = {
+  Flyout: {
+    hover: HoverFlyout,
+    Hover: HoverFlyout
+  }
+};
 

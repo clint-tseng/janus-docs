@@ -59,14 +59,14 @@ class DocsApp extends App.build(
   ////////////////////////////////////////////////////////////////////////////////
   // APP UI / INTEROP
 
-  flyout(trigger, target, context = 'default') {
+  flyout(trigger, target, { context = 'default', type = 'Hover' }) {
     const triggerNode = trigger[0];
     const flyouts = this.get_('flyouts');
     for (const flyout of flyouts) // don't retrigger the same flyout twice.
       if (flyout.get_('trigger')[0] === triggerNode)
         return;
 
-    flyouts.add(new Flyout({ trigger, target, context }));
+    flyouts.add(new Flyout[type]({ trigger, target, context }));
   }
 
   sheet(title, target) {
