@@ -21,7 +21,7 @@ class HoverFlyout extends Model.build(
 ) {
   _initialize() {
     // first, destroy ourselves if our subject is, or we're ever not active.
-    this.destroyWith(this.subject);
+    this.destroyWith(this.get_('target'));
     this.reactTo(this.get('active.net'), false, (active) => {
       if (!active) this.destroy();
     });
