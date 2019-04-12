@@ -60,7 +60,7 @@ class XRayEntryView extends DomView.build($(`
     .css('height', from('size.height').map(px)),
 
   find('.xray-view').render(from('view').map(inspect)),
-  find('.xray-subject').render(from('view').map((view) => inspect(view.subject)))
+  find('.xray-subject').render(from('view').map((view) => inspect(view.subject, true)))
 )) {
   _wireEvents() {
     const subject = this.subject;
