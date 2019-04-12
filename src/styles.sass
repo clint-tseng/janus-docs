@@ -1746,9 +1746,19 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     overflow: hidden
     white-space: nowrap
     width: 1em
-  .pair-v
+  .pair-function
+    background: #f4f4f4
+    border-bottom: 1px dotted #ccc
+    margin: 0 0.5em
+    padding: 0 0.3em
+    &:before
+      content: 'λ'
+      font-size: 1.2em
+    &:after
+      @include icon($icon-arrow-right)
+
+  .pair-value
     line-height: 1.4em
-    margin-right: 1em // make room for the list + button
   .pair-clear
     @include no-appearance
     cursor: default
@@ -2002,17 +2012,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .list-mapped .data-pair
   .pair-value
     font-size: 1.2rem
-
-  .pair-function
-    background: #f4f4f4
-    border-bottom: 1px dotted #ccc
-    margin: 0 0.5em
-    padding: 0 0.3em
-    &:before
-      content: 'λ'
-      font-size: 1.2em
-    &:after
-      @include icon($icon-arrow-right)
 
 .list-filtered
   .list-list
