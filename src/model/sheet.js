@@ -1,7 +1,8 @@
 const { Model } = require('janus');
 
-// just a dummy class for registration.
-class Sheet extends Model {}
+class Sheet extends Model {
+  _initialize() { this.destroyWith(this.get_('target')); }
+}
 
 module.exports = { Sheet };
 
