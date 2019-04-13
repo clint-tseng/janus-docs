@@ -97,7 +97,7 @@ class DocsApp extends App.build(
 
   placehold(target) {
     const placeholder = new Placeholder({ target });
-    if (!holdParent(target, placeholder)) return;
+    if (!holdParent(target, placeholder, true)) return;
     this.get_('junk').add(placeholder);
     return placeholder;
   }
@@ -117,6 +117,7 @@ class DocsApp extends App.build(
 
     valuator.get('result').react(false, (result) => { // no point in reactTo
       callback(result);
+      this.placehold(trigger);
       valuator.destroy();
     });
     return valuator;

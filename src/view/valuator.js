@@ -25,9 +25,6 @@ class QuickValuatorView extends DomView.build($(`
     const sheet = view.options.app.sheet(valuator.get_('title'), valuator);
     valuator.destroyWith(sheet);
 
-    // set up a placeholder to drop in when the sheet closes:
-    sheet.on('destroying', () => { view.options.app.placehold(valuator.get_('trigger')); });
-
     // prepare to clear the flyout away, then do so:
     // first hold our parent flyout open as long as the sheet lives, if any.
     const flyoutView = view.closest(Flyout.Manual).first().get_();

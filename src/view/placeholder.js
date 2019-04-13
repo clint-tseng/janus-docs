@@ -12,7 +12,7 @@ class PlaceholderView extends DomView.build(
     .on('mouseover', (_, subject) => { subject.destroy(); })
 ) {
   _wireEvents() {
-    this.subject.set(this.subject.get_('target').offset());
+    this.subject.set(this.subject.get_('target').offsetCenter());
     this.destroyWith(this.subject);
   }
 }

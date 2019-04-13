@@ -13,10 +13,14 @@ const { sticky, fromEvents } = require('janus-stdlib').varying;
 // add a reference to our trigger's flyout parent to prevent its destruction.
 // TODO: this is sort of the "canonical" way to do this from elsewhere too but
 // somehow it still feels sort of lame.
-const holdParent = (trigger, ref) => {
+// TODO: yeah this function is getting completely ridiculous. need a better
+// way to do this. maybe a more automatic one.
+const holdParent = (trigger, ref, abortIfHovered = false) => {
   const parentDom = trigger.closest('.flyout');
   if (parentDom.length === 0) return false;
-  parentDom.view().subject.get_('children').add(ref);
+  const flyout = parentDom.view().subject;
+  if (abortIfHovered && flyout.get_('hover.target')) return false;
+  flyout.get_('children').add(ref);
   return true;
 };
 

@@ -7,6 +7,7 @@ const { Article } = require('./model/article');
 
 const { think } = require('./view/thinker');
 
+// some jquery utilities, like this was 2009.
 $.fn.view = function() {
   let ptr = this;
   while (ptr.length > 0) {
@@ -14,6 +15,13 @@ $.fn.view = function() {
     if (view != null) return view;
     ptr = ptr.parent();
   }
+};
+
+$.fn.offsetCenter = function() {
+  const offset = this.offset();
+  offset.top += (this.height() / 2);
+  offset.left += (this.width() / 2);
+  return offset;
 };
 
 window.init = (tocData, apiData, articleData) => {
