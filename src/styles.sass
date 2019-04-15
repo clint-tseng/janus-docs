@@ -1789,6 +1789,45 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     ~ .panel-content
       margin-right: $sidebar-width
 
+.janus-inspect-panel.janus-inspect-panel
+  .model-create
+    background-color: #e4e4e4
+    position: relative
+
+    .new-key
+      background-color: $color-accent
+      box-shadow: 0 1px 0 $color-accent
+      padding: 0.3em 0.5em
+      input
+        @include no-appearance
+        color: #fff
+        width: calc(100% - 2em)
+
+    .new-value
+      padding: 1.1em 0.5em
+
+    .new-create
+      @include no-appearance
+      color: #fff
+      position: absolute
+      right: 0.6em
+      top: 0.6em
+      &:before
+        @include icon($icon-check)
+
+  .model-do-create
+    @include no-appearance
+    color: #666
+    &:before
+      @include icon($icon-add)
+    &:hover
+      color: $color-accent2
+
+  .model-create.creating
+    margin-top: 0.6em
+    + .model-do-create
+      display: none
+
 .data-pair
   font-size: 1.2rem
   padding-bottom: 0.15em
