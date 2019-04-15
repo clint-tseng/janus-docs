@@ -109,9 +109,10 @@ class DocsApp extends App.build(
   ////////////////////////////////////////////////////////////////////////////////
   // EVAL INTEROP
 
-  valuator(trigger, { title, values = [], initial }, callback) {
+  // OPTIONS: title, values, initial, rider, focus
+  valuator(trigger, options, callback) {
     const env = { inject: this.get_('eval.env') };
-    const valuator = new Valuator({ trigger, title, values, initial, env });
+    const valuator = new Valuator(Object.assign({ trigger }, options));
     const flyout = this.flyout(trigger, valuator, { context: 'quick', type: 'Manual' });
     valuator.destroyWith(flyout);
 

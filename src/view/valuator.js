@@ -13,9 +13,11 @@ const { holdParent, Flyout } = require('../model/flyout');
 
 class QuickValuatorView extends DomView.build($(`
   <div class="valuator-quick">
+    <div class="valuator-rider"/>
     <div class="quick-statement"/>
     <button class="quick-expand" title="Full Editor"/>
   </div>`), template(
+  find('.valuator-rider').render(from('rider')),
   find('.quick-statement')
     // here we deliberately don't react to changes, since whatever the initial
     // statement was when the valuator was created is what we always want to show.
@@ -38,11 +40,13 @@ class QuickValuatorView extends DomView.build($(`
     const valuator = this.subject;
     const statement = valuator.get_('statements').at_(-1);
     this.reactTo(statement.get('result'), false, (result) => {
-      if (success.match(result)) valuator.set('result', result.get());
+      valuator.tryCommit(this.artifact(), this, result);
     });
 
-    const { EditorView } = require('./editor');
-    this.into(Statement).into(EditorView).first().get_().focus();
+    if (valuator.get_('focus') !== false) {
+      const { EditorView } = require('./editor');
+      this.into(Statement).into(EditorView).first().get_().focus();
+    }
   }
 
   // if we aren't destroyed but we are asked to commit, it means a statement has
@@ -72,8 +76,10 @@ const ValuatorLineView = DomView.build($(`
 class ValuatorView extends DomView.build($(`
   <div class="valuator">
     <button class="valuator-xray" title="Inspect via X-Ray"/>
+    <div class="valuator-rider"/>
     <div class="valuator-statements"/>
   </div>`), template(
+  find('.valuator-rider').render(from('rider')),
 
   find('.valuator-statements')
     .render(from('statements'))
@@ -81,14 +87,7 @@ class ValuatorView extends DomView.build($(`
 
     .on('click', '.valuator-accept', (event, subject, view) => {
       const button = $(event.target);
-      const result = button.view().subject.get_('result');
-      if (success.match(result)) {
-        try {
-          subject.set('result', result.get());
-        } catch (ex) {
-          view.options.app.flyout(button, ex, { type: 'Manual' });
-        }
-      }
+      subject.tryCommit(button, view, button.view().subject.get_('result'));
     })
 
     .on('commit', 'li:last-child .valuator-line', (e, subject, view) => {

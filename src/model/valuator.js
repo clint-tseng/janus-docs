@@ -17,8 +17,9 @@ class Valuator extends Repl {
     Repl.prototype._initialize.call(this); // thanks for nothing es6
 
     // populate seed values
-    for (const { name, value } of this.get_('values'))
-      this.reference(value, name);
+    const values = this.get_('values')
+    if (values != null)
+      for (const { name, value } of values) this.reference(value, name);
 
     // populate working statement
     const initial = this.get_('initial');
@@ -26,6 +27,17 @@ class Valuator extends Repl {
     if (isPrimitive(initial)) setTimeout(() => {
       this.get_('statements').at_(-1).set('code', JSON.stringify(this.get_('initial')))
     });
+  }
+
+  // trigger is the dom element that is causing this commit attempt.
+  tryCommit(trigger, view, result) {
+    if (!success.match(result)) return;
+    if (this.get_('rider').valid().get() !== true) return;
+    try {
+      this.set('result', result.get());
+    } catch (ex) {
+      view.options.app.flyout(trigger, ex, { type: 'Manual' });
+    }
   }
 }
 
