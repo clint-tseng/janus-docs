@@ -16,6 +16,8 @@ $color-heading: #000
 $color-text: #333
 $color-success: #4c4
 $color-error: #c44
+$color-warning: #fadd00
+$color-highlight: $color-warning
 $color-xray: #444
 $color-xray-selected: #2364cb
 
@@ -1789,44 +1791,32 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     ~ .panel-content
       margin-right: $sidebar-width
 
-.janus-inspect-panel.janus-inspect-panel
-  .model-create
-    background-color: #e4e4e4
-    position: relative
-
-    .new-key
-      background-color: $color-accent
-      box-shadow: 0 1px 0 $color-accent
-      padding: 0.3em 0.5em
-      input
-        @include no-appearance
-        color: #fff
-        width: calc(100% - 2em)
-
-    .new-value
-      padding: 1.1em 0.5em
-
-    .new-create
-      @include no-appearance
-      color: #fff
-      position: absolute
-      right: 0.6em
-      top: 0.6em
-      &:before
-        @include icon($icon-check)
-
-  .model-do-create
+.janus-inspect-model.janus-inspect-panel
+  .model-add
     @include no-appearance
-    color: #666
+    margin-top: 0.5em
     &:before
       @include icon($icon-add)
-    &:hover
-      color: $color-accent2
 
-  .model-create.creating
-    margin-top: 0.6em
-    + .model-do-create
-      display: none
+.namer
+  .namer-input input
+    @include no-appearance
+    background: #fff
+    font-family: $font-monospace
+    padding: 0.5em
+    width: 100%
+
+  .namer-warning
+    background-color: $color-warning
+    padding: 0.2em 0.5em
+
+.valuator-quick .namer
+  border-bottom: 1px dotted #ccc
+  margin: 0.5em
+    bottom: -0.5em
+
+.valuator .namer
+  border-bottom: 1px dotted #ccc
 
 .data-pair
   font-size: 1.2rem
@@ -1909,8 +1899,6 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     display: block
 
 .janus-inspect-varying.janus-inspect-panel
-  $highlight-color: #fadd00 // TODO: copied from janus-inspect
-
   .varying-bar
     border-bottom: 1px dotted #ccc
     margin: 0 -1em
@@ -1955,10 +1943,10 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       line-height: 2.2em
 
     .reaction.checked .rxn-value
-      background-color: $highlight-color
+      background-color: $color-highlight
 
   .varying-snapshot
-    background-color: $highlight-color
+    background-color: $color-highlight
     color: $color-text
     margin: -0.5em -1em 0.5em
     padding: 0.5em 0.7em
