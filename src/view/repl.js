@@ -63,8 +63,8 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
     .options(from.self().map((view) => ({
       onCommit: () => {
         if (view.subject.commit() === true) {
-          // the statement was accepted. add a newline only if we are the last statement.
-          if (view.subject === view.subject.get_('statements').at_(-1))
+          // the statement was accepted. add a newline only if this is first run.
+          if (view.subject.get_('run-count') === 1)
             view.closest(Repl).first().get_().commit();
           return true; // but no matter what consume the keypress.
         }

@@ -49,6 +49,7 @@ const atomize = (nodes) => {
 class Statement extends Model.build(
   attribute('name', attribute.Text),
   attribute('code', attribute.Text),
+  dēfault('run-count', 0),
   bind('named', from('name').map(nonblank))
 ) {
   commit() {
@@ -123,6 +124,8 @@ class Statement extends Model.build(
     const compiled = compile(env, `return ${this.get_('code')};`);
     try { this.set('result', compiled.flatMap((f) => f())); }
     catch(ex) { this.set('result', fail(ex)); }
+
+    this.set('run-count', this.get_('run-count') + 1);
   }
 }
 
