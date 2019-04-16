@@ -1301,28 +1301,32 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     .CodeMirror-scroll
       height: auto
 
-  $left-gutter-zone: calc(#{$repl-left-gutter} - 2.5em)
+  .statement-left
+    bottom: 0
+    left: 0
+    padding: 0.8em 0
+    position: absolute
+    text-align: right
+    top: 0
+    width: calc(#{$repl-left-gutter} - 1em)
+
   .statement-placeholder
     // TODO: sort of a mess but i just want this to work.
     color: $placeholder-color
     font-family: $font-monospace
     font-size: 1.1em
-    left: 0
     padding: 0.5em 0
     pointer-events: none
     position: absolute
-    text-align: right
-    width: $left-gutter-zone
+    width: calc(100% - 1.3em)
     &:after
       padding-left: 0.3em
 
   .statement-name
     font-family: $font-monospace
     font-size: 1.4em
-    left: 0
     padding-top: 0.15em
-    position: absolute
-    width: $repl-left-gutter
+    width: 100%
 
     input
       @include no-appearance
@@ -1337,12 +1341,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       content: '>'
 
   .statement-toolbox
-    left: 0
-    position: absolute
-    text-align: right
-    top: 3.5em
-    width: $left-gutter-zone
-
+    padding: 0.6em 1.5em
     button
       @include no-appearance
       margin-left: 0.5em

@@ -36,13 +36,14 @@ const toolbox = template(
 
 const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
   <div class="statement">
-    <div class="statement-placeholder">line</div>
-    <div class="statement-name"/>
-    <div class="statement-toolbox">
-      <button class="statement-pin" title="Pin statement"/>
-      <span class="statement-panel" title="View as panel"/>
+    <div class="statement-left">
+      <div class="statement-placeholder">line</div>
+      <div class="statement-name"/>
+      <div class="statement-toolbox">
+        <button class="statement-pin" title="Pin statement"/>
+        <span class="statement-panel" title="View as panel"/>
+      </div>
     </div>
-
     <div class="statement-code"/>
     <div class="statement-result"/>
   </div>
