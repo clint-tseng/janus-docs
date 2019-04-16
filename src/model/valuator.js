@@ -32,7 +32,9 @@ class Valuator extends Repl {
   // trigger is the dom element that is causing this commit attempt.
   tryCommit(trigger, view, result) {
     if (!success.match(result)) return;
-    if (this.get_('rider').valid().get() !== true) return;
+    const rider = this.get_('rider');
+    if ((rider != null) && (rider.valid().get() !== true)) return;
+
     try {
       this.set('result', result.get());
     } catch (ex) {
