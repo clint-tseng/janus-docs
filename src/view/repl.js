@@ -77,11 +77,13 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
 // TODO: repetitive with above; sort of awaiting janus#138
 const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
   <div class="statement">
-    <div class="statement-placeholder">value</div>
-    <div class="statement-name"/>
-    <div class="statement-toolbox">
-      <button class="statement-pin" title="Pin value"/>
-      <span class="statement-panel" title="View as panel"/>
+    <div class="statement-left">
+      <div class="statement-placeholder">value</div>
+      <div class="statement-name"/>
+      <div class="statement-toolbox">
+        <button class="statement-pin" title="Pin value"/>
+        <span class="statement-panel" title="View as panel"/>
+      </div>
     </div>
     <div class="statement-result"/>
   </div>`), template(
