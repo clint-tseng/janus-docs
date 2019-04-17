@@ -112,7 +112,7 @@ class DocsApp extends App.build(
   // OPTIONS: title, values, initial, rider, focus
   valuator(trigger, options, callback) {
     const env = { inject: this.get_('eval.env') };
-    const valuator = new Valuator(Object.assign({ trigger }, options));
+    const valuator = new Valuator(Object.assign({ trigger, env }, options));
     const flyout = this.flyout(trigger, valuator, { context: 'quick', type: 'Manual' });
     valuator.destroyWith(flyout);
 
