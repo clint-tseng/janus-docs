@@ -146,10 +146,10 @@ class Repl extends Model.build(
     this.createStatement();
   }
 
-  createStatement() {
+  createStatement(idx) {
     const statements = this.get_('statements');
     const statement = new Statement({ statements, env: { base: this.get_('env.base') } });
-    statements.add(statement);
+    statements.add(statement, idx);
     return statement;
   }
 

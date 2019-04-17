@@ -1341,7 +1341,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       content: '>'
 
   .statement-toolbox
-    padding: 0.6em 1.5em
+    padding: 0.8em
+      right: 0
+
     button
       @include no-appearance
       margin-left: 0.5em
@@ -1353,16 +1355,28 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
         color: $color-accent2
         opacity: 1
 
+    .statement-insert
+      left: 0
+      position: absolute
+      top: -0.5em
+
+    .statement-insert:before
+      content: $icon-add
+    .statement-remove:before
+      content: $icon-delete
     .statement-pin:before
       content: $icon-pin
     .statement-panel button:before
       content: $icon-window
 
   &:hover .statement-toolbox button
-    opacity: 0.2
+    opacity: 0.13
   .statement-left:hover .statement-toolbox button
     opacity: 1
     transition-duration: 0
+
+  &:first-child .statement-insert
+    display: none
 
   &.named
     .statement-placeholder
@@ -1390,6 +1404,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
   &.has-result .statement-result
     padding-top: 0.6em
+  &.reference .statement-result
+    padding-top: 0.45em
 
 .pin
   overflow: hidden

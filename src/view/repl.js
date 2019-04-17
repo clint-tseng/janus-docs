@@ -25,6 +25,14 @@ const StatementVM = Model.build(
 
 // TODO: janus#138
 const toolbox = template(
+  find('.statement-insert').on('click', (e, statement, view) => {
+    const repl = view.closest(Repl).first().get_().subject;
+    const idx = repl.get_('statements').list.indexOf(statement);
+    repl.createStatement(idx);
+  }),
+  find('.statement-remove').on('click', (e, statement) => {
+    statement.destroy();
+  }),
   find('.statement-pin').on('click', (e, statement, view) => {
     // TODO: yeah this is definitely still awkwardfest.
     view.closest(Repl).first().get_().subject.get_('pins').add(statement);
@@ -40,8 +48,11 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
       <div class="statement-placeholder">line</div>
       <div class="statement-name"/>
       <div class="statement-toolbox">
-        <button class="statement-pin" title="Pin statement"/>
+        <button class="statement-insert" title="Add Statement"/>
+
         <span class="statement-panel" title="View as panel"/>
+        <button class="statement-pin" title="Pin statement"/>
+        <button class="statement-remove" title="Delete statement"/>
       </div>
     </div>
     <div class="statement-code"/>
@@ -76,13 +87,16 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
 
 // TODO: repetitive with above; sort of awaiting janus#138
 const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
-  <div class="statement">
+  <div class="statement reference">
     <div class="statement-left">
       <div class="statement-placeholder">value</div>
       <div class="statement-name"/>
       <div class="statement-toolbox">
-        <button class="statement-pin" title="Pin value"/>
+        <button class="statement-insert" title="Add Statement"/>
+
         <span class="statement-panel" title="View as panel"/>
+        <button class="statement-pin" title="Pin value"/>
+        <button class="statement-remove" title="Remove value"/>
       </div>
     </div>
     <div class="statement-result"/>
