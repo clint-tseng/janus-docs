@@ -34,7 +34,6 @@ const toolbox = template(
     statement.destroy();
   }),
   find('.statement-pin').on('click', (e, statement, view) => {
-    // TODO: yeah this is definitely still awkwardfest.
     view.closest(Repl).first().get_().subject.get_('pins').add(statement);
   }),
   find('.statement-panel').render(from.vm().attribute('panel.direct'))
@@ -42,7 +41,7 @@ const toolbox = template(
     .options({ stringify: give('') })
 );
 
-const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
+class StatementView extends DomView.withOptions({ viewModelClass: StatementVM }).build($(`
   <div class="statement">
     <div class="statement-left">
       <div class="statement-placeholder">line</div>
@@ -83,7 +82,13 @@ const StatementView = DomView.withOptions({ viewModelClass: StatementVM }).build
         return false; // otherwise passthrough the keypress.
       }
     })))
-));
+)) {
+  focus() {
+    // we require this here because requiring codemirror at all server-side crashes jsdom.
+    const { EditorView } = require('./editor');
+    this.into(EditorView).first().get_().focus();
+  }
+}
 
 // TODO: repetitive with above; sort of awaiting janus#138
 const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
@@ -173,8 +178,9 @@ class ReplView extends DomView.build($(`
   find('.repl-main')
     .render(from('statements'))
     .on('click', (event, _, view) => {
-      if ($(event.target).is('.repl-main, .repl-statement, .repl-statement-result'))
-        view.focusLast();
+      const target = $(event.target);
+      if (target.is('.repl-main')) view.focusLast();
+      if (target.is('.statement')) target.view().focus();
     }),
 
   find('.repl').classed('has-pins', from('pins').flatMap((pins) => pins.nonEmpty())),
@@ -186,10 +192,7 @@ class ReplView extends DomView.build($(`
     this.subject.createStatement();
     this.focusLast();
   }
-  focusLast() {
-    const { EditorView } = require('./editor');
-    this.into('statements').into(-1).into(EditorView).last().get_().focus();
-  }
+  focusLast() { this.into('statements').into(-1).last().get_().focus(); }
 }
 
 
