@@ -167,7 +167,7 @@ class ReplView extends DomView.build($(`
     .criteria({ context: 'edit', style: 'button' })
     .options({ stringify: give('') }),
   find('.repl-clear').on('click', (event, repl, view) => {
-    view.options.app.confirm($(event.target),
+    view.options.app.confirm($(event.target), // TODO: disallow multiple
       'Are you sure you want to completely clear the console?',
       _ => { repl.clear(); });
   }),
@@ -187,9 +187,9 @@ class ReplView extends DomView.build($(`
 )) {
   _wireEvents() {
     // any time a new statement is created, focus it.
-    this.into('statements').into(-1).last().get().react(ifExists((sv) => { sv.focus(); }));
+    this.into('statements').into().last().get().react(ifExists((sv) => { sv.focus(); }));
   }
-  focusLast() { this.into('statements').into(-1).last().get_().focus(); }
+  focusLast() { this.into('statements').into().last().get_().focus(); }
 }
 
 
