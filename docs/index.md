@@ -98,7 +98,7 @@ const DogEditor = DomView.build($(`
 );
 
 const dog = new Dog({ name: 'Spot', age: 3 });
-return new DogEditor(dog);
+return new DogEditor(dog, { app });
 ~~~
 
 Data Structures and Models
@@ -195,7 +195,7 @@ const Editor = DomView.build(
 
 const changed = shadow.modified().map(modified => `Changed: ${modified}`);
 
-return [ new Editor(shadow), changed ];
+return [ new Editor(shadow, { app }), changed ];
 ~~~
 
 A Simple Application
