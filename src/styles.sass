@@ -1703,6 +1703,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 .confirm
   background: #fff
   border-top: 1px solid $color-accent
+  box-shadow: $subtle-shadow
   padding: 1em
   position: absolute
   width: 25em
@@ -1787,9 +1788,8 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     font-size: 1.3em
     font-weight: bold
     padding: 0.5em
-      bottom: 0.57em // TODO: oh it hurts
 
-    button
+    .janus-inspect-reference, .janus-inspect-pin
       @include no-appearance
       display: block
       position: absolute
