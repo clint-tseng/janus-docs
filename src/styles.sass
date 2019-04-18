@@ -1242,8 +1242,9 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     .statement-placeholder:after
       content: counter(line-number)
 
-    .statement-result .janus-inspect-pin
-      display: none
+    .statement-result
+      .janus-inspect-reference, .janus-inspect-pin
+        display: none
 
   &.autopaneled .statement-panel
     display: none
@@ -1271,8 +1272,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
         &:first-child
           border-top: none
 
-    .janus-inspect-panel .panel-title .janus-inspect-pin
-      display: none
+    .janus-inspect-panel .panel-title
+      .janus-inspect-reference
+        right: 0.6em
+      .janus-inspect-pin
+        display: none
 
   &.has-pins
     $pins-width: 45em
@@ -1363,7 +1367,7 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     .statement-insert:before
       content: $icon-add
     .statement-remove:before
-      content: $icon-delete
+      content: $icon-close
     .statement-pin:before
       content: $icon-pin
     .statement-panel button:before
@@ -1754,18 +1758,25 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     padding: 0.5em
       bottom: 0.57em // TODO: oh it hurts
 
-    .janus-inspect-pin
+    button
       @include no-appearance
       display: block
-      right: 0.6em
       position: absolute
       top: 0.85em
       z-index: 1
-
       &:before
-        @include icon($icon-pin)
+        @include icon
         color: #fff
         font-size: 1.2em
+
+    .janus-inspect-reference
+      right: 2.4em
+      &:before
+        content: $icon-console-add
+    .janus-inspect-pin
+      right: 0.6em
+      &:before
+        content: $icon-pin
 
   .panel-derivation
     background: #0a8b8b

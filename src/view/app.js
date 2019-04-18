@@ -91,6 +91,11 @@ class AppView extends DomView.build($('body').clone(), template(
       node.one('mouseleave', _ => { clearTimeout(timer); });
     });
 
+    dom.on('click', '.janus-inspect-reference', (event) => {
+      const target = $(event.target).closest('.janus-inspect-panel').view().subject;
+      repl.reference(target);
+      app.showRepl();
+    });
     dom.on('click', '.janus-inspect-pin', (event) => {
       const target = $(event.target).closest('.janus-inspect-panel').view().subject;
       pins.add(asPanel(target));

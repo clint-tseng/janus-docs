@@ -29,12 +29,16 @@ class DocsApp extends App.build(
   bind('repl.activated', from('repl.active').pipe(filter((x) => x === true)))
 ) {
   _initialize() {
-    // TODO: this is sort of messy and i don't really like it but somehow we have
-    // to track one stream of these events regardless of app shadowing.
     this.listenTo(this, 'createdView', (view) => {
       // emit an event if we have an inspector, on the original root app.
-      if (typeof view.highlight === 'function')
+      // TODO: this is sort of messy and i don't really like it but somehow we have
+      // to track one stream of these events regardless of app shadowing.
+      if (typeof view.highlight === 'function') {
         this.original().emit('inspected', view, view.highlight());
+
+        view.artifact().find('.janus-inspect-pin').before(
+          '<button class="janus-inspect-reference" title="Reference"/>');
+      }
     });
   }
 
