@@ -152,8 +152,10 @@ class ReplView extends DomView.build($(`
       <h2>Console</h2>
 
       <div class="repl-toolbar">
-        <button class="repl-xray" title="Inspect via X-Ray"/>
         <span class="repl-autopanel" title="View all as panel"/>
+        <button class="repl-xray" title="Inspect via X-Ray"/>
+        <hr/>
+        <button class="repl-clear" title="Clear All"/>
       </div>
     </div>
     <div class="repl-main"/>
@@ -174,6 +176,11 @@ class ReplView extends DomView.build($(`
   find('.repl-autopanel').render(from.attribute('autopanel'))
     .criteria({ context: 'edit', style: 'button' })
     .options({ stringify: give('') }),
+  find('.repl-clear').on('click', (event, repl, view) => {
+    view.options.app.confirm($(event.target),
+      'Are you sure you want to completely clear the console?',
+      _ => { repl.clear(); });
+  }),
 
   find('.repl-main')
     .render(from('statements'))

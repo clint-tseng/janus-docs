@@ -175,6 +175,12 @@ class Repl extends Model.build(
       this.createStatement();
     }
   }
+
+  clear() {
+    this.get_('pins').removeAll();
+    this.get_('statements').removeAll();
+    this.createStatement();
+  }
 }
 
 module.exports = { Statement, Reference, Repl };

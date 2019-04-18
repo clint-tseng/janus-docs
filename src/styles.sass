@@ -1196,11 +1196,17 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
         content: $icon-close-circle
       &.repl-xray:before
         content: $icon-target
+      &.repl-clear:before
+        content: $icon-close
     .repl-autopanel button
       &:before
         content: $icon-window
       &.checked
         color: $color-accent2
+
+    hr
+      border: none
+      padding-bottom: 1em
 
     h2
       color: $repl-chrome-color-fg
