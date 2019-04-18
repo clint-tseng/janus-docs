@@ -30,7 +30,9 @@ window.init = (tocData, apiData, articleData) => {
   window.app = app;
 
   app.set('toc', Tocs.deserialize(tocData));
-  app.cacheArticle(path, Article.deserialize(articleData));
+  const initialArticle = Article.deserialize(articleData);
+  initialArticle.set('html', $('#main').html());
+  app.cacheArticle(path, initialArticle);
 
   const appView = app.view(app);
   appView.attach($('body'));

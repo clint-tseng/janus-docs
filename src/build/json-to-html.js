@@ -28,7 +28,10 @@ dom.find('#main').append(articleView.artifact());
 
 // 5. Attach model data to the page.
 const inlineScript = $('<script/>');
-const data = [ tocData, apiData, articleData ].join(',').replace(/<\/script>/g, '<\\/script>');
+const tocOut = JSON.stringify(JSON.parse(tocData));
+const articleOut = JSON.stringify(Object.assign(JSON.parse(articleData), { html: null }));
+const data = [ tocOut, apiData, articleOut ].join(',\n')
+  .replace(/<\/script>/g, '<\\/script>');
 inlineScript.text(`init(${data});`);
 dom.find('script').after(inlineScript);
 
