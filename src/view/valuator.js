@@ -41,7 +41,7 @@ class QuickValuatorView extends DomView.build($(`
     const valuator = this.subject;
     const statement = valuator.get_('statements').at_(-1);
     this.reactTo(statement.get('result'), false, (result) => {
-      valuator.tryCommit(this.artifact(), this, result);
+      valuator.offer(this.artifact(), this, result);
     });
 
     if (valuator.get_('focus') !== false) {
@@ -83,7 +83,7 @@ class ValuatorView extends DomView.build($(`
 
     .on('click', '.valuator-accept', (event, subject, view) => {
       const button = $(event.target);
-      subject.tryCommit(button, view, button.view().subject.get_('result'));
+      subject.offer(button, view, button.view().subject.get_('result'));
     })
 
     .on('commit', 'li:last-child .valuator-line', (e, subject) => {

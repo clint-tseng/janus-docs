@@ -29,8 +29,9 @@ class Valuator extends Repl {
     });
   }
 
-  // trigger is the dom element that is causing this commit attempt.
-  tryCommit(trigger, view, result) {
+  // called to actually offer up a final value for this valuator session.
+  // trigger is the dom element that is causing this offer attempt.
+  offer(trigger, view, result) {
     if (!success.match(result)) return;
     const rider = this.get_('rider');
     if ((rider != null) && (rider.valid().get() !== true)) return;
