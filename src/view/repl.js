@@ -71,17 +71,7 @@ class StatementView extends DomView.withOptions({ viewModelClass: StatementVM })
 
   find('.statement-code').render(from.attribute('code'))
     .criteria({ context: 'edit', style: 'code' })
-    .options(from.self().map((view) => ({
-      onCommit: () => {
-        if (view.subject.commit() === true) {
-          // the statement was accepted. add a newline only if this is first run.
-          if (view.subject.get_('run-count') === 1)
-            view.closest(Repl).first().get_().commit();
-          return true; // but no matter what consume the keypress.
-        }
-        return false; // otherwise passthrough the keypress.
-      }
-    })))
+    .options(from.self().map((view) => ({ onCommit: () => view.subject.commit() })))
 )) {
   focus() {
     // we require this here because requiring codemirror at all server-side crashes jsdom.
@@ -191,13 +181,13 @@ class ReplView extends DomView.build($(`
     }),
 
   find('.repl').classed('has-pins', from('pins').flatMap((pins) => pins.nonEmpty())),
-  find('.repl-pins-clear').on('click', (e, subject) => subject.get_('pins').removeAll()),
+  find('.repl-pins-clear').on('click', (e, subject) => { subject.get_('pins').removeAll(); }),
   find('.repl-pins-list')
     .render(from('pins').map((pins) => pins.map((subject) => new Pin({ subject }))))
 )) {
-  commit() {
-    this.subject.createStatement();
-    this.focusLast();
+  _wireEvents() {
+    // any time a new statement is created, focus it.
+    this.into('statements').into(-1).last().get().react(ifExists((sv) => { sv.focus(); }));
   }
   focusLast() { this.into('statements').into(-1).last().get_().focus(); }
 }

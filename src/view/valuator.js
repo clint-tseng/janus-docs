@@ -4,6 +4,7 @@ const { not } = require('../util/util');
 const { success } = require('../util/eval');
 const { Valuator } = require('../model/valuator');
 const { Statement } = require('../model/repl');
+const { ReplView } = require('../view/repl');
 const { holdParent, Flyout } = require('../model/flyout');
 
 
@@ -48,11 +49,6 @@ class QuickValuatorView extends DomView.build($(`
       this.into(Statement).into(EditorView).first().get_().focus();
     }
   }
-
-  // if we aren't destroyed but we are asked to commit, it means a statement has
-  // run but has failed. we still want to create a subsequent statement in case
-  // the user goes expanded, but we don't want to focus on it.
-  commit() { if (this.destroyed !== true) this.subject.createStatement(); }
 }
 
 
@@ -61,16 +57,16 @@ class QuickValuatorView extends DomView.build($(`
 // used when the valuator is expanded out into a sheet view.
 
 const fromSelf = (f) => from.self().map(f);
-const ValuatorLineView = DomView.build($(`
+class ValuatorLineView extends DomView.build($(`
   <div class="valuator-line">
     <div class="valuator-statement"/>
     <button class="valuator-accept" title="Use this value"/>
   </div>`), template(
-  find('.valuator-statement')
-    .render(fromSelf((view) => view.subject))
-    .options(fromSelf((view) => ({ onCommit() { view.artifact().trigger('commit'); } }))),
+  find('.valuator-statement').render(fromSelf((view) => view.subject)),
   find('.valuator-accept').classed('disabled', from('result').map(success.match).map(not))
-));
+)) {
+  focus() { this.into(Statement).first().get_().focus(); }
+}
 
 
 class ValuatorView extends DomView.build($(`
@@ -90,25 +86,15 @@ class ValuatorView extends DomView.build($(`
       subject.tryCommit(button, view, button.view().subject.get_('result'));
     })
 
-    .on('commit', 'li:last-child .valuator-line', (e, subject, view) => {
+    .on('commit', 'li:last-child .valuator-line', (e, subject) => {
       subject.get_('repl').createStatement();
-      view.into('repl').into('statements').into(-1).into(EditorView).last().get_().focus();
     }),
 
   find('.valuator-xray').on('click', (e, repl, view) => {
     view.options.app.xray((result) => { repl.reference(result); });
   })
 )) {
-  _wireEvents() {
-    // any time a new statement is created, focus it.
-    const { EditorView } = require('./editor');
-    this.into('statements').into(-1).last().get().react((statementView) => {
-      if (statementView == null) return;
-      statementView.into().into(EditorView).last().get_().focus();
-    });
-  }
-
-  commit() { this.subject.createStatement(); }
+  _wireEvents() { ReplView.prototype._wireEvents.call(this); }
 }
 
 

@@ -5,7 +5,7 @@ const { parse } = require('cherow');
 
 const { Map, Model, attribute, dēfault, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
-const { blank, nonblank } = require('../util/util');
+const { blank, nonblank, ifExists } = require('../util/util');
 const { inspect } = require('../util/inspect');
 
 const rootEnv = Object.assign({ $, stdlib, inspect }, janus);
@@ -49,7 +49,6 @@ const atomize = (nodes) => {
 class Statement extends Model.build(
   attribute('name', attribute.Text),
   attribute('code', attribute.Text),
-  dēfault('run-count', 0),
   bind('named', from('name').map(nonblank))
 ) {
   commit() {
@@ -124,8 +123,6 @@ class Statement extends Model.build(
     const compiled = compile(env, `return ${this.get_('code')};`);
     try { this.set('result', compiled.flatMap((f) => f())); }
     catch(ex) { this.set('result', fail(ex)); }
-
-    this.set('run-count', this.get_('run-count') + 1);
   }
 }
 
@@ -143,7 +140,15 @@ class Repl extends Model.build(
 ) {
   _initialize() {
     this.set('env.base', new Env(rootEnv, this.get_('env.inject')));
-    this.createStatement();
+
+    // any time the repl is empty, create a statement.
+    const statements = this.get_('statements');
+    statements.length.react((l) => { if (l === 0) this.createStatement(); });
+
+    // any time the very last statement is finalized, make a new one following.
+    statements.at(-1).flatMap(ifExists((s) => s.get('result'))).react((result) => {
+      if (result != null) this.createStatement();
+    });
   }
 
   createStatement(idx) {
@@ -162,24 +167,15 @@ class Repl extends Model.build(
 
     target.set('code', dereturned);
     target.commit();
-    this.createStatement();
   }
 
   reference(obj, name) {
-    const ref = new Reference({ result: success(obj), name });
-    const statements = this.get_('statements');
-    if (blank(statements.get_(-1).get_('code'))) {
-      statements.add(ref, -1);
-    } else {
-      statements.add(ref);
-      this.createStatement();
-    }
+    this.get_('statements').add(new Reference({ result: success(obj), name }), -1);
   }
 
   clear() {
     this.get_('pins').removeAll();
     this.get_('statements').removeAll();
-    this.createStatement();
   }
 }
 
