@@ -217,7 +217,7 @@ const ItemView = DomView.build($(`
   <div class="todo-item">
     <span class="done"/>
     <span class="description"/>
-    <a class="remove" href="#remove">x</a>
+    <button class="remove">x</button>
   </div>`), template(
 
   find('.done').render(from.attribute('done')).context('edit'),
@@ -247,7 +247,6 @@ const TodoListView = DomView.build($(`
   find('.items').render(from('items')),
 
   find('.add').on('click', (event, subject) => {
-    event.preventDefault();
     subject.get_('items').add(new Item());
   })
 ));
