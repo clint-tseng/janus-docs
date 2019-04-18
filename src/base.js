@@ -15,6 +15,7 @@ const baseViews = () => {
   require('./view/api').registerWith(views);
   require('./view/app').registerWith(views);
   require('./view/article').registerWith(views);
+  require('./view/confirm').registerWith(views);
   require('./view/context').registerWith(views);
   require('./view/exception').registerWith(views);
   require('./view/flyout').registerWith(views);

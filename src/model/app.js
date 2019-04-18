@@ -8,6 +8,7 @@ const { Sheet } = require('./sheet');
 const { Repl } = require('./repl');
 const { Valuator } = require('./valuator');
 const { XRay } = require('./xray');
+const { Confirm } = require('../view/confirm');
 
 
 class GlobalList extends attribute.List.withDefault() {
@@ -64,6 +65,17 @@ class DocsApp extends App.build(
 
   ////////////////////////////////////////////////////////////////////////////////
   // APP UI / INTEROP
+
+  confirm(trigger, message, callback) {
+    const confirm = new Confirm({ trigger, message });
+    confirm.get('result').react(false, (result) => {
+      if (result === true) callback();
+      confirm.destroy();
+    });
+    holdParent(trigger, confirm);
+    this.get_('junk').add(confirm);
+    return confirm;
+  }
 
   flyout(trigger, target, { context = 'default', type = 'Hover' } = {}) {
     const triggerNode = trigger[0];
