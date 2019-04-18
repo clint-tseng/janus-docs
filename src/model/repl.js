@@ -1,43 +1,14 @@
 const $ = require('janus-dollar');
 const janus = require('janus');
 const stdlib = require('janus-stdlib');
-const { parse } = require('cherow');
 
 const { Map, Model, attribute, dēfault, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
 const { blank, nonblank, ifExists } = require('../util/util');
+const { atomize } = require('../util/code');
 const { inspect } = require('../util/inspect');
 
 const rootEnv = Object.assign({ $, stdlib, inspect }, janus);
-
-
-// one case we don't (yet?) account for is sequence expressions mixing assignment
-// and other statements; for example:
-// myvar = 4, f(), yourvar = 6;
-const atomize = (nodes) => {
-  const result = [];
-  for (const node of nodes) {
-    // first, our recursive cases.
-    if ((node.type === 'ExpressionStatement') &&
-      (node.expression.type === 'SequenceExpression') &&
-      (node.expression.expressions.every((e) => e.type === 'AssignmentExpression')))
-      Array.prototype.push.apply(result, atomize(node.expression.expressions));
-    else if (node.type === 'VariableDeclaration')
-      Array.prototype.push.apply(result, atomize(node.declarations));
-
-    // then, our atomic ones.
-    else if ((node.type === 'ExpressionStatement') &&
-      (node.expression.type === 'AssignmentExpression'))
-      result.push([ node.expression.left, node.expression.right ]);
-    else if (node.type === 'AssignmentExpression')
-      result.push([ node.left, node.right ]);
-    else if (node.type === 'VariableDeclarator')
-      result.push([ node.id, node.init ]);
-    else
-      result.push([ null, node ]);
-  }
-  return result;
-};
 
 
 // so, this used to be a beautiful purely functional databound process, which
@@ -52,23 +23,11 @@ class Statement extends Model.build(
   bind('named', from('name').map(nonblank))
 ) {
   commit() {
+    // parse and atomize. bail if we can't run the thing.
     const code = this.get_('code');
-    if (blank(code)) return false; // if no code, do nothing.
+    const atomized = atomize(code);
+    if (atomized === false) return false;
 
-    let tree;
-    try {
-      tree = parse(code, { ranges: 'index' });
-    } catch(ex) {
-      //this.set('result', fail(ex)); // TODO: give the option of showing this
-      return false; // if we don't compile, bail and allow newline.
-    }
-
-    // again, if there is no code, do nothing.
-    if (tree.body.length === 0) return false;
-
-    // atomize the code. this splits statements apart, and splits assignments
-    // if present.
-    const atomized = atomize(tree.body);
     const own = atomized.shift();
     if (own[0] != null) {
       // our own statement has an assignment. regardless what we had already for
