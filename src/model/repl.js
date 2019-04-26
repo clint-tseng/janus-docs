@@ -22,6 +22,12 @@ class Statement extends Model.build(
   attribute('code', attribute.Text),
   bind('named', from('name').map(nonblank))
 ) {
+  _initialize() {
+    this.reactTo(this.get('result'), (result) => {
+      if (success.match(result)) this.set('at', new Date());
+    });
+  }
+
   commit() {
     // parse and atomize. bail if we can't run the thing.
     const code = this.get_('code');

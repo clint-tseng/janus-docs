@@ -1320,6 +1320,18 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     top: 0
     width: calc(#{$repl-left-gutter} - 1em)
 
+  .statement-status
+    @include fill
+    right: auto
+    width: 2px
+  &.status-fail .statement-status
+    background: $color-error
+  &.status-fresh .statement-status
+    background: $color-success
+  &.status-stale .statement-status
+    background: repeating-linear-gradient(45deg, $color-success, $color-success 10px, #eee 10px, #eee 13px)
+
+
   .statement-placeholder
     // TODO: sort of a mess but i just want this to work.
     color: $placeholder-color

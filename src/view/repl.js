@@ -1,8 +1,8 @@
-const { DomView, template, find, from, match, Model, bind, attribute, dēfault, List } = require('janus');
+const { Varying, DomView, template, find, from, match, otherwise, Model, bind, attribute, dēfault, List } = require('janus');
 const $ = require('janus-dollar');
 
 const { Statement, Reference, Repl } = require('../model/repl');
-const { success, fail } = require('../util/eval');
+const { success, fail, inert } = require('../util/eval');
 const { blank, not, give, ifExists, exists } = require('../util/util');
 const { inspect } = require('../util/inspect');
 
@@ -12,6 +12,20 @@ const { inspect } = require('../util/inspect');
 
 const StatementVM = Model.build(
   bind('result', from.subject('result').map(ifExists((result) => result.mapSuccess(inspect).get()))),
+  bind('status', from.subject().and.subject('statements').and.subject('result')
+    .all.flatMap((statement, statements, result) => {
+      if (statement instanceof Reference) return 'inert';
+      else if ((result == null) || inert.match(result)) return 'inert';
+      else if (fail.match(result)) return 'fail';
+
+      // must be a success. now we must distinguish between fresh and stale.
+      // this calculation is.. expensive, but should be seldom-rerun.
+      return Varying.mapAll(
+        statement.get('at'),
+        statements.take(statements.indexOf(statement)).flatMap((s) => s.get('at')).max(),
+        (thisAt, maxAt) => (maxAt > thisAt) ? 'stale' : 'fresh'
+      );
+    })),
 
   attribute('panel.direct', attribute.Boolean),
   bind('panel.repl', from('view').flatMap((view) => {
@@ -44,6 +58,7 @@ const toolbox = template(
 class StatementView extends DomView.withOptions({ viewModelClass: StatementVM }).build($(`
   <div class="statement">
     <div class="statement-left">
+      <div class="statement-status"/>
       <div class="statement-placeholder">line</div>
       <div class="statement-name"/>
       <div class="statement-toolbox">
@@ -60,7 +75,8 @@ class StatementView extends DomView.withOptions({ viewModelClass: StatementVM })
 `), template(
   find('.statement')
     .classed('named', from('named'))
-    .classed('has-result', from('result').map(exists)),
+    .classed('has-result', from('result').map(exists))
+    .classGroup('status-', from.vm('status')),
   find('.statement-name').render(from.attribute('name')).context('edit'),
   toolbox,
 
