@@ -46,5 +46,46 @@ const atomize = (code) => {
   return (tree.body.length === 0) ? false : _atomize(tree.body);
 };
 
-module.exports = { atomize };
+// recevies a code string, and returns a new code string with any root-level
+// return statements removed. we do this because in the samples we return to
+// output result data, but the repl shows expression results directly and won't
+// execute the return statements sensibly.
+//
+// if anything goes wrong at any point, we just return the original code.
+const dereturn = (code) => {
+  const wrapped = `_=>{${code}}`;
+
+  let tree; // again, thank you based es6.
+  try { tree = parse(wrapped, { ranges: 'index' }); }
+  catch(ex) { return code; }
+
+            // prgm-----   expr------ arrw block
+  const body = tree.body[0].expression.body.body;
+  let result = '';
+
+  // go through the root statements. we track a return-less span of the string at
+  // a time, and each time we see a return we output that span then start it again
+  // with the start of the return subexpression.
+  // we also have to track a ptr to mind the gap between the end of the previous
+  // statement and the start of the present one.
+  let head = 0, tail = 0, ptr = 4;
+  for (const stmt of body) {
+    tail += (stmt.start - ptr);
+    ptr = stmt.end;
+
+    if (stmt.type === 'ReturnStatement') {
+      result += code.slice(head, tail);
+      head = tail + (stmt.argument.start - stmt.start);
+      tail = head + (stmt.end - stmt.argument.start);
+    } else {
+      tail += (stmt.end - stmt.start);
+    }
+  }
+
+  // now output any leftovers if we have any.
+  if (head < tail) result += code.slice(head, tail);
+  return result;
+};
+
+module.exports = { atomize, dereturn };
 

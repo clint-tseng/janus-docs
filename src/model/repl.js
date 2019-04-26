@@ -5,7 +5,7 @@ const stdlib = require('janus-stdlib');
 const { Map, Model, attribute, dēfault, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
 const { blank, nonblank, ifExists } = require('../util/util');
-const { atomize } = require('../util/code');
+const { atomize, dereturn } = require('../util/code');
 const { inspect } = require('../util/inspect');
 
 const rootEnv = Object.assign({ $, stdlib, inspect }, janus);
@@ -121,10 +121,7 @@ class Repl extends Model.build(
     const last = this.get_('statements').get_(-1);
     const target = blank(last.get_('code')) ? last : this.createStatement();
 
-    // TODO: send this through cherow insetad.
-    const dereturned = code.replace(/(?:\n|^)(?:\s*)return ([^\n]+)(?:$|\n)/, '$1');
-
-    target.set('code', dereturned);
+    target.set('code', dereturn(code));
     target.commit();
   }
 
