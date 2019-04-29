@@ -131,10 +131,10 @@ class DocsApp extends App.build(
     const valuator = new Valuator(Object.assign({ trigger, env }, options));
     const flyout = this.flyout(trigger, valuator, { context: 'quick', type: 'Manual' });
     valuator.destroyWith(flyout);
+    valuator.on('destroying', () => { this.placehold(trigger); });
 
     valuator.get('result').react(false, (result) => { // no point in reactTo
       callback(result);
-      this.placehold(trigger);
       valuator.destroy();
     });
     return valuator;
