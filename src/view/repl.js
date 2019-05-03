@@ -12,20 +12,15 @@ const { inspect } = require('../util/inspect');
 
 const StatementVM = Model.build(
   bind('result', from.subject('result').map(ifExists((result) => result.mapSuccess(inspect).get()))),
-  bind('status', from.subject().and.subject('statements').and.subject('result')
-    .all.flatMap((statement, statements, result) => {
-      if (statement instanceof Reference) return 'inert';
-      else if ((result == null) || inert.match(result)) return 'inert';
-      else if (fail.match(result)) return 'fail';
+  bind('status', from.subject().map((statement) => statement instanceof Reference)
+    .and.subject('result').map(match(
+      inert(give('inert')), success(give('success')), fail(give('fail')), otherwise(give('none'))))
+    .all.map((isReference, status) => isReference ? 'success' : status)),
 
-      // must be a success. now we must distinguish between fresh and stale.
-      // this calculation is.. expensive, but should be seldom-rerun.
-      return Varying.mapAll(
-        statement.get('at'),
-        statements.take(statements.indexOf(statement)).flatMap((s) => s.get('at')).max(),
-        (thisAt, maxAt) => (maxAt > thisAt) ? 'stale' : 'fresh'
-      );
-    })),
+  bind('prev', from.subject().and.subject('statements').all.map((it, all) => all.take(all.indexOf(it)))),
+  bind('stale', from.subject('at')
+    .and('prev').flatMap((prev) => prev.flatMap((s) => s.get('at')).max())
+    .all.map((thisAt, maxAt) => (thisAt != null) && (maxAt > thisAt))),
 
   attribute('panel.direct', attribute.Boolean),
   bind('panel.repl', from('view').flatMap((view) => {
@@ -58,7 +53,13 @@ const toolbox = template(
 class StatementView extends DomView.withOptions({ viewModelClass: StatementVM }).build($(`
   <div class="statement">
     <div class="statement-left">
-      <div class="statement-status"/>
+      <div class="statement-status">
+        <div>
+          <span class="statement-stale" title="This result may be outdated"/>
+          <button class="statement-rerun" title="Rerun statement"/>
+          <button class="statement-rerun-all" title="Rerun with all following statements (double-tap Enter in the future to automatically rerun)"/>
+        </div>
+      </div>
       <div class="statement-placeholder">line</div>
       <div class="statement-name"/>
       <div class="statement-toolbox">
@@ -76,9 +77,13 @@ class StatementView extends DomView.withOptions({ viewModelClass: StatementVM })
   find('.statement')
     .classed('named', from('named'))
     .classed('has-result', from('result').map(exists))
+    .classed('is-stale', from.vm('stale'))
     .classGroup('status-', from.vm('status')),
   find('.statement-name').render(from.attribute('name')).context('edit'),
   toolbox,
+
+  find('.statement-rerun').on('click', (_, statement) => { statement.run(); }),
+  find('.statement-rerun-all').on('click', (_, statement) => { statement.runTail(); }),
 
   find('.statement-result').render(from.vm('result'))
     .context(from.vm('context'))

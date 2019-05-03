@@ -23,9 +23,7 @@ class Statement extends Model.build(
   bind('named', from('name').map(nonblank))
 ) {
   _initialize() {
-    this.reactTo(this.get('result'), (result) => {
-      if (success.match(result)) this.set('at', new Date());
-    });
+    this.reactTo(this.get('result'), false, _ => { this.set('at', new Date()); });
   }
 
   commit() {
@@ -88,6 +86,16 @@ class Statement extends Model.build(
     const compiled = compile(env, `return ${this.get_('code')};`);
     try { this.set('result', compiled.flatMap((f) => f())); }
     catch(ex) { this.set('result', fail(ex)); }
+  }
+
+  runTail() {
+    const statements = this.get_('statements');
+    for (let idx = statements.list.indexOf(this); idx < statements.length_; idx++) {
+      const statement = statements.get_(idx);
+      const result = statement.get_('result');
+      if ((result == null) || inert.match(result)) continue;
+      statement.run();
+    }
   }
 }
 

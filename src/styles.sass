@@ -59,14 +59,15 @@ $icon-check: '\e913'
 $icon-chevron-down: '\e90a'
 $icon-chevron-right: '\e90b'
 $icon-delete: '\e901'
+$icon-clock: '\e918'
 $icon-close: '\e902'
 $icon-close-small: '\e90c'
 $icon-close-circle: '\e903'
 $icon-console-add: '\e90d'
 $icon-eye: '\e917'
-$icon-pencil: '\e904'
+$icon-ffwd: '\e905'
 $icon-load: '\e916'
-$icon-replay-all: '\e905'
+$icon-pencil: '\e904'
 $icon-pin: '\e906'
 $icon-play: '\e907'
 $icon-revert: '\e908'
@@ -135,8 +136,8 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 
 @font-face
   font-family: 'icons';
-  src: url('/assets/icons.eot?f')
-  src: url('/assets/icons.eot?f#iefix') format('embedded-opentype'), url('/assets/icons.ttf?f') format('truetype'), url('/assets/icons.woff?f') format('woff'), url('/assets/icons.svg?f#icomoon') format('svg')
+  src: url('/assets/icons.eot?g')
+  src: url('/assets/icons.eot?g#iefix') format('embedded-opentype'), url('/assets/icons.ttf?g') format('truetype'), url('/assets/icons.woff?g') format('woff'), url('/assets/icons.svg?g#icomoon') format('svg')
   font-weight: normal
   font-style: normal
 
@@ -1322,15 +1323,63 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
 
   .statement-status
     @include fill
-    right: auto
-    width: 2px
-  &.status-fail .statement-status
-    background: $color-error
-  &.status-fresh .statement-status
-    background: $color-success
-  &.status-stale .statement-status
-    background: repeating-linear-gradient(45deg, $color-success, $color-success 10px, #eee 10px, #eee 13px)
+    overflow: hidden
+    width: 2em
 
+    div
+      @include fill
+      background: #eee
+      left: 0
+      padding-top: 0.5em
+      right: auto
+      transform: translateX(-2em)
+      transition: 0.3s transform $ease-extreme-out
+      width: 2em
+
+    button
+      @include no-appearance
+    span, button
+      color: #444
+      cursor: default
+      display: none
+      margin: 0.4em 0.55em
+      &:before
+        @include icon
+
+    .statement-stale:before
+      content: $icon-clock
+
+    button
+      &:before
+        @include icon
+      &.statement-rerun:before
+        content: $icon-play
+      &.statement-rerun-all:before
+        content: $icon-ffwd
+
+  &.is-stale .statement-status div
+    background: $color-warning
+    transform: translateX(-2em) translateX(2px)
+  &.status-none .statement-status div
+    background: #bbb
+    transform: translateX(-2em) translateX(2px)
+  &.status-fail .statement-status div
+    background: $color-error
+    transform: translateX(-2em) translateX(2px)
+
+    span, button
+      color: #fff
+
+  &.is-stale
+    .statement-status
+      span, button
+        display: block
+
+    .statement-left:hover .statement-status div
+      transform: translateX(-2em) translateX(4px)
+
+    .statement-left .statement-status:hover div
+      transform: translateX(0)
 
   .statement-placeholder
     // TODO: sort of a mess but i just want this to work.
