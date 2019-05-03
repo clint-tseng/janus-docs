@@ -17,7 +17,9 @@ const StatementVM = Model.build(
       inert(give('inert')), success(give('success')), fail(give('fail')), otherwise(give('none'))))
     .all.map((isReference, status) => isReference ? 'success' : status)),
 
-  bind('prev', from.subject().and.subject('statements').all.map((it, all) => all.take(all.indexOf(it)))),
+  bind('prev', from.subject().and.subject('statements')
+    // guard because statements list is not populate for references.
+    .all.map((it, all) => (all == null) ? new List() : all.take(all.indexOf(it)))),
   bind('stale', from.subject('at')
     .and('prev').flatMap((prev) => prev.flatMap((s) => s.get('at')).max())
     .all.map((thisAt, maxAt) => (thisAt != null) && (maxAt > thisAt))),
