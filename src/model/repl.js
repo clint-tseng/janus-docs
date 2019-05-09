@@ -93,7 +93,7 @@ class Statement extends Model.build(
     for (let idx = statements.list.indexOf(this); idx < statements.length_; idx++) {
       const statement = statements.get_(idx);
       const result = statement.get_('result');
-      if ((result == null) || inert.match(result)) continue;
+      if ((result == null) || inert.match(result)) continue; // TODO: eliminate null case.
       statement.run();
     }
   }

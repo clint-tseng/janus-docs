@@ -1,4 +1,5 @@
 const { Varying, DomView, template, find, from, match, otherwise, Model, bind, attribute, dēfault, List } = require('janus');
+const { zipSequential } = require('janus-stdlib').varying;
 const $ = require('janus-dollar');
 
 const { Statement, Reference, Repl } = require('../model/repl');
@@ -10,7 +11,7 @@ const { inspect } = require('../util/inspect');
 ////////////////////////////////////////////////////////////////////////////////
 // STATEMENTS
 
-const StatementVM = Model.build(
+class StatementVM extends Model.build(
   bind('result', from.subject('result').map(ifExists((result) => result.mapSuccess(inspect).get()))),
   bind('status', from.subject().map((statement) => statement instanceof Reference)
     .and.subject('result').map(match(
@@ -32,7 +33,13 @@ const StatementVM = Model.build(
   bind('panel.pin', from('view').map((view) => (view.closest(Pin).first().get_() != null))),
   bind('context', from('panel.direct').and('panel.repl').and('panel.pin')
     .all.map((x, y, z) => (x || y || z) ? 'panel' : null))
-);
+) {
+  _initialize() {
+    this.reactTo(this.get('last-commit').pipe(zipSequential), false, ([ a, b ]) => {
+      if (b - a < 250) this.get_('subject').runTail();
+    });
+  }
+}
 
 // TODO: janus#138
 const toolbox = template(
@@ -94,7 +101,11 @@ class StatementView extends DomView.withOptions({ viewModelClass: StatementVM })
 
   find('.statement-code').render(from.attribute('code'))
     .criteria({ context: 'edit', style: 'code' })
-    .options(from.self().map((view) => ({ onCommit: () => view.subject.commit() })))
+    .options(from.self().map((view) => ({ onCommit: () => {
+      const result = view.subject.commit();
+      if (result === true) view.vm.set('last-commit', new Date());
+      return result;
+    } })))
 )) {
   focus() {
     // we require this here because requiring codemirror at all server-side crashes jsdom.
