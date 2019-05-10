@@ -23,8 +23,8 @@ to add it as well as a shim to feed it your DOM manipulation library of choice.
    in the header above, or run `npm install --save-prod janus-stdlib`.
 2. Add a library `janus-dollar` to your `package.json` file.
    * Instead of a version, you will need to point it directly at this URL:
-     `git+https://github.com/clint-tseng/janus-dollar-jquery`.
-   * You can alternatively run `npm install --save-prod janus-dollar git+https://github.com/clint-tseng/janus-dollar-jquery`.
+     `git+https://github.com/issa-tseng/janus-dollar-jquery`.
+   * You can alternatively run `npm install --save-prod janus-dollar git+https://github.com/issa-tseng/janus-dollar-jquery`.
 
 Once you are done, you should end up with a `package.json` that looks something
 like:
@@ -35,7 +35,7 @@ like:
   "dependencies": {
     "janus": "~0",
     "janus-stdlib": "~0",
-    "janus-dollar": "git+https://github.com/clint-tseng/janus-dollar-jquery"
+    "janus-dollar": "git+https://github.com/issa-tseng/janus-dollar-jquery"
   }
 }
 ~~~

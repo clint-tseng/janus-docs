@@ -37,7 +37,7 @@ on the source data&mdash;a string munge or some logics must often be done&mdash;
 this eventing system needs to provide the ability to somehow express and perform
 those computations.
 
-You can go back and [look at Janus 0.1](https://github.com/clint-tseng/janus/tree/0.1)
+You can go back and [look at Janus 0.1](https://github.com/issa-tseng/janus/tree/0.1)
 and see how it is a very direct translation of these central ideas into code, in
 a rough, object-oriented style reflective of the times. While those central ideas
 (and the grammatical form of the APIs) have not changed since then, we have slowly

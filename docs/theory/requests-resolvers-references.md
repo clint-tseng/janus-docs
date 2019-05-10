@@ -71,7 +71,7 @@ off some asynchronous process that will eventually change the Varying value to
 `success(data)` or `failure(error)`.
 
 Let's take a look at a concrete example, from this very project you are reading,
-copied verbatim [from source](https://github.com/clint-tseng/janus-docs/blob/master/src/model/app.js):
+copied verbatim [from source](https://github.com/issa-tseng/janus-docs/blob/master/src/model/app.js):
 
 ~~~
 const Article = Model.build(attribute('samples', attribute.List));

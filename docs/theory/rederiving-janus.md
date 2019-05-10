@@ -569,7 +569,7 @@ In fact, that extensibility system is what motivates the third and final coremos
 Janus component, the one we haven't touched on here, which are case classes.
 
 And lastly, mutators are extremely similar to what you just saw here. Just take
-a look at the function signature of a [true Janus mutator](https://github.com/clint-tseng/janus/blob/master/src/view/mutators.coffee) compared to what we did here:
+a look at the function signature of a [true Janus mutator](https://github.com/issa-tseng/janus/blob/master/src/view/mutators.coffee) compared to what we did here:
 
 ~~~ noexec
 // our example:

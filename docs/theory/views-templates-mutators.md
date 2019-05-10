@@ -734,7 +734,7 @@ Custom View Render
 ------------------
 
 The standard DomView builder structure doesn't work well _every_ rendering task.
-This is true of [Lists](https://github.com/clint-tseng/janus-stdlib/blob/master/src/view/list.coffee),
+This is true of [Lists](https://github.com/issa-tseng/janus-stdlib/blob/master/src/view/list.coffee),
 for example, which is why we've solved the problem for you and provided it in the
 Standard Library.
 
@@ -863,7 +863,7 @@ Recap
 Mutators, Templates, and Views required a lot of explanation, simply because they
 accomplish so much. But they are not, in isolation, complex, nor are they some
 monolithic, tightly-bound machine. In fact, we'd encourage you to go [peruse the
-actual implementation](https://github.com/clint-tseng/janus/tree/master/src/view);
+actual implementation](https://github.com/issa-tseng/janus/tree/master/src/view);
 none of these components are longer than 100 lines of commented code.
 
 To review:

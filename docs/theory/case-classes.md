@@ -163,7 +163,7 @@ and whether that result is something it should assign to the actual model as a
 real data value. The first part&mdash;the when&mdash;is easy; we already have a
 construct that lets us reason about changing values over time, and that is `Varying`.
 And the second part can be solved by using the `types.result` case class we've
-been using in these examples, with `success` and `failure` [and others](https://github.com/clint-tseng/janus/blob/bc460e61109288ebbb96cc2188bc29c1c0e8588f/src/core/types.coffee#L8).
+been using in these examples, with `success` and `failure` [and others](https://github.com/issa-tseng/janus/blob/bc460e61109288ebbb96cc2188bc29c1c0e8588f/src/core/types.coffee#L8).
 
 Putting these two solutions together, we end up with a value type `Varying[types.result[x]]`.
 We can allow extraordinary flexibility in how applications implement their fetching

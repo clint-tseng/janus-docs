@@ -165,7 +165,7 @@ return [
 return { magic: (subject, from) => from.all.point(subject.pointer()) };
 ~~~
 
-Here, the `.get` helper is [equivalent to writing](https://github.com/clint-tseng/janus/blob/7f81b0000c318de1bc6f9e5df4effa2b22f015c7/src/core/from.coffee#L27)
+Here, the `.get` helper is [equivalent to writing](https://github.com/issa-tseng/janus/blob/7f81b0000c318de1bc6f9e5df4effa2b22f015c7/src/core/from.coffee#L27)
 `.flatMap(model => (model == null) ? null : model.get('name'))`, which is quite a
 mouthful. This little bit of simple syntactic sugar helps save a lot of typing
 and reading. Other such helpers are available; check the [API documentation](/api/from)
@@ -338,7 +338,7 @@ equal&mdash;say, if some strings reference keys but other strings reference
 something else&mdash;these case classes allow us to express some semantic on top
 of the string (or really, any value type).
 
-Here are all the [default source cases](https://github.com/clint-tseng/janus/blob/bc460e61109288ebbb96cc2188bc29c1c0e8588f/src/core/types.coffee#L6):
+Here are all the [default source cases](https://github.com/issa-tseng/janus/blob/bc460e61109288ebbb96cc2188bc29c1c0e8588f/src/core/types.coffee#L6):
 
 * `get(key)` will watch the `key` of the target.
 * `attribute(key)` will get the `key` [attribute object](/theory/model) for a Model.

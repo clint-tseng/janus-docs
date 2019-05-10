@@ -304,7 +304,7 @@ would lead to the entire list being recomputed were the first element to change.
 > any time you see `.on` (or even `.react`) used directly. Unless you are sure
 > those handlers should run forever, it is better to use `.listenTo` and `.reactTo`,
 > as we will cover in the [resource management](/theory/resource-management)
-> chapter, and as done in the [actual implementation of sum](https://github.com/clint-tseng/janus/blob/master/src/collection/derived/sum-fold.coffee).
+> chapter, and as done in the [actual implementation of sum](https://github.com/issa-tseng/janus/blob/master/src/collection/derived/sum-fold.coffee).
 
 We'll try something a bit more advanced here, so you get more of a taste of how
 these things tend to go. Let's trying implementing `.reverse()`, which unlike

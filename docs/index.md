@@ -265,7 +265,7 @@ return view;
 ~~~
 
 A fancier, more complete Todo list can be found in the [samples
-repository](https://github.com/clint-tseng/janus-samples/tree/master/todo).
+repository](https://github.com/issa-tseng/janus-samples/tree/master/todo).
 
 A Closer Look
 -------------
@@ -281,6 +281,6 @@ For more information about Janus, please take a look at the following resources:
 * The [cookbook](/cookbook) is a compendium of common problems and answers that
   serve as a quick solutions reference, but also illustrate how to approach
   problem-solving in Janus.
-* The [Janus Samples](https://github.com/clint-tseng/janus-samples) repository
+* The [Janus Samples](https://github.com/issa-tseng/janus-samples) repository
   contains complete example projects that show Janus in use in context.
 
