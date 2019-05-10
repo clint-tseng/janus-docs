@@ -2321,6 +2321,11 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       right: -1em
       top: 1em
 
+    &.unwired .domview-display-label:after
+      color: red
+      content: " (This view has been moved; events won't work)"
+      font-weight: normal
+
     > :first-child
       padding-top: 3.5em
 
