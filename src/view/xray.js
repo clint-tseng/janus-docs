@@ -81,7 +81,7 @@ class XRayEntryView extends DomView.build($(`
       }
     };
 
-    const layout = fromEvent(targetDom.parents(), 'scroll', ({ timeStamp }) => timeStamp);
+    const layout = fromEvent(targetDom.parents(), 'scroll', false, ({ timeStamp }) => timeStamp);
     this.reactTo(layout, _ => {
       cache.delete(targetDom);
       resize();
