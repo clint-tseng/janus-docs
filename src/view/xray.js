@@ -33,7 +33,9 @@ const XRayListView = DomView.build($(`
   </div>`), template(
   find('.xray-entry').classGroup('delta', from('idx.delta')),
   find('.xray-view').render(from('view').map(inspect)),
-  find('.xray-subject').render(from('view').map((view) => inspect(view.subject, true)))
+  find('.xray-subject')
+    .render(from('view').map((view) => inspect(view.subject, true)))
+    .context('entity') // most entities have no context but sometimes (eg Error) we special-case.
 ));
 
 ////////////////////////////////////////
@@ -60,7 +62,9 @@ class XRayEntryView extends DomView.build($(`
     .css('height', from('size.height').map(px)),
 
   find('.xray-view').render(from('view').map(inspect)),
-  find('.xray-subject').render(from('view').map((view) => inspect(view.subject, true)))
+  find('.xray-subject')
+    .render(from('view').map((view) => inspect(view.subject, true)))
+    .context('entity') // most entities have no context but sometimes (eg Error) we special-case.
 )) {
   _wireEvents() {
     const subject = this.subject;
