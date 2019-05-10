@@ -7,7 +7,7 @@
     "codemirror": "^5.39.2",
     "error-stack-parser": "~2",
     "janus": "~0.4",
-    "janus-dollar": "git+https://github.com/clint-tseng/janus-dollar-jquery",
+    "janus-dollar": "git+https://github.com/issa-tseng/janus-dollar-jquery",
     "janus-inspect": "~0",
     "janus-stdlib": "~0.4",
     "luxon": "~1"
