@@ -6,8 +6,10 @@ const [ html, tocData, apiData, articleData ] =
   [ indexFile, tocFile, apiFile, articleFile ].map(readFileAsUtf8Sync);
 
 // 2. Initialize a DOM for rendering.
-const $ = require('janus-dollar');
-const dom = $(`<div>${html}</div>`);
+const domino = require('domino');
+const jquery = require('jquery');
+const window = domino.createWindow(html);
+const $ = jquery(window);
 
 // 3. Obtain a Docs application.
 const { baseApp } = require('../base');
@@ -18,13 +20,13 @@ const app = baseApp(urlPath, JSON.parse(apiData));
 const { Tocs } = require('../model/toc');
 const toc = Tocs.deserialize(JSON.parse(tocData));
 const tocView = app.view(toc);
-dom.find('#left nav').append(tocView.artifact());
+$('#left nav').append(tocView.artifact());
 
 // 4b. Render the main article in the appropriate place.
 const { Article } = require('../model/article');
 const article = Article.deserialize(JSON.parse(articleData));
 const articleView = app.view(article);
-dom.find('#main').append(articleView.artifact());
+$('#main').append(articleView.artifact());
 
 // 5. Attach model data to the page.
 const inlineScript = $('<script/>');
@@ -33,7 +35,7 @@ const articleOut = JSON.stringify(Object.assign(JSON.parse(articleData), { html:
 const data = [ tocOut, apiData, articleOut ].join(',\n')
   .replace(/<\/script>/g, '<\\/script>');
 inlineScript.text(`init(${data});`);
-dom.find('script').after(inlineScript);
+$('script').after(inlineScript);
 
 // 6. Do some minor cache-busting.
 const dateStr = (new Date()).getTime().toString();
@@ -41,9 +43,9 @@ const bust = (attr) => (_, node) => {
   const $node = $(node);
   $node.attr(attr, `${$node.attr(attr)}?${dateStr}`);
 };
-dom.find('link[rel="stylesheet"][href^="/"]').each(bust('href'));
-dom.find('script[src^="/"]').each(bust('src'));
+$('link[rel="stylesheet"][href^="/"]').each(bust('href'));
+$('script[src^="/"]').each(bust('src'));
 
 // 7. Write our HTML output.
-writeFileSync(outFile, dom.get(0).innerHTML, 'utf8');
+writeFileSync(outFile, window.document.documentElement.outerHTML, 'utf8');
 
