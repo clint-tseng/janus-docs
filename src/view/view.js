@@ -42,7 +42,10 @@ class ViewView extends DomView {
   }
 
   _destroy() {
-    this.subject.destroy();
+    // rather than destroy our subject we want to detach its dom. if it can be
+    // garbage collected it (hopefully) still can be. but if it gets redrawn
+    // at some point, then it's still intact.
+    this.subject.artifact().detach();
     if (this._bindings != null)
       for (const binding of this._bindings)
         binding.stop();
