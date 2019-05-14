@@ -1,6 +1,6 @@
 const $ = require('janus-dollar');
 const janus = require('janus');
-const { Model, attribute, List, bind, from, DomView } = janus;
+const { Model, attribute, List, bind, from, DomView, App, Library } = janus;
 const stdlib = require('janus-stdlib');
 const { inspect } = require('../util/inspect');
 const { compile, success, fail, inert, Env } = require('../util/eval');
@@ -8,6 +8,11 @@ const { compile, success, fail, inert, Env } = require('../util/eval');
 
 ////////////////////////////////////////
 // UTIL
+
+// create a reasonable base app for samples to use:
+const views = new Library();
+stdlib.view.registerWith(views);
+const app = new App({ views });
 
 // doing nothing as a happy result.
 const noop = (x) => success(x);
@@ -66,7 +71,7 @@ class Sample extends Model.build(
 
   // our default env is simply everything janus provides, plus $:
   bind('env.default', from('env.dollar').and('env.additions').all.map(($, additions) =>
-    new Env({ $, stdlib, inspect }, janus, additions))),
+    new Env({ $, stdlib, inspect, app }, janus, additions))),
 
   // but if the code block has custom require()s in it instead, we need to provide
   // require(), along with shims to bridge $.

@@ -17,7 +17,7 @@ const compile = (env, code) => {
   const inject = `const { ${Object.keys(env).join(', ')} } = __env`;
 
   try {
-    const f_ = new Function('__env', '__arg', `${inject};\n${code};`);
+    const f_ = new Function('__env', '__arg', `${inject};return (function() {\n${code};\n})();`);
     const wrapped = (x) => {
       try {
         return success(f_.call(null, env, x));
