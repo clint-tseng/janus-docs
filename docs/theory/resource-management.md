@@ -308,7 +308,7 @@ const enumeration = list.enumeration();
 list.add(63);
 list.remove(15);
 list.remove(16);
-return enumeration;
+return inspect(enumeration);
 ~~~
 
 We even used `.listenTo`, so the work will be terminated when our List is destroyed.

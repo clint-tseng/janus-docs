@@ -190,12 +190,13 @@ But wait, why do both `Resolver.oneOf` and `Resolver.fromLibrary` exist? They bo
 seem to solve the same problem: given a Request and many possible Resolvers, try
 to locate a Resolver that might handle that Request and have it do so.
 
-It turns out that `fromLibrary` is configured by default and `oneOf` is not&mdash;this
-preference can be found in an overridable method in `App`. As Library registrations
-are far more precise than "try everything until something sticks," it is the
-solution we prefer.
+The difference is in expectation: with `fromLibrary`, we task the Library with
+figuring out which resolver is correct for the given request. With `oneOf`, the
+resolvers themselves must make this determination, and we are stuck with a very
+imprecise "try everything until something sticks" approach.
 
-Rather, to understand why `oneOf` exists, we need to get into caching.
+So, if `oneOf` is a clearly inferior solution, why does it exist? To understand
+this, we have to start talking about caching.
 
 Caching Resolvers
 -----------------

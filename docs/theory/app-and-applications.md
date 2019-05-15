@@ -235,11 +235,11 @@ const AppView = DomView.withOptions({ viewModelClass: AppViewModel }).build($(`
     <div id="demo-loader">LOADING</div>
   </div>`), template(
 
-  find('#demo-loader').classed('loading', from('pending_requests').flatMap(pr =>
+  find('#demo-loader').classed('loading', from.vm('pending_requests').flatMap(pr =>
     pr.filter(req => req.map(types.result.pending.match)).nonEmpty())),
 
   find('button').on('click', (event, subject) => {
-    subject.get_('subject').resolve(new MockRequest()); })
+    subject.resolve(new MockRequest()); })
 ));
 
 // Application glue:

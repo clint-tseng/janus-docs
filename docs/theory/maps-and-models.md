@@ -191,7 +191,7 @@ const pairs = keys.flatMap(key => data.get(key)
 
 data.set('owner.age', 27);
 
-return pairs;
+return inspect(pairs);
 ~~~
 
 You can imagine that this sort of thing might be useful when you don't know in
@@ -385,7 +385,7 @@ class SegmentedAxisView extends DomView.build(
     const dom = this.artifact();
     this.reactTo(
       // a handy utility provided by the stdlib to form a Varying from events:
-      stdlib.varying.fromEvent($(window), 'resize', (() => dom.width()), true),
+      stdlib.varying.fromEvent($(window), 'resize', (() => dom.width())),
       this.subject.set('width'));
   }
 }
@@ -684,9 +684,9 @@ const Document = Model.build(
 const Window = Model.build(
   dēfault.writing('documents', () => new List([ new Document() ])),
 
-  attribute('current_document', class extends attribute.Enum {
+  attribute('current-document', class extends attribute.Enum {
     default() { return this.model.get_('documents').at_(0); }
-    values() { return from('documents'); }
+    _values() { return from('documents'); }
   })
 );
 
@@ -710,9 +710,10 @@ const WindowView = DomView.build($(`
     </div>
     <div class="current"/>
   </div>`), template(
-  find('.documents .doc-list').render(from.attribute('current_document'))
-    .criteria({ context: 'edit', style: 'list' }),
-  find('.current').render(from('current_document')),
+  find('.documents .doc-list').render(from.attribute('current-document'))
+    .criteria({ context: 'edit', style: 'list' })
+    .options({ renderItem: (x) => x.context('summary')}),
+  find('.current').render(from('current-document')),
 
   find('.documents .new-doc').on('click', (_, subject) => {
     subject.get_('documents').add(new Document()); })));
@@ -731,34 +732,25 @@ return app.view(new Window());
   overflow: hidden;
 }
 .window .doc-list,
-.window .doc-list li,
+.window .doc-list .document-summary,
 .window .new-doc {
   float: left;
 }
-.window .janus-list-selectItem {
+.window .document-summary {
   cursor: default;
+  font-size: 1.2em;
   padding: 0.3em 0.7em 0.1em;
   position: relative;
 }
-.window .janus-list-selectItem.checked {
+.window .document-summary.checked {
   background-color: #d7d7d7;
-}
-.window .janus-list-selectItem button.janus-list-selectItem-select {
-  bottom: 0;
-  left: 0;
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
-}
-.window .document-summary {
-  font-size: 1.2em;
 }
 .window .new-doc {
   background: none;
   border: none;
   font-size: 1.4em;
   font-weight: bold;
+  height: 1em;
   margin-left: 0.5em;
   outline: none;
   padding: 0;
@@ -828,10 +820,6 @@ value, and there is some known list of options of which that object is one. This
 is exactly an Enum attribute, and by modelling our data structure after that
 interpretation, we can simplify the entire problem drastically, relying on the
 prebuilt standard library views to accomplish our task.
-
-> It might be worth right-clicking on the tabs and inspecting their HTML structure.
-> There is actually a `<button>` that the standard library tries to render, which
-> we coöpt with CSS to achieve the impression of a tab.
 
 The end result of this is that not only have we saved ourselves a lot of work,
 we've grounded the resulting implementation entirely in simple data operations.
@@ -927,7 +915,7 @@ const Dog = Model.build(
 
   attribute('status', class extends attribute.Enum {
     default() { return 'available'; }
-    values() { return [ 'adopted', 'pending', 'available' ]; }
+    _values() { return [ 'adopted', 'pending', 'available' ]; }
   }),
 
   // note that we just use Text for owner for this one to keep things simple.
@@ -976,11 +964,12 @@ return app.view(new Dog());
 .dog-editor .errors {
   margin-bottom: 0.8em;
 }
-.dog-editor .errors li {
+.dog-editor .errors span {
   color: red;
+  display: block;
   font-weight: bold;
 }
-.dog-editor .errors li:before {
+.dog-editor .errors span:before {
   content: '×';
   padding-right: 0.2em;
 }

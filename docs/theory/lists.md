@@ -100,7 +100,7 @@ list.moveAt(2, 1); // or move by index to index.
 
 list.set(2, 1.5); // set an index to a value.
 
-return list;
+return inspect(list);
 ~~~
 
 By default, the Janus API assumes you care more about things than structures&mdash;that
@@ -109,11 +109,8 @@ way of its indices&mdash;and so all the base methods take references to List
 members rather than indices to operate on. But add `At` to these methods, and
 it'll happily take an index instead.
 
-`.put` and `.set` do the same thing (in fact, `.set` delegates to `.put` to actually
-do the work); `.set` mostly exists to harmonize with Map, which also has a `.set`
-method.
-
-You see the same thing with `.get_` as we cover item retrieval:
+You can use either `.at_` or `.get_` to immediately get an item at an index. They
+do the same thing:
 
 ~~~
 const list = new List([ 0, 1, 2, 3 ]);

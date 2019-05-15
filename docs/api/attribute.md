@@ -241,17 +241,18 @@ Key to the `Enum` Attribute is the method `values`, which declares the allowed
 values. It also adds the `nullable` property, but it does not override any default
 `Attribute` methods.
 
-### #values
+### #_values
 #### Listlike[T]: Array[T]|List[T], Binding[U]: U|Varying[U]|From[U] => .values(): Binding[Listlike[T]]
 
-Returns the allowable values for this `Enum` attribute. They may be of any type.
-Either an `Array` or a `List` may be returned, and they may be directly given,
-or wrapped in a `Varying`, or wrapped in a `from`-binding expression. This allows
-the allowable values to change based on other conditions or inputs.
+Override to specify the allowable values for this `Enum` attribute. They may be
+of any type.  Either an `Array` or a `List` may be returned, and they may be
+directly given, or wrapped in a `Varying`, or wrapped in a `from`-binding
+expression. This allows the allowable values to change based on other conditions
+or inputs.
 
 > Note, however, that as of time of writing, there is no direct enforcement that
 > the value written to the `model` actually conforms to one of the given values.
-> Rather, like the `nullable` property described below, the `#values` method is
+> Rather, like the `nullable` property described below, the `#_values` method is
 > used by the Janus [Standard Library](/api/stdlib) editor components to determine
 > what options to present to the user.
 
@@ -260,7 +261,7 @@ on the model. Another common approach is to `map` a `List`.
 
 ~~~ inspect-plain
 class SampleEnumAttr extends attribute.Enum {
-  values() {
+  _values() {
     return from('restricted').map(restricted => restricted
       ? [ 'anonymous', 'user' ]
       : [ 'anonymous', 'user', 'moderator', 'administrator' ]);
@@ -287,7 +288,7 @@ Please see the note on `#values` above regarding the enforcement of this propert
 ~~~ inspect-plain
 const TestModel = Model.build(
   attribute('color', class extends attribute.Enum {
-    values() { return [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple' ]; }
+    _values() { return [ 'red', 'orange', 'yellow', 'green', 'blue', 'purple' ]; }
     get nullable() { return true; }
   })
 );
@@ -393,7 +394,7 @@ const ParentWidget = Model.build(
   })
 );
 
-return ParentWidget.deserialize({ child: { x: 42 } }).get_('child');
+return ParentWidget.deserialize({ child: { x: 42 } });
 ~~~
 
 ### @of
@@ -408,7 +409,7 @@ const ParentWidget = Model.build(
   attribute('child', attribute.Model.of(ChildWidget))
 );
 
-return ParentWidget.deserialize({ child: { x: 42 } }).get_('child');
+return ParentWidget.deserialize({ child: { x: 42 } });
 ~~~
 
 ## List Attribute
@@ -438,7 +439,7 @@ const ParentWidget = Model.build(
   })
 );
 
-return ParentWidget.deserialize({ children: [{ x: 42 }] }).get_('children');
+return ParentWidget.deserialize({ children: [{ x: 42 }] });
 ~~~
 
 ### @of
@@ -455,7 +456,7 @@ const ParentWidget = Model.build(
   attribute('children', attribute.List.of(ChildWidgets))
 );
 
-return ParentWidget.deserialize({ children: [{ x: 42 }] }).get_('children');
+return ParentWidget.deserialize({ children: [{ x: 42 }] });
 ~~~
 
 ## Reference Attribute

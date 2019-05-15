@@ -605,7 +605,7 @@ const Person = Model.build();
 const PersonViewModel = Model.build(
   attribute('children.show', attribute.Boolean),
 
-  bind('children.count', from('subject').get('children')
+  bind('children.count', from.subject('children')
     .flatMap(cs => (cs == null) ? 0 : cs.length))
 );
 const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).build($(`
@@ -618,23 +618,23 @@ const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).buil
     <div class="child-list"/>
   </div>`), template(
 
-  find('.name').text(from('subject').get('name')),
+  find('.name').text(from('name')),
 
-  find('.child-count .num').text(from('children.count')
+  find('.child-count .num').text(from.vm('children.count')
     .map(count => (count === 0) ? 'no' : count)),
-  find('.child-count .label').text(from('children.count')
+  find('.child-count .label').text(from.vm('children.count')
     .map(count => (count === 1) ? 'child' : 'children')),
 
   find('.child-show')
-    .render(from.attribute('children.show'))
+    .render(from.vm().map((vm) => vm.attribute('children.show')))
       .context('edit')
       .criteria({ style: 'button' })
       .options({ stringify: (x => x ? 'hide' : 'show') })
-    .classed('hide', from('children.count').map(count => count === 0)),
+    .classed('hide', from.vm('children.count').map(count => count === 0)),
 
   find('.child-list')
-    .render(from('subject').get('children'))
-    .classed('hide', from('children.show').map(x => !x))
+    .render(from('children'))
+    .classed('hide', from.vm('children.show').map(x => !x))
 
 ));
 

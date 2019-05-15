@@ -1,5 +1,7 @@
 # DomView
 
+* !SAMPLES inspect-panel
+
 The `DomView` is a specialization of `View` which comes equipped to deal with
 HTML fragment views. It provides tools for drawing fragments, reattaching to
 already-drawn fragments, wiring up client events, and fetching the final HTML
