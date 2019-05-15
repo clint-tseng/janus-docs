@@ -2311,24 +2311,17 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     font-size: 1.1rem
 
   .domview-display
-    position: relative
-
     .domview-display-label
       border-top: 1px dotted #ccc
       font-weight: bold
-      left: -1em
-      padding: 0.5em 1em
-      position: absolute
-      right: -1em
-      top: 1em
+      margin-bottom: 1em
+      margin-top: 0.5em
+      padding: 0.5em 0
 
     &.unwired .domview-display-label:after
       color: red
-      content: " (This view has been moved; events won't work)"
+      content: " (This view was moved; events may not work)"
       font-weight: normal
-
-    > :first-child
-      padding-top: 3.5em
 
 .janus-inspect-entity.janus-inspect-date
   .entity-content
