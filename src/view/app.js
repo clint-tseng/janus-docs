@@ -43,11 +43,12 @@ class AppView extends DomView.build($('body').clone(), template(
     // page navigation:
 
     dom.on('click', 'a', (event) => {
+      const target = event.currentTarget;
       if (event.isDefaultPrevented()) return;
-      if (event.target.host !== location.host) return;
+      if (target.host !== location.host) return;
       if (event.ctrlKey || event.shiftKey || event.metaKey) return;
 
-      const { pathname, hash } = event.target;
+      const { pathname, hash } = target;
       if (pathname !== location.pathname) { // navigating to different page
         event.preventDefault();
       } else if (hash === '') { // navigating from #anchor to same-page
