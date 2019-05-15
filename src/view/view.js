@@ -4,9 +4,7 @@ const { exists } = require('../util/util');
 
 class ViewView extends DomView {
   _initialize() {
-    if (this.subject.options.app == null)
-      this.subject.options.app = this.options.app;
-    this.error = new Varying();
+    this.error = new Varying(); // TODO: i guess this is viewmodel material
   }
 
   _render() {
