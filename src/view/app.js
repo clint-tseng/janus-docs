@@ -1,12 +1,44 @@
 const { DomView, template, find, from } = require('janus');
 const { filter } = require('janus-stdlib').varying;
-const { exists, blank } = require('../util/util');
+const { exists, blank, nonblank, debounce } = require('../util/util');
 const { highlight } = require('./highlighter');
 const { positionFlyout } = require('../util/dom');
 const { App } = require('../model/app');
 const { Repl } = require('../model/repl');
 const { asPanel } = require('./context');
 const $ = require('janus-dollar');
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SCROLL MANAGEMENT
+
+if ((typeof window !== 'undefined') && ('scrollRestoration' in window.history))
+  window.history.scrollRestoration = 'manual';
+
+const savePosition = () => {
+  const path = window.location.pathname + window.location.hash;
+  window.history.replaceState({ scroll: window.scrollY }, '', path);
+};
+
+const loadPosition = (state = window.history.state) => {
+  // first try restoring scrollstate.
+  if ((state != null) && (state.scroll != null))
+    return window.scrollTo(0, state.scroll);
+
+  // if that fails, scroll to the requested hash location if provided.
+  // we have to defer so that samples have a chance to run.
+  if (nonblank(window.location.hash) && (window.location.hash !== '#')) {
+    const anchor = document.getElementById(window.location.hash.slice(1));
+    if (anchor != null)
+      return setTimeout(() => { window.scrollTo(0, $(anchor).offset().top); });
+  }
+
+  window.scrollTo(0, 0); // otherwise scroll to top.
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// APP VIEW
 
 class AppView extends DomView.build($('body').clone(), template(
   find('#left nav').render(from('toc')),
@@ -43,26 +75,34 @@ class AppView extends DomView.build($('body').clone(), template(
     // page navigation:
 
     dom.on('click', 'a', (event) => {
-      const target = event.currentTarget;
       if (event.isDefaultPrevented()) return;
-      if (target.host !== location.host) return;
       if (event.ctrlKey || event.shiftKey || event.metaKey) return;
+
+      savePosition(); // save our present scroll position to history.
+      const target = event.currentTarget;
+      if (target.host !== location.host) return;
 
       const { pathname, hash } = target;
       if (pathname !== location.pathname) { // navigating to different page
         event.preventDefault();
       } else if (hash === '') { // navigating from #anchor to same-page
         event.preventDefault();
-        window.scrollTo(0, 0); // TODO: this clobbers scroll history :( :( :(
-      }
+        window.scrollTo(0, 0);
+      } else { return; } // navigating onto #anchor on same page
 
       window.history.pushState(null, '', pathname + hash);
       app.set('path', pathname);
     });
 
     $(window).on('popstate', (event) => {
-      app.set('path', location.pathname);
+      if (app.get_('path') === window.location.pathname)
+        loadPosition(event.originalEvent.state);
+      else
+        app.set('path', window.location.pathname);
     });
+
+    $(window).on('scroll', debounce(180, savePosition));
+    app.get('article').react(() => { loadPosition(); });
 
     // select paragraph-inline code on click:
 
