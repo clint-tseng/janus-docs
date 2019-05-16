@@ -8,6 +8,15 @@ class ArticleView extends DomView {
     // we count heavily here on Articles being static, which they are.
     const dom = $(this.subject.get_('html'));
     this._drawSamples(dom);
+
+    // if we find an #api-index div and it's empty, we want to render an API index.
+    // theoretically, this should only happen on offline-render server-side.
+    const index = dom.find('#api-index');
+    if ((index.length > 0) && (index.children().length === 0)) {
+      const app = this.options.app;
+      index.append(app.view(app.get_('api'), { context: 'index' }).artifact());
+    }
+
     return dom;
   }
 

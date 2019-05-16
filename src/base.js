@@ -13,6 +13,7 @@ const baseViews = () => {
   stdlib.view.registerWith(views);
   inspect.view.registerWith(views);
   require('./view/api').registerWith(views);
+  require('./view/api-index').registerWith(views);
   require('./view/app').registerWith(views);
   require('./view/article').registerWith(views);
   require('./view/confirm').registerWith(views);
