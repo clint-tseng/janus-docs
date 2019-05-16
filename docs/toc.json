@@ -64,6 +64,7 @@
     "title": "Core",
     "children": [
       "Varying",
+      "Observation",
       "Case",
       "from",
       "Base"
