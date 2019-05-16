@@ -28,7 +28,8 @@ const loadPosition = (state = window.history.state) => {
   // if that fails, scroll to the requested hash location if provided.
   // we have to defer so that samples have a chance to run.
   if (nonblank(window.location.hash) && (window.location.hash !== '#')) {
-    const anchor = document.getElementById(window.location.hash.slice(1));
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const anchor = document.getElementById(id);
     if (anchor != null)
       return setTimeout(() => { window.scrollTo(0, $(anchor).offset().top); });
   }
