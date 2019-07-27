@@ -67,7 +67,7 @@ class AppView extends DomView.build($('body').clone(), template(
 
     // save off the repl view to our model since there are cases where we need
     // it and it is essentially singleton.
-    app.set('repl.view', this.into(Repl).first().get_());
+    app.set('repl.view', this.into_(Repl));
 
     ////////////////////////////////////////
     // GLOBAL EVENTS

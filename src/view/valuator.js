@@ -29,11 +29,11 @@ class QuickValuatorView extends DomView.build($(`
 
     // prepare to clear the flyout away, then do so:
     // first hold our parent flyout open as long as the sheet lives, if any.
-    const flyoutView = view.closest(Flyout.Manual).first().get_();
+    const flyoutView = view.closest_(Flyout.Manual);
     if (flyoutView != null) holdParent(flyoutView.subject.get_('trigger'), sheet);
 
     valuator.tap(); // because app#valuator/flyout will try (correctly) to destroy()
-    view.closest(Flyout.Manual).first().get_().destroy(); // and now gone.
+    view.closest_(Flyout.Manual).destroy(); // and now gone.
   })
 )) {
   _wireEvents() {
@@ -45,7 +45,7 @@ class QuickValuatorView extends DomView.build($(`
 
     if (valuator.get_('focus') !== false) {
       const { EditorView } = require('./editor');
-      this.into(Statement).into(EditorView).first().get_().focus();
+      this.into_(Statement).into_(EditorView).focus();
     }
   }
 }
@@ -64,7 +64,7 @@ class ValuatorLineView extends DomView.build($(`
   find('.valuator-statement').render(fromSelf((view) => view.subject)),
   find('.valuator-accept').classed('disabled', from('result').map(success.match).map(not))
 )) {
-  focus() { this.into(Statement).first().get_().focus(); }
+  focus() { this.into_(Statement).focus(); }
 }
 
 

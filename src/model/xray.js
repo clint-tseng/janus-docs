@@ -6,7 +6,7 @@ class XRay extends Model.build(
     const stack = new List(target);
     if (target != null) {
       let ptr = target;
-      while ((ptr = ptr.parent().first().get_()) != null) stack.add(ptr);
+      while ((ptr = ptr.parent_()) != null) stack.add(ptr);
     }
     return stack;
   })),

@@ -26,10 +26,10 @@ class StatementVM extends Model.build(
 
   attribute('panel.direct', attribute.Boolean),
   bind('panel.repl', from('view').flatMap((view) => {
-    const replView = view.closest(Repl).first().get_();
+    const replView = view.closest_(Repl);
     return (replView == null) ? false : replView.subject.get('autopanel');
   })),
-  bind('panel.pin', from('view').map((view) => (view.closest(Pin).first().get_() != null))),
+  bind('panel.pin', from('view').map((view) => (view.closest_(Pin) != null))),
   bind('context', from('panel.direct').and('panel.repl').and('panel.pin')
     .all.map((x, y, z) => (x || y || z) ? 'panel' : null))
 ) {
@@ -43,7 +43,7 @@ class StatementVM extends Model.build(
 // TODO: janus#138
 const toolbox = template(
   find('.statement-insert').on('click', (e, statement, view) => {
-    const repl = view.closest(Repl).first().get_().subject;
+    const repl = view.closest_(Repl).subject;
     const idx = repl.get_('statements').list.indexOf(statement);
     repl.createStatement(idx);
   }),
@@ -51,7 +51,7 @@ const toolbox = template(
     statement.destroy();
   }),
   find('.statement-pin').on('click', (e, statement, view) => {
-    view.closest(Repl).first().get_().subject.get_('pins').add(statement);
+    view.closest_(Repl).subject.get_('pins').add(statement);
   }),
   find('.statement-panel').render(from.vm().attribute('panel.direct'))
     .criteria({ context: 'edit', style: 'button' })
@@ -109,7 +109,7 @@ class StatementView extends DomView.withOptions({ viewModelClass: StatementVM })
   focus() {
     // we require this here because requiring codemirror at all server-side crashes jsdom.
     const { EditorView } = require('./editor');
-    this.into(EditorView).first().get_().focus();
+    this.into_(EditorView).focus();
   }
 }
 
@@ -139,7 +139,7 @@ const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build
 ////////////////////////////////////////////////////////////////////////////////
 // PINS
 
-const Pin = Model.build(dēfault('expanded', true, attribute.Boolean));
+const Pin = Model.build(initial('expanded', true, attribute.Boolean));
 
 const PinView = DomView.build($(`
   <div class="pin">
@@ -160,7 +160,7 @@ const PinView = DomView.build($(`
     // we do this by index on the parent list in case multiple instances of this
     // item exist.
     const idx = $(event.target).closest('.pin').prevAll().length;
-    view.closest(List).first().get_().subject.parent.removeAt(idx);
+    view.closest_(List).subject.parent.removeAt(idx);
   }),
 ));
 
@@ -220,9 +220,9 @@ class ReplView extends DomView.build($(`
 )) {
   _wireEvents() {
     // any time a new statement is created, focus it.
-    this.into('statements').into().last().get().react(ifExists((sv) => { sv.focus(); }));
+    this.into_('statements').into(-1).react(ifExists((sv) => { sv.focus(); }));
   }
-  focusLast() { this.into('statements').into().last().get_().focus(); }
+  focusLast() { this.into_('statements').into_(-1).focus(); }
 }
 
 

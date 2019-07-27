@@ -48,7 +48,7 @@ class SampleView extends DomView.build($(`
     const dom = this.artifact();
     dom.on('code-navigate', (_, { line, col }) => {
       const { EditorView } = require('./editor');
-      this.into(EditorView).first().get_().setCursor(line, col);
+      this.into_(EditorView).setCursor(line, col);
     });
 
     dom.on('code-focus', _ => { dom.addClass('activated'); });
