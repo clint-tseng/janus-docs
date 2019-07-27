@@ -21,7 +21,7 @@ inspect.panel = (x) => asPanel(inspect(x));
 // TODO: for now, we put some stdlib mutator extractors here but it's not clear
 // where they really belong. it's obviously not here. it's also not clear how the
 // library should be populated but we should obviously not be doing it globally.
-const { ListView } = require('janus-stdlib').view.list;
+const { ListView } = require('janus-stdlib').view($).list;
 const { Mutation, DomViewInspector } = jInspect.inspector.domview;
 const listViewExtractor = (view) => view._mappedBindings.mapPairs((idx, binding) =>
   new Mutation({ operation: `[${idx}]`, binding: binding.parent }));

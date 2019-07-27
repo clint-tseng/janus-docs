@@ -1,5 +1,4 @@
 const { Model, DomView, template, find, from } = require('janus');
-const $ = require('janus-dollar');
 const { positionFlyout } = require('../util/dom');
 
 class Confirm extends Model {}

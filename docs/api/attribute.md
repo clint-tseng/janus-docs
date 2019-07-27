@@ -227,7 +227,7 @@ the View Library](/theory/app-and-applications#app-view-management).
 const model = new Model();
 const attr = new attribute.Text(model, 'key');
 return [
-  new stdlib.view.textAttribute.TextAttributeEditView(attr),
+  new stdlib.view($).textAttribute.TextAttributeEditView(attr),
   inspect.panel(model)
 ];
 ~~~
@@ -271,7 +271,7 @@ class SampleEnumAttr extends attribute.Enum {
 const model = new Model({ restricted: false, role: 'user' });
 const attr = new SampleEnumAttr(model, 'role');
 return [
-  new stdlib.view.enumAttribute.EnumAttributeEditView(attr),
+  new stdlib.view($).enumAttribute.EnumAttributeEditView(attr),
   inspect.panel(model)
 ];
 ~~~
@@ -294,7 +294,7 @@ const TestModel = Model.build(
 );
 
 const model = new TestModel();
-return new stdlib.view.enumAttribute.EnumAttributeEditView(model.attribute('color'));
+return new stdlib.view($).enumAttribute.EnumAttributeEditView(model.attribute('color'));
 ~~~
 
 ## Number Attribute
@@ -310,7 +310,7 @@ the View Library](/theory/app-and-applications#app-view-management).
 const model = new Model();
 const attr = new attribute.Number(model, 'key');
 return [
-  new stdlib.view.numberAttribute.NumberAttributeEditView(attr),
+  new stdlib.view($).numberAttribute.NumberAttributeEditView(attr),
   inspect.panel(model)
 ];
 ~~~
@@ -328,7 +328,7 @@ the View Library](/theory/app-and-applications#app-view-management).
 const model = new Model();
 const attr = new attribute.Boolean(model, 'key');
 return [
-  new stdlib.view.booleanAttribute.BooleanAttributeEditView(attr),
+  new stdlib.view($).booleanAttribute.BooleanAttributeEditView(attr),
   inspect.panel(model)
 ];
 ~~~

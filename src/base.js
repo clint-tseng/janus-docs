@@ -10,8 +10,8 @@ const inspect = require('janus-inspect');
 
 const baseViews = () => {
   const views = new Library();
-  stdlib.view.registerWith(views);
-  inspect.view.registerWith(views);
+  stdlib.view($).registerWith(views);
+  inspect.view($).registerWith(views);
   require('./view/api').registerWith(views);
   require('./view/api-index').registerWith(views);
   require('./view/app').registerWith(views);

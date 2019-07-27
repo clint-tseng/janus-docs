@@ -639,7 +639,7 @@ const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).buil
 ));
 
 const app = new App();
-stdlib.view.registerWith(app.get_('views'));
+stdlib.view($).registerWith(app.get_('views'));
 app.get_('views').register(Person, PersonView);
 
 const person = new Person({ name: 'Alice', children: new List([
@@ -667,7 +667,9 @@ out of the way:
   looking for (try removing the `.criteria` line, for example).
   * Again, we will cover this in more depth later.
 * We need to render Lists and buttons, so we teach our app about the views available
-  in the Standard Library (`stdlib.view.registerWith(library)`).
+  in the Standard Library (`stdlib.view($).registerWith(library)`). The Standard
+  Library itself needs access to whichever jQuery-compatible library we are using,
+  because it does not come with its own.
 * We also rely on a common convention in Janus applications, to define a `hide`
   CSS class which applies `display: none !important;` to the element.
 

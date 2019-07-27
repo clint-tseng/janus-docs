@@ -1,4 +1,3 @@
-const $ = require('janus-dollar');
 const janus = require('janus');
 const stdlib = require('janus-stdlib');
 

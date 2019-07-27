@@ -1,5 +1,4 @@
 const { Model, attribute, bind, dēfault, List, DomView, template, find, from } = require('janus');
-const $ = require('janus-dollar');
 const { nonblank, not } = require('../util/util');
 
 // TODO: there's probably a better way to do this but my brain is mush at this

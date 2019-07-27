@@ -2,9 +2,6 @@
 // purposes. it's not possible to do so, and so we don't even try.
 
 const janus = require('janus');
-const { baseViews } = require('../base');
-const $ = require('janus-dollar');
-
 const cases = { success, fail, inert } = janus.Case.build('success', 'fail', 'inert');
 
 // special method for success/fail cases which flatMaps successes/fails appropriately.

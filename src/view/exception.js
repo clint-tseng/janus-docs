@@ -1,7 +1,6 @@
 const { Model, attribute, bind, List, DomView, template, find, from } = require('janus');
 const { isNumber } = require('janus').util;
 const { filter } = require('janus-stdlib').varying;
-const $ = require('janus-dollar');
 const ESP = require('error-stack-parser')
 const { give, blank } = require('../util/util');
 

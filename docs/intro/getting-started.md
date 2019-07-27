@@ -18,13 +18,8 @@ run `npm install --save-prod janus` to have it automatically inserted.
 To import the Janus [Standard Library](/api/stdlib) as well, which provides
 useful, generic implementations for common needs like List Views, you will need
 to add it as well as a shim to feed it your DOM manipulation library of choice.
-
-1. Add `janus-stdlib` to your `package.json` file. You can find the current version
-   in the header above, or run `npm install --save-prod janus-stdlib`.
-2. Add a library `janus-dollar` to your `package.json` file.
-   * Instead of a version, you will need to point it directly at this URL:
-     `git+https://github.com/issa-tseng/janus-dollar-jquery`.
-   * You can alternatively run `npm install --save-prod janus-dollar git+https://github.com/issa-tseng/janus-dollar-jquery`.
+Add `janus-stdlib` to your `package.json` file. You can find the current version
+in the header above, or run `npm install --save-prod janus-stdlib`.
 
 Once you are done, you should end up with a `package.json` that looks something
 like:
@@ -33,9 +28,8 @@ like:
 {
   …,
   "dependencies": {
-    "janus": "~0",
-    "janus-stdlib": "~0",
-    "janus-dollar": "git+https://github.com/issa-tseng/janus-dollar-jquery"
+    "janus": "^0.5",
+    "janus-stdlib": "^0.5"
   }
 }
 ~~~
@@ -294,7 +288,7 @@ const inventory = new List([
 const sale = new Sale({ inventory, order: new List() });
 
 const app = new App();
-stdlib.view.registerWith(app.get_('views'));
+stdlib.view($).registerWith(app.get_('views'));
 app.get_('views').register(Item, ItemView);
 app.get_('views').register(Sale, SaleView);
 

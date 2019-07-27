@@ -60,7 +60,7 @@ the Model theory chapter.
 > export namespace somewhat smaller.
 
 ~~~
-const { EnumAttributeEditView } = stdlib.view.enumAttribute;
+const { EnumAttributeEditView } = stdlib.view($).enumAttribute;
 
 const ExampleModel = Model.build(
   attribute('name', class extends attribute.Text {

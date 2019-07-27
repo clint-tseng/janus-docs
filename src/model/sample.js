@@ -1,4 +1,3 @@
-const $ = require('janus-dollar');
 const janus = require('janus');
 const { Model, attribute, List, bind, from, DomView, App, Library } = janus;
 const stdlib = require('janus-stdlib');
@@ -11,7 +10,7 @@ const { compile, success, fail, inert, Env } = require('../util/eval');
 
 // create a reasonable base app for samples to use:
 const views = new Library();
-stdlib.view.registerWith(views);
+stdlib.view($).registerWith(views);
 const app = new App({ views });
 
 // doing nothing as a happy result.
@@ -79,7 +78,7 @@ class Sample extends Model.build(
     if (manual !== true) return env;
     else return {
       require: (target) => {
-        if ((target === 'jquery') || (target === 'janus-dollar')) return env.$;
+        if (target === 'jquery') return env.$;
         else if ((target === 'janus') || (target === 'janus-stdlib')) return require(target);
       }
     };

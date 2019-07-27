@@ -1,5 +1,4 @@
 const { DomView, template, find, from } = require('janus');
-const $ = require('janus-dollar');
 const { not } = require('../util/util');
 const { success } = require('../util/eval');
 const { Valuator } = require('../model/valuator');

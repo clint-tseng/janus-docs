@@ -1,5 +1,4 @@
 const { DomView, template, find, from } = require('janus');
-const $ = require('janus-dollar');
 
 const { Flyout } = require('../model/flyout');
 const { positionFlyout } = require('../util/dom.js');

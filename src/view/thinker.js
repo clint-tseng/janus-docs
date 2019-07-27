@@ -1,6 +1,5 @@
 // not a standard view! used in src/model/app.js.
 const { List, types } = require('janus');
-const $ = require('janus-dollar');
 
 const thinker = $('#thinker');
 

@@ -11,7 +11,7 @@ const stdlib = require('janus-stdlib');
 
 // register all your views with the view library, starting with stdlib:
 const views = new Library();
-stdlib.view.registerWith(views);
+stdlib.view($).registerWith(views);
 
 // option one, exporting a .registerWith(library) method in each of your views:
 require('./views/my-first-view').registerWith(views);

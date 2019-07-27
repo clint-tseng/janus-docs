@@ -6,7 +6,6 @@ const { positionFlyout } = require('../util/dom');
 const { App } = require('../model/app');
 const { Repl } = require('../model/repl');
 const { asPanel } = require('./context');
-const $ = require('janus-dollar');
 
 
 ////////////////////////////////////////////////////////////////////////////////

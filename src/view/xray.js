@@ -1,6 +1,5 @@
 const { DomView, template, find, from, Model, bind, Map, Varying } = require('janus');
 const { fromEvent } = require('janus-stdlib').varying;
-const $ = require('janus-dollar');
 const { XRay } = require('../model/xray');
 const { inspect } = require('../util/inspect');
 const { identity } = require('../util/util');

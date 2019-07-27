@@ -7,16 +7,15 @@
     "codemirror": "^5.39.2",
     "error-stack-parser": "~2",
     "janus": "~0.4",
-    "janus-dollar": "git+https://github.com/issa-tseng/janus-dollar-jquery",
     "janus-inspect": "~0",
     "janus-stdlib": "~0.4",
+    "jquery": "~3",
     "luxon": "~1"
   },
   "devDependencies": {
     "babel-minify": "~0",
     "browserify": "~16",
     "domino": "~2",
-    "jquery": "~3",
     "marked": "~0.4",
     "node-sass": "~4"
   }

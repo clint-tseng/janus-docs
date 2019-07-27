@@ -1,5 +1,4 @@
 const { Varying } = require('janus');
-const $ = require('janus-dollar');
 
 // TODO: it's possible this is functionality we want in inspect, and that we'd rather
 // duplicate this behavior across all the disparate inspector classes (right now they

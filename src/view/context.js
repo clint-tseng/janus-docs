@@ -1,5 +1,4 @@
 const { Model, attribute, bind, DomView, template, find, from, Varying } = require('janus');
-$ = require('janus-dollar');
 
 // really just switches inspection contexts between standard and panel.
 class ContextModel extends Model {

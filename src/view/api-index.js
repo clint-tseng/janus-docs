@@ -1,6 +1,5 @@
 const { DomView, template, find, from, Model } = require('janus');
 const { Api, ApiObject, ApiMember } = require('../model/api');
-const $ = require('janus-dollar');
 
 const ApiIndexView = DomView.build(
   $('<div class="api-index"/>'),

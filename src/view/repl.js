@@ -1,6 +1,5 @@
 const { Varying, DomView, template, find, from, match, otherwise, Model, bind, attribute, dēfault, List } = require('janus');
 const { zipSequential } = require('janus-stdlib').varying;
-const $ = require('janus-dollar');
 
 const { Statement, Reference, Repl } = require('../model/repl');
 const { success, fail, inert } = require('../util/eval');

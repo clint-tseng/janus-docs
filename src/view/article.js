@@ -1,5 +1,4 @@
 const { DomView, from, mutators } = require('janus');
-const $ = require('janus-dollar');
 const { Article } = require('../model/article');
 
 class ArticleView extends DomView {

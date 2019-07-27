@@ -9,7 +9,7 @@ const [ html, tocData, apiData, articleData ] =
 const domino = require('domino');
 const jquery = require('jquery');
 const window = domino.createWindow(html);
-const $ = jquery(window);
+global.$ = jquery(window);
 
 // 3. Obtain a Docs application.
 const { baseApp } = require('../base');

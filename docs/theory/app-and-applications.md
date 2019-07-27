@@ -370,7 +370,7 @@ app.views.register(types.result.success, SuccessContentView,
   { context: 'full', label: false });
 app.views.register(types.result.success, SuccessHybridView,
   { context: 'full', label: true });
-stdlib.view.registerWith(app.views);
+stdlib.view($).registerWith(app.views);
 
 return [
   app.view(new Map({ value: types.result.success(4) })),
@@ -471,7 +471,7 @@ const ProfilePageView = DomView.build($(`
 
 const app = new App();
 app.views.register(ProfilePage, ProfilePageView);
-stdlib.view.registerWith(app.views);
+stdlib.view($).registerWith(app.views);
 
 app.resolvers.register(UserRequest, userResolver);
 app.resolvers.register(FriendsRequest, friendsResolver);

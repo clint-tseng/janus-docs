@@ -1,7 +1,8 @@
 const { readFileSync, writeFileSync } = require('fs');
 
 const md = require('marked');
-const $ = require('janus-dollar');
+const domino = require('domino');
+const $ = require('jquery')(domino.createWindow());
 
 const [ , , infile, outfile ] = process.argv;
 
