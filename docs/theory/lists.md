@@ -377,8 +377,8 @@ const data = new Map({
   b: new List([ 8, 15 ]),
   c: new Map({ d: 16, e: new List([ 23, new List([ 42 ]) ]) })
 });
-const target = 42;
-return includesDeep(data, target); // TODO: use inspect.panel here?
+
+return [ inspect.panel(data), includesDeep(data, 42) ];
 ~~~
 
 Here we build a tool that allows us to search for any arbitrary value (which itself
