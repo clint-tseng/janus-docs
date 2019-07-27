@@ -26,7 +26,7 @@ const holdParent = (trigger, ref, abortIfHovered = false) => {
 
 // manual flyouts don't have much to do.
 class ManualFlyout extends Model.build(
-  attribute('children', attribute.List.withDefault())
+  attribute('children', attribute.List.withInitial())
 ) {
   _initialize() {
     this.destroyWith(this.get_('target'));
@@ -36,7 +36,7 @@ class ManualFlyout extends Model.build(
 
 // hover flyouts have to track hovers.
 class HoverFlyout extends Model.build(
-  attribute('children', attribute.List.withDefault()),
+  attribute('children', attribute.List.withInitial()),
 
   bind('hover.trigger', from('trigger').flatMap((trigger) =>
     fromEvents(trigger, true, { mouseenter: true, mouseleave: false }))),

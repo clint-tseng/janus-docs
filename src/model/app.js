@@ -1,4 +1,4 @@
-const { App, Varying, attribute, bind, dēfault, types, from, Request, Resolver, List } = require('janus');
+const { App, Varying, attribute, bind, initial, types, from, Request, Resolver, List } = require('janus');
 const { filter } = require('janus-stdlib').varying
 const { compile, fail } = require('../util/eval');
 const { Article } = require('./article');
@@ -11,7 +11,7 @@ const { XRay } = require('./xray');
 const { Confirm } = require('../view/confirm');
 
 
-class GlobalList extends attribute.List.withDefault() {
+class GlobalList extends attribute.List.withInitial() {
   get shadow() { return false; }
 }
 
@@ -23,9 +23,9 @@ class DocsApp extends App.build(
   attribute('sheets', GlobalList),
   attribute('junk', GlobalList),
 
-  dēfault.writing('cache.articles', []),
-  dēfault.writing('repl.obj', new Repl()),
-  dēfault.writing('eval.env', {}),
+  initial.writing('cache.articles', []),
+  initial.writing('repl.obj', new Repl()),
+  initial.writing('eval.env', {}),
 
   bind('repl.activated', from('repl.active').pipe(filter((x) => x === true)))
 ) {

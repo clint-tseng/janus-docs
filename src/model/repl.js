@@ -1,7 +1,7 @@
 const janus = require('janus');
 const stdlib = require('janus-stdlib');
 
-const { Map, Model, attribute, dēfault, bind, from, List, Varying } = janus;
+const { Map, Model, attribute, initial, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
 const { blank, nonblank, ifExists } = require('../util/util');
 const { atomize, dereturn } = require('../util/code');
@@ -104,10 +104,10 @@ class Reference extends Statement {
 }
 
 class Repl extends Model.build(
-  attribute('statements', attribute.List.withDefault()), // ref immutative
-  dēfault.writing('env.inject', {}),
+  attribute('statements', attribute.List.withInitial()), // ref immutative
+  initial.writing('env.inject', {}),
 
-  attribute('pins', attribute.List.withDefault()),
+  attribute('pins', attribute.List.withInitial()),
   attribute('autopanel', attribute.Boolean) // TODO: => viewmodel?
 ) {
   _initialize() {

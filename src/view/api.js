@@ -1,4 +1,4 @@
-const { Model, attribute, bind, dēfault, List, DomView, template, find, from } = require('janus');
+const { Model, attribute, bind, initial, List, DomView, template, find, from } = require('janus');
 const { nonblank, not } = require('../util/util');
 
 // TODO: there's probably a better way to do this but my brain is mush at this
@@ -131,7 +131,7 @@ const ApiBrowserObjectView = DomView.build($(`
 // TOC API SECTION
 
 class ApiBrowserSection extends Model.build(
-  dēfault('expanded.explicit', null),
+  initial('expanded.explicit', null),
   bind('expanded.match', from('objects').flatMap(anyMatch)),
   bind('expanded.navigated', from('objects').flatMap(anyByAttr('navigated'))),
   bind('expanded.final', from('expanded.explicit')

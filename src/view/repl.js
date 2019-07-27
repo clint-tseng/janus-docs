@@ -1,4 +1,4 @@
-const { Varying, DomView, template, find, from, match, otherwise, Model, bind, attribute, dēfault, List } = require('janus');
+const { Varying, DomView, template, find, from, match, otherwise, Model, bind, attribute, initial, List } = require('janus');
 const { zipSequential } = require('janus-stdlib').varying;
 
 const { Statement, Reference, Repl } = require('../model/repl');
