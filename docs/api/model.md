@@ -307,6 +307,22 @@ const model = new ExampleModel({ name: 'Alice' });
 return model.attribute('name').getValue_();
 ~~~
 
+### #attributes
+#### .attribute(): Array[Attribute]
+
+Returns all attribute instance classes for this model. If they have not yet been
+instantiated via [`#attribute`], this will instantiate all of them.
+
+~~~
+const ExampleModel = Model.build(
+  attribute('name', attribute.Text),
+  attribute('age', attribute.Number)
+);
+
+const model = new ExampleModel({ name: 'Alice', age: 26 });
+return model.attributes();
+~~~
+
 ## Binding and Context
 
 ### #pointer
@@ -327,23 +343,6 @@ const binding = from('name').map(name => `hello, ${name}!`);
 const model = new Model({ name: 'Alice' });
 return binding.all.point(model.pointer());
 ~~~
-
-### #autoResolveWith
-#### .autoResolveWith(app: App): void
-
-* !IMPURE
-
-Given an `App` instance, triggers auto-resolution of any `Reference` type `Attribute`s
-in this `Model`. This does _not_ directly cause any requests to be sent; it provides
-the context required to resolve references, but only data that is being observed
-will be resolved.
-
-In general, there is little reason to manually call this method: the Model and
-DomView databinding systems will both perform this call on your behalf when
-appropriate.
-
-Please see the [chapter on References and Requests](/theory/requests-resolvers-references)
-for more information.
 
 ## Mapping and Transformation
 
