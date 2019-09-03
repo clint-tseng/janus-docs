@@ -18,7 +18,7 @@ class StatementVM extends Model.build(
     .all.map((isReference, status) => isReference ? 'success' : status)),
 
   bind('prev', from.subject().and.subject('statements')
-    // guard because statements list is not populate for references.
+    // guard because statements list is not populated for references.
     .all.map((it, all) => (all == null) ? new List() : all.take(all.indexOf(it)))),
   bind('stale', from.subject('at')
     .and('prev').flatMap((prev) => prev.flatMap((s) => s.get('at')).max())
@@ -39,24 +39,6 @@ class StatementVM extends Model.build(
     });
   }
 }
-
-// TODO: janus#138
-const toolbox = template(
-  find('.statement-insert').on('click', (e, statement, view) => {
-    const repl = view.closest_(Repl).subject;
-    const idx = repl.get_('statements').list.indexOf(statement);
-    repl.createStatement(idx);
-  }),
-  find('.statement-remove').on('click', (e, statement) => {
-    statement.destroy();
-  }),
-  find('.statement-pin').on('click', (e, statement, view) => {
-    view.closest_(Repl).subject.get_('pins').add(statement);
-  }),
-  find('.statement-panel').render(from.vm().attribute('panel.direct'))
-    .criteria({ context: 'edit', style: 'button' })
-    .options({ stringify: give('') })
-);
 
 class StatementView extends DomView.withOptions({ viewModelClass: StatementVM }).build($(`
   <div class="statement">
@@ -88,7 +70,23 @@ class StatementView extends DomView.withOptions({ viewModelClass: StatementVM })
     .classed('is-stale', from.vm('stale'))
     .classGroup('status-', from.vm('status')),
   find('.statement-name').render(from.attribute('name')).context('edit'),
-  toolbox,
+
+  template('toolbox',
+    find('.statement-insert').on('click', (e, statement, view) => {
+      const repl = view.closest_(Repl).subject;
+      const idx = repl.get_('statements').list.indexOf(statement);
+      repl.createStatement(idx);
+    }),
+    find('.statement-remove').on('click', (e, statement) => {
+      statement.destroy();
+    }),
+    find('.statement-pin').on('click', (e, statement, view) => {
+      view.closest_(Repl).subject.get_('pins').add(statement);
+    }),
+    find('.statement-panel').render(from.vm().attribute('panel.direct'))
+      .criteria({ context: 'edit', style: 'button' })
+      .options({ stringify: give('') })
+  ),
 
   find('.statement-rerun').on('click', (_, statement) => { statement.run(); }),
   find('.statement-rerun-all').on('click', (_, statement) => { statement.runTail(); }),
@@ -131,7 +129,7 @@ const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build
   </div>`), template(
   find('.statement').classed('named', from('named')),
   find('.statement-name').render(from.attribute('name')).context('edit'),
-  toolbox,
+  StatementView.template.toolbox,
   find('.statement-result').render(from.vm('result')).context(from.vm('context'))
 ));
 
