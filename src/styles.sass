@@ -729,15 +729,6 @@ footer
     margin-bottom: 1.5em
     max-width: $main-max-width
 
-    &.splash
-      color: $color-splash
-      font-family: $font-heading
-      font-size: 3em
-      letter-spacing: -0.02em
-
-      .splash-two
-        color: $color-accent2
-
     + ul
       margin-top: -1em
 
@@ -832,6 +823,22 @@ footer
 
     h2 a.self-link
       display: none
+
+////////////////////////////////////////
+// CONTENT: splash page
+
+.article p.splash
+  color: $color-splash
+  font-family: $font-heading
+  font-size: 3em
+  letter-spacing: -0.02em
+
+  .splash-two
+    color: $color-accent2
+
+  ~ div .eval-success > .janus-list > .janus-list > .janus-literal
+    display: block
+
 
 ////////////////////////////////////////
 // CONTENT: API index

@@ -15,10 +15,10 @@ that structures multiple values together across all of time will necessarily
 require some other treatment.
 
 But seen from a different perspective, the same general rules will apply: when
-some transformation is defined on some Map or List, the resulting Map or List
-will apply that transformation across all of time. In fact, it will be relatively
-common that you end up mapping eg `Varying[List[x]]` to another `Varying[List[x]]`
-with code that looks something like this:
+some transformation like `map` is defined on some Map or List, the resulting Map
+or List will apply that transformation across all of time. In fact, it will be
+relatively common that you end up mapping eg `Varying[List[x]]` to another
+`Varying[List[x]]` with code that looks something like this:
 
 ~~~
 const v = new Varying(new List([ 1, 2, 3, 4, 5 ]));
@@ -31,12 +31,13 @@ the transformed list, and we wrap that in a Varying to ensure that if our refere
 changes&mdash;if we start talking about a different list altogether&mdash;that
 we are still computing the correct result.
 
-> There _is_ actually an important practical difference between Varying and these
+> There _is_ actually one important fundamental difference between Varying and these
 > data structures, at least in this early version of Janus: Maps and Lists perform
 > their transformations _eagerly_. Unlike Varying, which doesn't do any work unless
 > it has to, Map and List don't (yet) know how to do this.
 
-So, bear that in mind as we dive in and start poking around Lists, Maps, and Models.
+So, bear these philosophical similarities in mind as we dive in and start poking
+around Lists, Maps, and Models.
 
 First, we'll talk about some (but not all) of the basic manipulation operations
 on Lists. You can find a full listing in the [API Reference](/api/list). Then,
@@ -57,14 +58,14 @@ return [
 ].map(inspect);
 ~~~
 
-You can also `@deserialize` a List from plain data. The `@modelClass` class property
+You can also `@deserialize` a List from plain data. The `modelClass` instance property
 can be defined to instantiate all elements as some classtype. The `modelClass` must
 also have a `@deserialize` (`Model` does).
 
 ~~~
 class Person extends Model {}
 class People extends List {
-  static get modelClass() { return Person; }
+  get modelClass() { return Person; }
 }
 
 return [
@@ -110,7 +111,7 @@ members rather than indices to operate on. But add `At` to these methods, and
 it'll happily take an index instead.
 
 You can use either `.at_` or `.get_` to immediately get an item at an index. They
-do the same thing:
+mean the same thing as each other:
 
 ~~~
 const list = new List([ 0, 1, 2, 3 ]);
@@ -158,8 +159,8 @@ xs.removeAt(0);
 return inspect(ys);
 ~~~
 
-Of course, `.flatMap` is possible, and as usual it refers not to the flattening
-of Lists but rather the possibility of mapping to a Varying return type:
+Of course, `.flatMap` is possible, and per Janus convention it refers not to the
+flattening of Lists but rather the possibility of mapping to a Varying return type:
 
 ~~~
 const xs = new List([ 0, 1, 2, 3 ]);
@@ -172,6 +173,10 @@ factor.set(5);
 
 return inspect(ys);
 ~~~
+
+> You may notice that `factor` will get mapped for each List element, _each time
+> any element changes_. So if the list elements change a lot, this particular
+> code sample may suffer a little in performance.
 
 But other common operations are available, too, and their parameters all accept
 Varying inputs:
@@ -191,8 +196,15 @@ const filterMod = new Varying(3);
 const filtered = list.filter(x => filterMod.map(mod => (x % mod) === 0));
 filterMod.set(2);
 
-return [ taken, index, filtered ].map(inspect);
+return [
+  take, taken,
+  lookFor, index,
+  filterMod, filtered
+].map(inspect);
 ~~~
+
+Hover on each `Varying` in the sample result and double click on the value to
+change it, and see what happens.
 
 See the [API Reference](/api/list) for a full accounting, but among the operations
 we have not covered here are `.concat`, `.flatten`, `.uniq`, `.includes`, and `.any`.
@@ -205,7 +217,7 @@ example, returns a single value derived from the list as a whole, as does `.any`
 There are others available, like `.sum`, `.min`, and `.max`, which perform simple
 logic and math and are easy to optimize. These operations can be used unreservedly.
 
-But fully-fledged `.foldl` (sometimes called reduce) is harder to optimize. Because
+But fully-fledged `.fold` (sometimes called reduce) is harder to optimize. Because
 it operates in a particular order, typically left-to-right, it implies a sequence
 of operations as long as the list itself, each dependent on the output of the
 previous. It also means that changes to elements early in the sequence order cause
@@ -278,7 +290,7 @@ const sum = (list) => {
 };
 
 const list = new List([ 2, -3, 4, -5, 6 ]);
-return inspect(sum(list));
+return [ inspect.panel(list), inspect(sum(list)) ];
 ~~~
 
 Here, we do a bit of work to compute our initial value by directly iterating over
@@ -289,11 +301,13 @@ this is modeled in the events as the old value being removed and the new one add
 And, we don't care when computing the sum of the list the relative positions of
 the values (addition is commutative), so we never bother with the `moved` event.
 
-This, of course, means we've cheated a bit with this example: the motivation we
-gave in the previous section was precisely the case wherein order _does_ matter.
-But even in this example we can see how reacting directly to data changes in the
+This, of course, means we've cheated a bit with this example: we closed the previous
+section by hinting at how directly handling these events could help with fold performance
+in cases where order _does_ matter.
+
+But even in this example we can see how responding directly to data changes in the
 list is cheaper than, say, writing `foldl(0, (x, y) => x + y)`, as this approach
-would lead to the entire list being recomputed were the first element to change.
+would force the entire list to be recomputed were the first element to change.
 
 > # Aside
 > Just as you should get a bad feeling in your stomach when you see a lot of static
@@ -301,7 +315,7 @@ would lead to the entire list being recomputed were the first element to change.
 > any time you see `.on` (or even `.react`) used directly. Unless you are sure
 > those handlers should run forever, it is better to use `.listenTo` and `.reactTo`,
 > as we will cover in the [resource management](/theory/resource-management)
-> chapter, and as done in the [actual implementation of sum](https://github.com/issa-tseng/janus/blob/master/src/collection/derived/sum-fold.coffee).
+> chapter, and as done in the [actual implementation of sum](https://github.com/issa-tseng/janus/blob/master/janus/src/collection/derived/sum-fold.coffee).
 
 We'll try something a bit more advanced here, so you get more of a taste of how
 these things tend to go. Let's trying implementing `.reverse()`, which unlike
@@ -311,10 +325,10 @@ sum is not provided by default.
 const reverse = (list) => {
   const result = new List(list.list.slice().reverse());
 
-  list.on('added', (elem, idx) => { result.add(elem, result.length - idx); });
-  list.on('removed', (_, idx) => { result.removeAt(result.length - 1 - idx); });
+  list.on('added', (elem, idx) => { result.add(elem, result.length_ - idx); });
+  list.on('removed', (_, idx) => { result.removeAt(result.length_ - 1 - idx); });
   list.on('moved', (_, to, from) =>
-    { result.moveAt(result.length - 1 - from, result.length - 1 - to); });
+    { result.moveAt(result.length_ - 1 - from, result.length_ - 1 - to); });
 
   return result;
 };
@@ -329,7 +343,7 @@ list.move(2, -1);
 return [ list, reversed ].map(inspect);
 ~~~
 
-Here, we do actually race about the order of our elements, and so we have to pay
+Here, we do actually care about the order of our elements, and so we have to pay
 attention to `moved` events as well. Note how when writing internal code like this,
 we tend to use the `…At` methods rather than the reference-based methods. We don't
 know what the structures might contain, and whether duplicates might exist, so
@@ -347,7 +361,7 @@ Both List and Map derive from `Enumerable`. Enumerable demands that its subclass
 offer basic key/value storage (by numeric index in the case of List and by string
 key in the case of Map), ways to watch those keys, and a way to get a List of
 the data structure's keys that is updated as the structure itself changes (this
-is the actual `Enumeration` itself).
+is an `Enumeration`).
 
 Getting a list of the keys in a List may not sound too exciting, but the unity
 this interface provides allows manipulation code to handle both List-like and
@@ -384,11 +398,17 @@ return [ inspect.panel(data), includesDeep(data, 42) ];
 Here we build a tool that allows us to search for any arbitrary value (which itself
 may change if it's a Varying) at any depth in a structure. Our test data is a
 complete mess of Maps and Lists, but because we can just treat the entire problem
-as a per-key/value-pair decision on what to do, we never have to worry about that
+as a decision per key/value-pair on what to do, we never have to worry about that
 detail.
+
+> # An Exercise
+> Update the sample so that the `target` value of `42` can be set using an inspector
+> panel in the results.
 
 Importantly, just like our various List and Map transformations, this Traversal
 results in a Varying that will update its answer as our data structures change.
+You can try mousing over the Map inspector and deleting the `42` value to watch
+the computation update.
 
 Here's another example, perhaps more directly practical&mdash;it can sometimes
 arise that some data structure wants to be serialized one way in some scenarios,
@@ -408,7 +428,7 @@ const Person = Model.build();
 const { delegate, value } = types.traversal;
 const serialize = (data, personIdsOnly) => Traversal.natural_(data, {
   map: (k, v) => ((v instanceof Person) && (personIdsOnly === true))
-    ? value(v.get('id'))
+    ? value(v.get_('id'))
     : delegate(Traversal.default.serialize.map)
 });
 
@@ -457,6 +477,11 @@ almost all of the work to the default serializer, but when it spots a Person
 (notably, whether that Person is part of a List or a Map), it steps in and just
 grabs the `id` off of them instead.
 
+Without Traversal, this kind of logic flow can become a spaghetti worm weaving
+through your entire codebase, with all sorts of tangentially relevant data models
+growing extra methods or parameters just to convey the necessary switch to the
+correct spot deep in the data tree.
+
 There is a lot more to Traversal than what you see here, and there is quite a
 bit to explain even just about what we have already shown. But all of that gets
 its [own chapter](/further-reading/traversal). What we wish to emphasize here as
@@ -475,8 +500,8 @@ the same functionality, just with some Janus philosophy incorporated.
   be manipulated and fetched with `.add`, `.put`, `.remove`, and `.at`.
   * In the case of `.put` and `.remove`, adding `At` (`.putAt`, `.removeAt`)
     switches to an index-based rather than reference-based interface.
-  * `.length` works directly, and ES6 users can directly iterate on the List
-    with `for..of`.
+  * `.length` and `.length_` work directly, and ES6 users can directly iterate
+    on the List with `for..of`.
 * Common map-like and fold-like list transformations are available: `.map`,
   `.flatten`, `.concat`, and many more.
   * These transformations respond to changes on their sources, such that the

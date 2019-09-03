@@ -13,8 +13,8 @@ composably and seamlessly. Here is a brief overview of each of them:
   get to that), which allows easy reusability of little pieces. They also do the
   work of interpreting and executing the selectors targeting each Mutator.
 * **Views** take a subject, a DOM fragment, and a template, and each instantiation
-  manages the lifecycle of a single view instance. Mostly, this involves providing
-  a `point` context for the `from` statements in the template, managing client-side
+  manages the lifecycle of a single view instance. It does this by providing a
+  `point` context for the `from` statements in the template, managing client-side
   event wiring, and properly disposing of resources at the end of a view's life.
 
 We'll go through each one in order, before delving into some topics that combine
@@ -85,6 +85,8 @@ const pointer = (model) => match(types.from.dynamic(key => model.get(key)));
 
 const observation = mutators.text(from('name'))($('.target'), pointer(dog));
 const teardown = () => { observation.stop(); }; // for use later.
+
+dog.set('name', 'Woofers');
 ~~~
 ~~~ target-html
 <div class="target"/>
@@ -100,7 +102,7 @@ is a chaining API managing selectors and mutations.
 > We are going to look at many examples of using templates, but bear in mind that
 > while our template _definitions_ look like they would in typical application
 > code, we would normally execute these templates in the context of a `DomView`,
-> which we will avoid using until we cover it in the following section.
+> which we will avoid using until we cover them in the following section.
 >
 > You may also wonder how the mutators end up becoming chained operations off of
 > `find`. We'll explain this later when we touch on [custom mutators](#bring-your-own-mutators).
@@ -135,11 +137,11 @@ we were using jQuery.
 In turn, the `template()` call takes one or more `find` chains, and groups them
 together to act in concert.
 
-But in our usage here, we have also tagged on a call `)($(html));` which feeds the
-template an html fragment. And then, in the last line, when we give the template
-that `dom, point, immediate` context triplet, it doesn't look like we're feeding
-it that same html fragment, but instead some other copy of it that we've added to
-the page. What gives?
+But something is weird in our usage here. When we get our `template` back, we then
+call `)($(html));` which feeds the template an html fragment. And then, in the
+last line, when we give the template that `dom, point, immediate` context triplet,
+it doesn't look like we're feeding it that same html fragment, but instead some
+other copy of it that we've added to the page. What gives?
 
 It turns out that template wants its target html fragment twice. Here is the full
 function signature of `find` and `template`:
@@ -173,7 +175,8 @@ The other thing you might notice from the above definitions is that `find` and
 > You might find it odd that `find` returns `[Observation]` rather than a single
 > `Observation` as does a mutator. But while `find` only deals with a single
 > selection, it _does_ let us chain multiple mutations onto that one selection.
-> So for simplicity, it always gives us `[Observation]`.
+> So it _could_ cause more than one `Observation`, and so for simplicity, it
+> always gives us `[Observation]`.
 
 This is intentional, because it lets us treat the two the same in a lot of ways;
 most specifically, this trick lets us nest `template`s inside of each other:
@@ -244,6 +247,10 @@ bother with `template` if you just have one `find` statement.
 > to Janus. We want you to feel completely comfortable with all these terms and
 > tools as individual entities so that you can use Janus to its fullest.
 
+There is one more pattern related to template reuse, which can be a little more
+convenient in some cases than what we've shown so far. We'll get to it once we
+cover Views.
+
 Views
 =====
 
@@ -269,7 +276,11 @@ const NameTag = DomView.build(
 ));
 
 const dog = new Model({ name: 'Spot!', age: 4 });
-return new NameTag(dog);
+const view = new NameTag(dog);
+$('.sample-output').append(view.artifact());
+~~~
+~~~ target-html
+<div><div class="sample-output"></div></div>
 ~~~
 
 Gone is all the annoying boilerplate! By defining the convention that the given
@@ -281,12 +292,61 @@ anchor our `point` operation, we simplify the view invocation by a lot.
 > Focusing each View around a single subject also greatly simplifies the task of
 > creating [child views](#child-views), which we will cover below.
 
+Here, we call `view.artifact()` to get the one canonical view-thing for this View
+instance. For `DomView`s, the artifact is always a DOM fragment. Each View will
+only ever manage a single artifact; calling `artifact()` a second time will yield
+the same result.
+
+Named template reuse
+--------------------
+
+As promised, here we will demonstrate one more way to reuse templates across
+different Views. The advantage of this methodology is that it doesn't force you
+to break the template rules out into a separate block of code:
+
+~~~
+const NameTag = DomView.build(
+  $('<div><div class="name"/><div class="age"/></div>'),
+  template(
+    template(
+      'formattedName',
+      find('.name')
+        .text(from('name'))
+        .css('color', from('name').map(x => x.includes('!') ? 'red' : ''))),
+
+    find('.age').text(from('age').map(x => x * 7))
+));
+
+const BusinessCard = DomView.build(
+  $('<div><div class="name"/><div class="title"/></div>'),
+  template(
+    NameTag.template.formattedName,
+    find('.title').text(from('title'))
+));
+
+const dog = new Model({ name: 'Spot', age: 4 });
+const person = new Model({ name: 'Jane!!', title: 'Founder and CEO' });
+
+return [ new NameTag(dog), new BusinessCard(person) ];
+~~~
+
+When you provide a `name` string as the first argument to a `template()` call,
+the resulting template function will export itself as a property by that `name`
+on itself. When you nest `template()`s, these named exports will get agglomerated
+and conveyed up to the root, so they are all available on the final `template`
+function and thus accessible from the View.
+
+This approach is nice because it allows you to declare the template bindings in
+line with the rest of the principle View they are a part of, so anybody reading
+the code doesn't have to scamper off to other parts of the code to understand the
+View, while still preserving easy reusability.
+
 Client-side interactivity
 -------------------------
 
-Let's take a look at client-side interactivity, then. We already have jQuery,
-which is a pretty effective tool for doing this sort of thing, but how does it
-fit into the Janus picture?
+Let's take a look at client-side interactivity. We already have jQuery, which is
+a pretty effective tool for doing this sort of thing, but how does it fit into
+the Janus picture?
 
 There are two options. (We're going to simplify the template itself for the next
 few examples, since you probably get that point by now.)
@@ -390,7 +450,7 @@ return view;
 Fine, so that wasn't very exciting. It turns out that `.destroy` is definitive
 enough an action that it makes creating any kind of demonstration difficult:
 
-* It halts all bound mutators (by `.stop()`ping their reactions).
+* It halts all bound mutators (by `.stop()`ping their reaction `Observation`s).
 * It emits a `destroying` event on the DOM fragment as an open notification.
 * It removes its DOM fragment from the document.
 * It stops some internal tracking reactions on child views which it uses to
@@ -406,7 +466,7 @@ the `render` mutator, which handles child views, to do this for you.
 Child Views
 ===========
 
-We delayed talking about this one since `render` and DomView work together, unlike
+Like the `on` mutator, `render` and DomView work together a little bit, unlike
 the other mutators that are entirely opaque to DomView. To render a child view,
 just ask for some subject to be rendered.
 
@@ -429,8 +489,8 @@ const dog = new Dog({
 return app.view(dog);
 ~~~
 
-So&mdash;we also delayed this one because suddenly we have to talk a little bit about
-`App` and `Library`. We will [go in-depth with them later](/theory/app-and-applications),
+So&mdash;we delayed discussing `render` because suddenly we have to talk a little
+bit about `App` and `Library`. We will [go in-depth with them later](/theory/app-and-applications),
 but in short `App` sequesters a lot of the glue code that makes some aspects of
 Janus seem to magically work. We are running into one of those gluey bits here.
 
@@ -451,7 +511,7 @@ App injected into it.
 Of course, you may have more than one view representation for each object, or
 arguments you want to pass to the created child view. To accomplish this, `render`
 has its own subchaining methods: `.context()` and `.criteria()` help describe
-the View you are looking for, while `.options()` passes `options` bags to the
+the View you are looking for, while `.options()` passes `options` objects to the
 instantiated child View. We'll show `.options` in use here, and save the other
 two for a later chapter when we talk more about App.
 
@@ -475,7 +535,7 @@ app.get_('views').register(Dog, NameTag);
 const dog = new Dog({ name: 'Spot',
   pup: new Dog({ name: 'Tot',
     pup: new Dog({ name: 'Blot',
-      pup: new Dog({ name: 'Ought' }) }) }) });
+      pup: new Dog({ name: 'Jot' }) }) }) });
 return app.view(dog);
 ~~~
 
@@ -486,7 +546,10 @@ subchained into the purview of `render` we can still chain back into the larger
 context, adding on further mutators without trouble (as long as the names don't
 conflict, in which case the subchain is preferred).
 
-> Typically, unless it's a really big performance difference not to draw the
+> You can also use View Navigation (covered below) to operate based on view hierarchy
+> and nesting structure. We cover that later in this chapter.
+>
+> And typically, unless it's a really big performance difference not to draw the
 > additional views, we would actually recommend the use of CSS to accomplish
 > the sort of task in the previous sample, since it's significantly simpler:
 >
@@ -506,29 +569,40 @@ Behind the scenes, DomView and the render mutator work together to ensure that
 `.wireEvents()` is filtered down to subviews when it should be, including when
 the subview is swapped out. The render mutator also makes sure any discarded views
 are properly disposed of with `destroy`. (Both of these tasks are accomplished
-by a `.view` Varying that `render` maintains on the Observation ticket&mdash;perhaps
-you are seeing a pattern here.)
+by a `.view` Varying that `render` sneakily maintains on the Observation
+ticket&mdash;perhaps you are seeing a pattern here.)
 
 Advanced Techniques
 ===================
 
 Various combinations of everything you've just learned will cover most of your
-rendering needs. It's worth covering, at least in brief, four advanced techniques.
+rendering needs. It's worth covering, at least in brief, three advanced techniques.
 
 * View Models are really useful when you have view-related state you want to databind
   without polluting your true Model data, when there are calculated values based
   on your Model data that your View repeatedly relies on, or when multiple Models
   need to be considered when rendering a view.
+* View Navigation can help you perform operations based on the hierarchical relationship
+  between Views as drawn on the page.
 * As with everything in Janus, the default mutators may be augmented or supplanted
   entirely by your own implementations.
-* You can, of course, skip all the convenient structures we've provided and handle
-  rendering on your own.
-* And `view.attach(dom)` is a very powerful alternative to `view.artifact()` which
-  uses the `immediate` parameter we've been passing around without explanation.
 
 By now, you should be familiar with the ritual: these are useful concepts to skim
 so you have some concept that they exist and what they are, but it's not necessary
 to understand each one in significant detail when you're getting started.
+
+There are also two very powerful and useful advanced techniques we have broken out
+into a separate article each:
+
+* You can skip all the convenient structures we've provided and handle rendering
+  on your own, for managing complex drawing tasks or extreme cases where performance
+  becomes a serious concern. For information about this, please see the Further
+  Reading chapter on [custom view rendering](/further-reading/view-custom-render).
+* [View `attach()`](/further-reading/view-attach) is a powerful feature in Janus,
+  and is the reason we've been passing the `immediate` parameter around. With `attach`,
+  you can initialize your application in the browser on the client side against
+  markup generated by your server, without doing any work to redraw the page. This
+  can drastically speed up page responsiveness on load.
 
 View Models
 -----------
@@ -581,7 +655,7 @@ return app.view(policy);
 ~~~
 
 So here, `EligibilityViewModel` accomplishes two things:
-1. It restructures our data into a form that makes the required computation easy.
+1. It restructures our data into a shape that makes the required computation easy.
 2. It gives `render` something to latch onto when finding the right view, because
    we register the `EligibilityView` against it.
 
@@ -656,11 +730,11 @@ out of the way:
 * There are some unfamiliar things going on with this `PersonViewModel`:
   * We're declaring an `attribute` on our Model, which helps us declare behavior
     on particular keys on the Model. We then call `render` on `from.attribute`
-    of that key, which apparently gets us a button.
+    of that key, which apparently gets us a button from the standard library.
   * We also see a `bind()` call in the Model definition. This one is pretty
     straightforward: that key on the Model will always carry the given computed
     value.
-  * We'll get into these things in the [next chapter](/theory/maps-and-models),
+  * We'll get into these things in a [later chapter](/theory/maps-and-models),
     on (Maps and) Models.
 * Here, as promised, is an example of the `.context` and `.criteria` subchain
   methods on `render`. They describe to the Library the kind of view we are
@@ -668,8 +742,8 @@ out of the way:
   * Again, we will cover this in more depth later.
 * We need to render Lists and buttons, so we teach our app about the views available
   in the Standard Library (`stdlib.view($).registerWith(library)`). The Standard
-  Library itself needs access to whichever jQuery-compatible library we are using,
-  because it does not come with its own.
+  Library itself needs access to whichever jQuery-alike we are using, because it
+  does not come with its own.
 * We also rely on a common convention in Janus applications, to define a `hide`
   CSS class which applies `display: none !important;` to the element.
 
@@ -681,17 +755,17 @@ not a View Model.
 
 Instead, with this `viewModelClass` option we ask `View` to transparently create
 a View Model class of the given type. That Model class is then given some context
-in the form of plain key/value data attributes, just like we've been assigning
+data in the form of plain key/value data attributes, just like we've been assigning
 `name` and `age` in all these examples. These are `{ subject, view, options }`
 where `subject` is the original intended subject for the view, `view` is the view,
 and `options` are `view.options`.
 
-This does mean that whenever we want a property off the real subject Model, we
-have to first go through `from('subject')` to get, in this case, the actual `Person`.
-But you can see that we can overlay a lot of useful context over the `Person`
-with this technique.
+Because Model gives us a lot of tools for describing data properties and relationships
+between them (using `attribute` and `bind` and other useful features you'll see
+later), this additional little View Model sandbox to play in gives you a lot of
+room to organize presentation behaviour about your View.
 
-We need the child count multiple times, and while we could declare a standalone
+Here, we need the child count multiple times, and while we could declare a standalone
 `const count = from('children').flatMap(…)` expression and use it twice in our
 template, it's nice for it to exist in a structure somewhere, and for it to be
 computed only once. And, rather than implement event handlers with ad-hoc internal
@@ -699,9 +773,111 @@ state to create our hide/show behavior, we can just use data modeling and Standa
 Library components to accomplish the same task, without any messy imperative code
 at all.
 
+To use data from the View Model rather than the subject Model, you can see that
+we use `from.vm()` (vm being short for View Model) rather than `from()` or `from.get()`.
+Relatedly, when we render our `children.show` attribute, we run into the fact that
+`from.attribute()` refers specifically to the _subject_ Model. So, we have to get
+the View Model first before `map`ping out the attribute in question (`from.vm().map(…)`).
+
 So when you have to combine multiple Models, or compute repeatedly used or complex
 multistep values, or add additional view-specific context in order to make your
-View a reality, think to yourself how inserting a View Model might help.
+View a reality, give some thought to how inserting a View Model might help. We
+will give more examples of this sort of structure and thinking in the chapter on
+Maps and Models.
+
+View Navigation
+---------------
+
+There will sometimes be cases where you will need to understand something about
+the View Hierarchy in order to correctly perform some operation or render some
+View.
+
+In this documentation, for example, the `SampleView` needs to have access to the
+code `Editor` view within it to do basic actions like set the cursor focus or
+navigate to some line and column within the text. In the other direction, the console
+`ReplView` needs access to the overall `AppView` that serves as the root of this
+entire page in order to hide itself when asked to.
+
+Though not a requirement of every application, this is a common enough problem in
+Janus that we have created a solution: View Navigation.
+
+~~~
+class Child extends Model {}
+class ChildView extends DomView.build(
+  $('<span/>'),
+  find('span').text(from('id'))
+) {
+  flash() { this.artifact().animate({ opacity: 0 }, 8).animate({ opacity: 1 }, 400); }
+}
+
+const { floor, random } = Math;
+class Parent extends Model {
+  randomize() { this.set('target', floor(random() * this.get_('children').length_)); }
+}
+const ParentView = DomView.build(
+  $('<div><div class="list"/><button/></div>'),
+  template(
+    find('.list').render(from('children')),
+    find('button')
+      .text(from('target').map(t => `Flash ${t}`))
+      .on('click', (event, subject, view) => {
+        const target = subject.get_('target');
+        view.into_('children').into_(target).flash();
+        subject.randomize();
+      })
+));
+
+const app = new App();
+stdlib.view($).registerWith(app.get_('views'));
+app.get_('views').register(Child, ChildView);
+app.get_('views').register(Parent, ParentView);
+
+const children = new List((new Array(10)).fill().map((_, id) => new Child({ id })));
+const parent = new Parent({ children });
+parent.randomize();
+
+return app.view(parent);
+~~~
+
+Here we define some of our own methods on both a View and a Model. This is a good
+practice not so much to privatize internal concerns but rather to ensure consistent
+handling of common tasks and make code more readable elsewhere.
+
+But the critical bits here are the calls to `.into_` on the View. The View Navigation
+methods are description-based data structure navigators. Here, we first provide
+a string key `children`, which corresponds to the `children` property on the Model.
+The `.into_` method will return the first immediate child View it finds that is
+associated with that data value, which in this case will be a `ListView`. In turn,
+we call `.into_` again on that `ListView` with a numeric index, and the process
+repeats. When we have our desired `ChildView` in hand, we call `flash()` on it.
+
+`.into_` is not the only navigation method:
+
+* `.into` is the same as `.into_` but returns a `Varying` result instead, which
+  as you might expect by now is kept up to date as data changes.
+* `.intoAll` and `.intoAll_` work like `into`, but will return an `Array` or a
+  `List` (respectively) with _all_ matching immediate child Views.
+* `.parent` and `.parent_` will return the immediate parent.
+* `.closest` and `.closest_` will return the closest parent that matches the criteria.
+
+And there are several ways to describe the View you are looking for:
+
+* If no parameter is provided (or you pass `undefined`), there is no criteria and
+  any Views found by the navigation walk will be returned.
+* As you have seen, if a string or number is provided, it is assumed to be a data
+  key and the data value associated with the key will be the search target.
+* If the provided value exactly matches a child View or a child View's subject,
+  that View will be returned.
+* If a class type is provided and a child View or the child View's subject is an
+  `instanceof` that class type, that View will match.
+
+> # Aside
+> You can also access the View Navigation methods as functions instead of instance
+> methods, under View.navigation. The function versions have the same name, but
+> take the View to search _from_ as the second parameter.
+
+For another example of View Navigation, see the [Advanced Layout](/cookbook/advanced-layout)
+Cookbook entry.
 
 Bring Your Own Mutators
 -----------------------
@@ -732,132 +908,8 @@ this, you'd define them in some common utility file that then exports your `find
 function, and this is where you would get `find` from throughout your application
 rather than the Janus package.
 
-Custom View Render
-------------------
-
-The standard DomView builder structure doesn't work well _every_ rendering task.
-This is true of [Lists](https://github.com/issa-tseng/janus-stdlib/blob/master/src/view/list.coffee),
-for example, which is why we've solved the problem for you and provided it in the
-Standard Library.
-
-High-performance cases or canvas drawing are other examples. Or, as we'll demonstrate
-in our sample code here, if your markup is not static per View but you still need
-to bind mutators into it.
-
-To address these scenarios, you'll need to learn about one more method override
-on `View`s: `_render()`. It will be called when the View is expected to produce
-an `artifact`, and it should return whatever object represents that View (typically
-a jQuery DOM fragment). It will only ever be called once: the result is cached
-as the one canonical artifact of the View.
-
-Let's see an example, which in fact is heavily based on the artifact you are
-currently looking at: this very article.
-
-~~~
-const Article = Model.build();
-const Sample = Model.build();
-
-class ArticleView extends DomView {
-  _render() {
-    const dom = $(this.subject.get_('html'));
-    const pointer = this.pointer();
-    this._sampleBindings = this.subject.get_('samples').map((sample) => {
-      const sampleDom = dom.find(`#sample-${sample.get_('id')}`);
-      return mutators.render(from(sample))(sampleDom, pointer);
-    });
-    return dom;
-  }
-  _destroy() {
-    if (this._sampleBindings != null)
-      for (const binding of this._sampleBindings)
-        binding.stop();
-  }
-}
-
-const SampleView = DomView.build($('<code/>'), find('code').text(from('code')));
-
-const app = new App();
-app.get_('views').register(Article, ArticleView);
-app.get_('views').register(Sample, SampleView);
-
-const article = new Article({
-  html: `
-    <div class="article">
-      <p>This is an article about a useful subject. Here's an example:</p>
-      <div id="sample-1"/>
-      <p>But here's a more complicated example:</p>
-      <div id="sample-2"/>
-    </div>`,
-  samples: new List([
-    new Sample({ id: 1, code: 'console.log("hello, world!");' }),
-    new Sample({ id: 2, code: 'console.log("greetings, universe!");' })
-  ])
-});
-
-return app.view(article);
-~~~
-
-So you see, we can still make use of our various tools to accomplish this task.
-We can directly invoke `mutators.render` if we know what it wants, and manually
-manage the `Observation` tickets we get back from it by implementing our own
-`_destroy` handler.
-
-But you can also see that we take some shortcuts here: we blithely assume that
-the `html` on the article will never change, nor will the `samples` List instance.
-If these are not safe assumptions to make, then we have a lot more homework to
-do to create the same kinds of guarantees Janus normally makes.
-
-It'll be incredibly rare that you have to write a custom view, but when you do
-don't forget these things: take only the shortcuts you can, and leverage the same
-primitive tools you would normally use with a built `DomView` when you can.
-
-Attaching to Rendered Views
----------------------------
-
-One of the more subtly powerful tools in the Janus toolkit is `view.attach(dom)`.
-Attachment is the sole reason you've seen the `immediate` parameter get piped
-around this whole time.
-
-`attach` allows you to create a View and attach it to an already-rendered DOM
-fragment, rather than generate its own fragment. Mutators will get bound against
-the extant fragment, and events will get wired just as usual, but the initial
-state of the fragment is assumed to be already up-to-date with the latest model
-values, and no mutations will occur until data actually changes.
-
-> After all, if we attached to an existing fragment but then immediately clobbered
-> its contents, which would include re-rendering child views, there wouldn't be
-> much point!
-
-The key use of this functionality is to be able to pick up server-rendered markup
-on the client side and resume maintaining it without having to first wipe the
-slate clean and re-render everything.
-
-You can perhaps spot how `immediate` fits this task. You will recall (hopefully)
-that calling `varying.react(false, (x) => { … })` will begin running the reaction
-callback only on the _next_ value change for the Varying. So by basing all our
-mutators on this resolution syntax:
-
-~~~ noexec
-(data) => (dom, point, immediate = true) => data.all.point(point).react(immediate, …)
-~~~
-
-…which you saw at the top of this article, all that's left is to pass `false`
-for `immediate`, and we have a free and easy `view.attach(dom)` method.
-
-> Okay, it's not that easy. The `render` mutator, in particular, needs to work
-> a little bit differently because while it doesn't want to _change_ the rendered
-> child view right away it still has to carry the `attach` operation all the way
-> down through the view tree.
-
-This does mean, however, that if you have implemented a custom `_render` View
-as described in the previous section, you'll have a little more work to do if
-you want to use `attach`: you'll have to implement `_attach(dom) {}`, which will
-need to work exactly like `_render` except it'll have to use the given `dom` rather
-than generate its own, and it isn't expected to return anything, and it should
-ideally (but optionally) itself pass `immediate = false` as appropriate to any
-mutators or `.react`s it performs.
-
-There is more information and sample code about `view.attach` in the [Cookbook](/NYI).
+Another example of a custom mutator can be found in the [Flyouts](/cookbook/flyouts)
+Cookbook entry.
 
 Recap
 =====
@@ -865,7 +917,7 @@ Recap
 Mutators, Templates, and Views required a lot of explanation, simply because they
 accomplish so much. But they are not, in isolation, complex, nor are they some
 monolithic, tightly-bound machine. In fact, we'd encourage you to go [peruse the
-actual implementation](https://github.com/issa-tseng/janus/tree/master/src/view);
+actual implementation](https://github.com/issa-tseng/janus/tree/master/janus/src/view);
 none of these components are longer than 100 lines of commented code.
 
 To review:
@@ -885,13 +937,15 @@ To review:
   * Upon `.destroy()` Views carefully dispose of any computing resources they created.
   * `_wireEvents` can be overridden to apply client-side interactivity, but the
     `on` mutator is often a simpler shortcut.
+* View Models are a powerful tool for restructuring or augmenting pure Model data
+  to make view rendering problems easier to solve.
+* Other powerful functionality exists that we have hinted at here but are described
+  in detail in Further Reading chapters:
   * `_render` can be overridden to skip the normal templating machinery, but care
     must be taken around changing values and resource management.
   * You can call `view.attach(dom)` instead of `view.artifact()` to attach a View
     instance to an already-correct DOM fragment. This can save an initial re-render
     when your application spins back up on the client-side.
-* View Models are a powerful tool for restructuring or augmenting pure Model data
-  to make view rendering problems easier to solve.
 
 Next Up
 =======

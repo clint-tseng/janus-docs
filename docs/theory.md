@@ -16,14 +16,15 @@ wish to do this:
 
 This may sound dry or needless or excessive: a guide to Rails does not include a
 deep dive into the internals of ActiveRecord, nor does a jQuery introduction cover
-the vagaries of its browser compatibility work.
+the vagaries of its internal selection management.
 
 Our view is that Janus is actually just a collection of very simple functional
 primitives that we happen to have imbued with some default that make them
-collectively a potent user interface framework. The more general purpose the tool,
-the broader the possibility space and so the deeper the understanding it takes
-to use it to its fullest potential: we are not surprised that programming languages
-require some amount of theoretical study before they may be properly used.
+collectively a potent user interface framework. The more general purpose a tool,
+the broader its possibility space and so the deeper the understanding it takes
+to use it to its fullest potential: we are not surprised that even the simplest
+programming languages require some amount of theoretical study before they may
+be properly used.
 
 It is very definitely possible to leverage Janus by copy-and-paste incantation
 work. We think it's still an effective tool used this way. But we hope you stick

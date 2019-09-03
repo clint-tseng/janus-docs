@@ -25,14 +25,14 @@ We will start by discussing Varying-based resource management.
 Managing Varyings
 =================
 
-We've previously discussed that Mapped Varyings are inert, they don't perform their
+We've previously discussed that Mapped Varyings are inert: they don't perform their
 mapping computation even if their source value changes unless someone is actually
 paying attention. In the case of Mapped Varyings this tracking is all internal,
 but all Varyings provide a mechanism, `.refCount`, that you can use to create
 similar behavior of your own.
 
-Reference attributes actually use this: remember that Reference attributes don't
-actually resolve their Request unless they detect that someone actually cares
+Reference attributes on Models actually use this: remember that Reference attributes
+don't actually resolve their Request until they detect that someone actually cares
 about their attribute: not just that it has been `.get`ted, but that the `.get`
 has been `.react`ed upon. Here's a sample mechanism somewhat similar to that one:
 
@@ -64,10 +64,11 @@ return [
 ~~~
 
 Here, in `lazyRequester`, we create a Varying return value with an initial value.
-But before we return it, we `.react` to its `.refCount()`, which is a Varying
-that always carries the number of observers on the actual valued Varying. We kick
-off Request resolution any time we see that there is more than one observer,
-though in practice we would only want to resolve the Request once.
+We don't actually go perform any request work. But before we return it, we `.react`
+to its `.refCount()`, which is a second Varying that always carries the count of
+observers on the first. We kick off Request resolution any time we see that there
+is more than one observer, though in practice we would only want to resolve the
+Request once.
 
 We flatten the result so that when we _do_ get a result Varying from Request
 resolution, we can blithely dump it inside our actual result, and the two will
@@ -140,12 +141,12 @@ return results;
 
 The `Varying.managed` method takes a bunch of functions that each returns some
 kind of expensive resource, and a final function that takes those resources and
-returns a Varying with the correct answer. It hangs on to all of these things
-until somebody comes along and `get`s or `react`s on it, at which point it calls
-all the resource functions, and hands those resources off to your function that
-gives the correct Varying result.
+returns a Varying with the correct answer. It returns a hollow Varying with no
+real value, and hangs on to all of these inert functions until somebody comes
+along and `get`s or `react`s on it, at which point it calls all the resource functions,
+performs the final computation to derive the Varying result you intended.
 
-When nobody cares again, it frees up those resources.
+When nobody cares again, it frees up those resources by calling `.destroy` on them.
 
 The `.destroy` method is an important one. It indicates that a resource is no
 longer needed, whereupon Janus will do its best to eliminate all references and
@@ -165,7 +166,7 @@ Base provides three primary facilities:
 * Basic event emitting in conformance with the standard `.on`, `.off`, `.emit`
   protocol via `EventEmitter2` (Janus's only dependency).
 * Managed event listening `.listenTo` and Varying reaction `.reactTo` methods
-  which automatically terminate when the Base object is destroyed.
+  which automatically terminate when the Base object is `destroy`ed.
 * `Base.managed`, which works somewhat like `Varying.managed`.
 
 Central to all of these facilities is `.destroy`. Upon destroy, a Base object
@@ -173,9 +174,9 @@ will:
 
 * Do some things to do with `Base.managed`, including decide whether or not to
   proceed with destruction (we'll get to this).
-* Terminate all inbound event listeners (other objects listening to its events).
+* Terminate all inbound event listeners (external objects listening to its events).
 * Terminate all outbound event listeners created with `.listenTo` and outbound
-  Varying observations created with `.reactTo` (this object listening to other
+  Varying observations created with `.reactTo` (this object listening to external
   things).
 
 The terminations are easy to describe and explain: any time you directly write
@@ -185,7 +186,7 @@ that is doing the consumption, and the first argument is the object being consum
 
 ~~~
 class ErrorLog extends Model.build(
-  dēfault.writing('errors', new List())
+  initial.writing('errors', new List())
 ){
   _initialize() {
     this.listenTo(this.get_('app'), 'resolvedRequest', (request, result) => {
@@ -231,14 +232,14 @@ bind('even_count',
 
 Here, a Filtered List and a Varying are created as part of the mapping pure function.
 But we don't have to worry about `.destroy`ing it: because this function is pure,
-only Varying internals can ever form references pointing at these objects&mdash;downstream
-maps and reactions on the result of this `.flatMap` get a plain length value, with
-no access to the filtered list or even the Varying that carries the length. So,
+only the Varying internals handling the `flatMap` can ever form references pointing
+at these objects&mdash;and anything depending on the `flatMap` refer to the `Varying`,
+not this intermediate filtered list, or even the `.length` Varying of the list. So,
 when the Varying is no longer being observed and the Varying internals relinquish
 their references to the mapping results, these intermediate objects will automatically
 be cleaned up by the garbage collector.
 
-<!-- TODO: is this true? how about the outbound event listeners to the parent list? -->
+<!-- TODO: is this always true? how about the outbound event listeners to the parent list? -->
 
 But when you are working in a more object-oriented fashion, for instance when
 implementing a List transformation of your own and instantiating tracking objects,
@@ -257,6 +258,13 @@ class CustomList extends List.Derived {
 
     // don't use .react, use .reactTo:
     this.reactTo(this._trackingList.length, l => { /* … */ });
+  }
+}
+
+class CustomList2 extends List.Derived {
+  _initialize() {
+    this._trackingList = new List(); // uh oh! an instantiated object.
+    // ...do work with the tracking list
   }
 
   _destroy() {
@@ -285,33 +293,35 @@ called `._destroy()` if it exists: that is your space to implement cleanup logic
 > pollute `._destroy()` either.
 
 But sometimes you need to optionally generate computed resources for external purposes
-only when they're needed&mdash;when someone asks for the enumeration (all keys,
-or in this case numeric indices) of a List, for example. You don't usually care,
-you don't usually track this information, but there's work to be done if somebody
-does.
+only when they're needed&mdash;when someone calls `#enumerate` on a List to get
+a list of its indices, for example. You don't usually care, you don't usually track
+this information, but there's work to be done if somebody does.
 
 The basic implementation is straightforward enough:
 
 ~~~
 class SampleList extends List {
-  enumeration() {
+  enumerate() {
     const result = new List((new Array(this.length_)).fill().map((_, idx) => idx));
-    this.listenTo(this, 'added', () => { result.add(result.length_); });
-    this.listenTo(this, 'removed', () => { result.removeAt(-1); });
+    result.listenTo(this, 'added', () => { result.add(result.length_); });
+    result.listenTo(this, 'removed', () => { result.removeAt(-1); });
+    result.destroyWith(this);
     return result;
   }
 }
 
 const list = new SampleList([ 4, 8, 15, 16, 23, 42 ]);
-const enumeration = list.enumeration();
+const enumerate = list.enumerate();
 
 list.add(63);
 list.remove(15);
 list.remove(16);
-return inspect(enumeration);
+return inspect(enumerate);
 ~~~
 
-We even used `.listenTo`, so the work will be terminated when our List is destroyed.
+We even used `.listenTo` and `.destroyWith`, so the work will be terminated when
+either List is destroyed.
+
 But even in this simple example where the generate resource and work is minimal,
 there's still something left to be greatly desired&mdash;what happens if many
 consumers care about the enumeration? Right now, we're doing all this work for
@@ -324,23 +334,24 @@ managing the enumeration if we could.
 
 ~~~
 class SampleList extends List {
-  enumeration() {
-    if (this.enumeration$ == null)
-      this.enumeration$ = Base.managed(() => {
-        const list = new List((new Array(this.length_)).fill().map((_, idx) => idx));
-        list.listenTo(this, 'added', () => { list.add(list.length_); });
-        list.listenTo(this, 'removed', () => { list.removeAt(-1); });
-        return list;
+  enumerate() {
+    if (this.enumerate$ == null)
+      this.enumerate$ = Base.managed(() => {
+        const result = new List((new Array(this.length_)).fill().map((_, idx) => idx));
+        result.listenTo(this, 'added', () => { result.add(list.length_ - 1); });
+        result.listenTo(this, 'removed', () => { result.removeAt(-1); });
+        result.destroyWith(this);
+        return result;
       });
 
-    return this.enumeration$();
+    return this.enumerate$();
   }
 }
 
 const results = [];
 const list = new SampleList([ 12 ]);
-const enumeration = list.enumeration();
-const enumeration2 = list.enumeration();
+const enumeration = list.enumerate();
+const enumeration2 = list.enumerate();
 
 enumeration2.destroy();
 list.add(24);
@@ -350,7 +361,7 @@ list.add(24);
 const snapshot = enumeration.list;
 enumeration.destroy();
 
-const enumeration3 = list.enumeration();
+const enumeration3 = list.enumerate();
 
 return [
   enumeration === enumeration2,
@@ -361,33 +372,38 @@ return [
 ~~~
 
 Here, we use `Base.managed`, which is a lot like `Varying.managed`. Unlike the
-Varying mechanism, however, `Base.managed` doesn't manage multiple object instances
-that boil down to a Varying, but instead returns a single managed object instance.
+Varying mechanism, `Base.managed` doesn't manage multiple resources required to
+generate a final product. Instead, it returns a single managed object instance.
 We do still have to cache/memoize something on the parent object, which in this
 case is the manage facility itself.
+
+This difference is because in the case of a Base object result, you can generate
+the resources yourself, and entangle them all together with `.destroyWith`, which
+is considerably more straightforward a homework assignment than managing a Varying
+`refCount`.
 
 > In Janus internals, cached values are always named with a `$` appended after the
 > method name that generates and relies on them.
 
-We can see from the final result checks that our two calls to `.enumeration()`
+We can see from the final result checks that our two calls to `.enumerate()`
 resulted in exactly the same List instance (if you perform this check on the previous
 sample, it will not be true). We can also see that after one `enumeration` was
 already destroyed the addition of `24` still resulted in an update to the enumeration
 List, while the addition of `48` after both requested enumerations were `.destroy`ed
 is not reflected.
 
-> You will also notice that we instantiate the result List, and call `list.listenTo`
+> You will also notice that we instantiate the result List, and call `result.listenTo`
 > rather than `this.listenTo`. After all, it is the result List whose lifespan
-> the listener should relate to&mdash;and there is nothing wrong with this sort
-> of invocation.
+> the listener should be tied to&mdash;and there is nothing wrong with this sort
+> of direct child invocation.
 
-Internally, _all_ Base objects have a reference counter. By default, this counter
-is instantiated with a value of `1`, and at some point when `.destroy` is called
-the counter is decremented and the destroy procedures are carried out only if the
-counter has hit `0`. The method `.tap` increments the counter.
+How does this work?  Internally, _all_ Base objects have a reference counter. By
+default, this counter is instantiated with a value of `1`, and at some point when
+`.destroy` is called the counter is decremented and the destroy procedures are
+carried out only if the counter has hit `0`. The method `.tap` increments the counter.
 
 All `Base.managed` does is choose intelligently between instantiating a new resource
-by calling your function or calling `.tap` on the one it knows it already has.
+by calling the stored function or calling `.tap` on the one it knows it already has.
 
 Of course, all of this depends on the resource consumer actually calling `.destroy`.
 These sorts of risks are always present in modern garbage collected languages.
@@ -406,7 +422,8 @@ automatically addressed.
 Where they cannot, Janus offers some tools to help you.
 
 * `varying.refCount()` returns a `Varying[number]` indicating the number of reactions
-  (observers) on `varying`. This can help you postpone work until it matters.
+  (observers) on `varying`. This can help you postpone work until it matters, and
+  cancel it when it does not.
 * For an even more automatic approach, `Varying.managed` generates a `Varying`
   which, when observed, generates resources of your description and manages their
   lifecycles for you.

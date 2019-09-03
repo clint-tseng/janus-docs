@@ -50,7 +50,7 @@ constructor, wrapping the value in a Varying and handing it back.
 
 In reality, it will be rare that you manually construct a Varying. For the most
 part, you'll be instead making use of Varyings that more advanced tools in Janus
-give you, like `List.length` or `Model.valid()`.
+return to you, like `List.length` or `Model.valid()`.
 
 Getting a Value
 ===============
@@ -288,10 +288,10 @@ const exceededQuota =
 return inspect(exceededQuota.get());
 ~~~
 
-Shoot, we called `get` on our Varying, but instead of retrieving the useful result
-we wanted, we got some other Varying back that was inside of it&mdash; rather
-than yielding a `Varying[bool]` as we might have hoped, we have created a
-`Varying[Varying[bool]]`.
+Shoot, we called `get` on our `exceededQuota` Varying, but instead of retrieving
+the useful result we wanted, we got some other Varying back that was inside of
+it&mdash; rather than declaring a `Varying[bool]` as we might have hoped, we have
+created a `Varying[Varying[bool]]`.
 
 Of course, part of the awkwardness here is how we nested `items.length.map` (which
 yields a `Varying[Int]` inside of `quota.map`, but that's simply because we don't
@@ -528,11 +528,10 @@ carried out:
 
 This doesn't seem so bad, necessarily. That `3.5` _did_ happen at some point,
 after all, so it seems natural that it should show up in the results array. But
-two things make this an unacceptable result. The first is that as far as `results`
-are concerned, because it sees the values in reverse order, `3.5` is _the final_
-canonical result.
+there is a big unacceptable problem here: as far as `results` are concerned, because
+it sees the values in reverse order, `3.5` is _the final_ canonical result.
 
-This becomes a big problem once we learn how Varyings actually perform mapping
+This becomes a worse problem once we learn how Varyings actually perform mapping
 in the following section: eventually, to fulfill `map`s, Varyings will `react`
 on their mapping source. So any mapped Varyings chained off this one would carry
 the wrong result.
@@ -554,13 +553,12 @@ instead of offering direct access to some `value` property&mdash;we might have
 to do work to answer the question.)
 
 But we've also previously mentioned that the _only_ ways to get values out of a
-Varying are `get` and `react`. There is no super-secret backdoor (yet) that Varying
-uses to snoop on its mapping source.
+Varying are `get` and `react`.
 
 So what a mapping-result-Varying (henceforth referred to as a `MappedVarying`)
 actually does is wait around until someone comes along and `react`s on it. When
 that happens, it itself `react`s on its source Varying, with a callback that maps
-the result and applies it to itself. This way, if a whole chain of Mapped Varyings
+the result and sets it on itself. This way, if a whole chain of Mapped Varyings
 are strung together, starting a reaction causes a series of `react`s in turn all
 the way back to the Varying source. The opposite is also true: when a Mapped Varying
 no longer has any reactions on it, it stops reacting on its source Varying.
@@ -635,9 +633,21 @@ v.set(42);
 return [ v, output ].map(inspect);
 ~~~
 
+> # Aside
+> You'll see that the two results are a little different: with the `debounce`
+> we wrote out above, the sample result prints immediately. You can add some spaces
+> at the end of a line to watch the debounce effect in action. But with this version,
+> the value isn't there; you have to click on it to see it, by which time it will
+> always pick up the value `42`. This is because by using tricks like `Varying.managed`,
+> the standard library version of debounce understands when nobody is watching its
+> result value and therefore when it shouldn't bother doing the work.
+>
+> You can add an `output.react();` just after `output` is created in the above
+> sample to force a value immediately.
+
 As you'll see when we talk about `from` later on, having this standard interface
-and making `debounce` currying (that is, it is willing to take just the interval
-at first, then take the varying later with a second call) will allow us to express
+and making `debounce` curry (that is, it is willing to take just the interval at
+first, then take the varying later with a second call) will allow us to express
 complicated transformations with ease.
 
 Recap

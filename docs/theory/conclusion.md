@@ -45,7 +45,7 @@ That said, here is a short overview of what you have hopefully picked up here:
   result in stoppable reaction Observations. Templates group mutators together.
   Views oversee the broader lifecycle of a DOM fragment and a bundle of mutators,
   tying them together with some particular subject for context.
-* Lists and Maps are standard versions of those data structures, but with methods
+* Lists and Maps are pretty standard to what you'd usually expect, but with methods
   like `.get` and `.length` that return Varying computed values rather than static
   answers, and transformations like `.map` and `.filter` which are maintained forever
   instead of computed once.
@@ -68,8 +68,8 @@ That said, here is a short overview of what you have hopefully picked up here:
   * Something must serve as this context, since views need to know how to render
     their subviews, and Requests need to be matched to Resolvers. Libraries help
     track all of these associations.
-  * Manifest is a tool based on this unique power of App that helps you manage
-    render lifecycles.
+  * Manifest is a tool based on the unique contextual omniscience of App that
+    helps you manage render lifecycles.
 * Resource management is automatic in most of mainline Janus usage, but tools like
   `Varying.refCount`, `Varying.managed`, and `Base.managed` exist when you need
   them.

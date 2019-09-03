@@ -53,7 +53,17 @@
   }]
 }, {
   "title": "Further Reading",
-  "path": "/more"
+  "path": "/further-reading",
+  "children": [{
+    "title": "Advanced Case Classes",
+    "path": "/further-reading/case-unapply"
+  }, {
+    "title": "Attaching Views",
+    "path": "/further-reading/view-attach"
+  }, {
+    "title": "View Custom Rendering",
+    "path": "/further-reading/view-custom-render"
+  }]
 }, {
   "title": "Cookbook",
   "path": "/cookbook"

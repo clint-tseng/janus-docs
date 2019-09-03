@@ -62,13 +62,13 @@ class Datum {
     this.value = value;
     this.listeners = [];
   }
-  set(value) {
+  set(value) { // called to set the value of this Datum
     this.value = value;
     for (const listener of this.listeners) listener(value);
   }
-  onChange(listener) {
+  onChange(listener) { // called to listen to changes to this Datum value
     this.listeners.push(listener);
-    listener(this.value); // run immediately!
+    listener(this.value); // call listener immediately!
   }
 }
 const mutate = (target, datum) => datum.onChange(value => target.text(value));
@@ -91,8 +91,9 @@ is our mutator, which we upgrade to take a Datum.
 > signature, whereas now we have combined the parameters into a single call. Before,
 > we had to call the mutator every time the value changed, so it made sense to
 > bind the target node context first. Now, the whole operation kicks off in one
-> go (all the relevant context is provided at once) and it just runs itself, so
-> the higher-order contextualization is no longer so useful.
+> go (`target` and `datum` are the only context we need and they are natural to
+> provide at once) and it just carries on by itself, so the higher-order contextualization
+> is no longer so useful.
 
 The next requirement we had described was some way to perform some transformation
 on the source value before it is used as the input to the mutator. So we need to
@@ -105,7 +106,7 @@ the correct value to give the mutator. Looking at the code, we have a few option
 2. Add a `transform` parameter to the mutator, such that it takes `(target, datum, transform)`
    and have it run the transformation function each time it gets a new value. But
    this gets annoying (and inefficient!) if, say, multiple mutators want to use
-   the same transformation.
+   the same transformation result.
 3. Add something to Datum itself&mdash;perhaps some way to call `.transform()`
    and get a new Datum which always houses the transformed value.
 
@@ -113,7 +114,7 @@ This last one looks promising! Our mutator doesn't have to understand the differ
 at all, so we don't have to change it. We also get a general-purpose way of reusing
 a transformation of a value, by passing around the resulting transformed Datum.
 Let's see what this looks like in code. Most of it is the same. The `transform`
-method is new, and the implementation has changed a bit.
+method is new, and the implementation section at the bottom has changed a bit.
 
 ~~~
 class Datum {
@@ -223,8 +224,8 @@ greeting.set('yo!');
 <div class="target"/>
 ~~~
 
-We're now just using `greeting.map()` directly rather than instantiating the
-`transformedGreeting` variable in between, but the effect is the same.
+We're now just passing along `greeting.map()` directly rather than creating the
+`transformedGreeting` reference in between, but the effect is the same.
 
 And also, we've added the `mutateClass` mutator, but it turns out we need another
 parameter to make it work: we need to be able to take in the actual name of the
@@ -244,40 +245,58 @@ Constructing a Whole View?
 Well, we've fulfilled all the objectives we laid out in the previous article: we
 have a way of performing idempotent mutations, databound against a changing value
 which can optionally be transformed before it is applied. Sounds great! Let's
-start making this look a little more like a framework, and make some reusable views,
-with more than one mutation. Let's see what that code would look like.
+start making this look a little more like a framework.
+
+What we'd like to do next is create the concept of a reusable view, where we can
+use the tools we've created to declaratively describe the relationships between
+some data to be displayed and the mutations that would make that happen. The views
+could then be easily instantiated many times against different instances of data
+and spots in the document.
+
+Let's see what that code might look like, using the `mutateText` we already wrote.
 
 ~~~ noexec
 const mutateText = (target, datum) => datum.onChange(x => target.text(x));
+const view = (...mutators) => (target) => mutators.forEach(m => m( ..uhh
+~~~
 
-const view = (...mutators) => (target) => ..uhh
+Hm. The way `mutateText` works, it can't be invoked without being given an
+already-concrete `target` DOM element, which makes it hard to use in a declarative
+context. We can make it more generalized by taking a selector instead of a concrete
+target, and we can take our concrete `target` DOM as part of a later call:
 
-// err, wait. we can't make our mutators to pass to views in the first place
-// without the targets to begin with. okay, let's change mutator a bit:
-
+~~~ noexec
 const mutateText = (selector, datum) => (target) =>
   datum.onChange(value => target.find(selector).text(value));
 
 const view = (...mutators) => (target) => mutators.forEach(m => m(target));
 
 const greetingView = view(mutateText('.greeting', ..something
-
-// ...oh. hmm. we forgot that the mutator won't know about the data either.
-// okay, let's start with view and reconsider what that should look like.
-
-const view = (...mutators) => (...data, target) =>
-  mutators.forEach(m => m(target));
-
-// so every time someone calls this view they need to look up exactly what
-// data it demands and in what order? gross!
 ~~~
 
-We run into trouble, because right now we can't formulate a mutator without a
-concrete piece of data to reference, and we can't formulate a generic reusable
-view without knowing what mutators we want to apply to it. There are some direct
-solutions imaginable but as you saw they are not pretty. Somehow, we need to be
-able to create mutators against data we don't yet have, and promise we'll give
-them that data later.
+We have the same problem now with the mutator `datum` requirement: it must already
+be a concrete instance of data by the time the mutator is invoked. Once again,
+this prevents us from using the mutation function as part of a declarative system.
+We fixed this for the DOM `target` by pushing the concrete reference back to a
+second-order call that imbues the mutator with the context it needs to actually
+function against a real target; maybe we can do something similar for our data:
+
+~~~ noexec
+const mutateText = (selector) => (data, target) =>
+  datum.onChange(value => target.find(selector).text(value));
+const view = (...mutators) => (data, target) => mutators.forEach(m => m(data, target));
+~~~
+
+But this doesn't work so well. How does the data we are given relate to the mutators
+we've declared? At the time we define the view, we have no ability to actually
+describe what the data ought to be and how it ought to be handled. With the abstractions
+we have defined so far, we would never be able to do so without already having the
+concrete data instances in our hands.
+
+This prevents us from creating generically reusable views. There are some ways
+we can work around these issues without making radical changes, but they are quite
+wordy and not very nice. Somehow, we need to be able to create mutators against
+data we don't yet have, and promise we'll give them that data later.
 
 Datum Indirection
 =================
@@ -315,7 +334,12 @@ the data, and take a function down the road that understands what datum to suppl
 given that description. What should the description be? With an eye toward some
 eventual world where we are binding views against some sort of key/value model-like
 entity, we'll just use some placeholder value called `of`, which is just a string,
-for now:
+for now.
+
+Our sample snippets have gotten quite long now, but only because of our stubborn
+reinclusion of our entire pretend framework every time. The new thing this time
+is the implementation of Predatum, which keeps track of some vague placeholder
+which our `datumifier` will eventually know how to interpret into a real Datum.
 
 ~~~
 const identity = (x) => x;
@@ -371,18 +395,13 @@ greeting.set('yo!');
 <div class="container"><div class="target"></div></div>
 ~~~
 
-Our sample snippets have gotten quite long now, but only because of our stubborn
-reinclusion of our entire pretend framework every time. The new thing this time
-is the implementation of Predatum, which keeps track of some vague placeholder
-which our `datumifier` will eventually know how to interpret into a real Datum.
-
-It also keeps track of a mapping function to immediately apply to the Datum once
-it is real. We can stack mapping functions together by creating a new Predatum
-each time, and each time composing the new function on top of the one or many old
-ones.
+The Predatum also keeps track of a mapping function to immediately apply to the
+Datum once it is real. We can stack mapping functions together by creating a new
+Predatum each time, and each time composing the new function on top of the one
+or many old ones.
 
 You will notice that Predatum has actually very little idea what a Datum is, other
-than that it can eventually be mapped. It never creates one itself&mdash;that is
+than that it can eventually be `map`ped. It never creates one itself&mdash;that is
 the responsibility of the datumifier, which takes that placeholder value and gives
 a Datum that satisfies it. You can see that our datumifier function really only
 handles the string `"greeting"` right now, but it could be expanded to handle all
@@ -394,7 +413,7 @@ but also maybe uppercase it, or maybe set a class based on it," the ones we migh
 consider a nascent reusable view, are now finally declarable _before_ the existence
 of the data they will eventually rely upon, as well as the target they should be
 mutating. Take a look at the previous samples to verify this for yourself: only
-now has this become possible.
+now has this ordering of statements become possible.
 
 We didn't do it here, but they are also reusable: just call them again with a
 different pair of `target` and `datumifier` and they'll happily apply that behavior
@@ -569,7 +588,7 @@ In fact, that extensibility system is what motivates the third and final coremos
 Janus component, the one we haven't touched on here, which are case classes.
 
 And lastly, mutators are extremely similar to what you just saw here. Just take
-a look at the function signature of a [true Janus mutator](https://github.com/issa-tseng/janus/blob/master/src/view/mutators.coffee) compared to what we did here:
+a look at the function signature of a [true Janus mutator](https://github.com/issa-tseng/janus/blob/master/janus/src/view/mutators.coffee) compared to what we did here:
 
 ~~~ noexec
 // our example:

@@ -107,7 +107,7 @@ mathematical statement.
 
 There is also an `otherwise` function that specifies what to do if none of the
 other matches succeeded. But you do not get access to the contained value in this
-case, you get the case class itself.
+case, you get the case class instance itself.
 
 ~~~
 const { success, failure, progress } = types.result;
@@ -155,10 +155,12 @@ data properties, and one of those behaviors allows you to reference data elsewhe
 over a resource request (eg by making an HTTP request). This can be useful when,
 for instance, fetching the Friends for some Person, or the Listing given some
 search parameters, on demand.  Janus doesn't actually implement or understand
-anything about such requests; that is all for the application developer to do as
-you please.
+anything about such requests, nor does the application developer have to handle
+the specifics of data flow: by using case classes as a communication medium, the
+framework can concern itself with just data flow, and the application developer
+needs only to define how a given data property ought to be turned into data.
 
-But somehow, Janus still needs to be able to understand when a result arrives,
+To make this happen, Janus needs to be able to understand when a result arrives,
 and whether that result is something it should assign to the actual model as a
 real data value. The first part&mdash;the when&mdash;is easy; we already have a
 construct that lets us reason about changing values over time, and that is `Varying`.
@@ -173,11 +175,11 @@ return.
 And indeed, the fact that we like to use `Varying` as our fundamental primitive
 wherever possible is a big part of why case classes are important: the Node.js
 style callback signature `(error, result) => …`, for instance, doesn't harmonize
-very well with Varying: you'd have to react to a Varying, and then&mdash;call
-the function it contains? We would rather have something that looks more like a
-value type. But we would also rather not resort to duck-typing: we'd like to be
-more precise than that, since such approaches end up devolving to conventions
-and incantations.
+very well with Varying: it is unclear how to map a callback with two arguments
+onto a data structure with a singular data value. We would rather have something
+that looks more like a value type. But we would also rather not resort to duck-typing:
+we'd like to be more precise than that, since such approaches end up devolving
+to conventions and incantations.
 
 So, here's an example of what that request resolution code might look like. First,
 we'll see how in application code an implementer might create a network request
@@ -186,9 +188,10 @@ handler:
 ~~~ noexec
 const getResource = (path) => {
   const result = new Varying(types.result.pending());
-  $.getJSON(path)
-    .done((data) => { result.set(types.result.success(data)) })
-    .fail((error) => { result.set(types.result.failure(error)) });
+  fetch(path)
+    .then((response) => response.json())
+    .then((data) => { result.set(types.result.success(data)); })
+    .catch((error) => { result.set(types.result.failure(error)); });
   return result;
 };
 ~~~
@@ -201,8 +204,8 @@ const { success, complete } = types.result;
 
 const result = /* calls application fetching code */;
 result.react(function(resultCase) {
-  success.match(resultCase, (caseInner) => model.set(key, caseInner));
-  complete.match(resultCase, () => this.stop());
+  success.match(resultCase, (caseInner) => { model.set(key, caseInner); });
+  complete.match(resultCase, () => { this.stop(); });
 });
 ~~~
 
@@ -213,6 +216,13 @@ the reaction entirely, as there is nothing more to be done.
 > It turns out that `complete` is a case superclass, which will match both `success`
 > as well as `failure`. We'll talk more about those in the [Advanced Case Classes](#advanced-case-classes)
 > section below.
+
+Here, case classes enable a clean, easy-to-remember interface point between application
+data request code and framework data flow code. Many approaches could be taken
+to define such an interface, but because Janus itself is very value-oriented (due
+in large part to its centering around `Varying`), this approach of adding semantic
+meaning to values plays well to the many tools offered by Janus. In the next section,
+we will talk about some of the case class-specific tools.
 
 Manipulating Case Classes
 =========================
@@ -247,14 +257,16 @@ return [
 
 The `xOrElse` methods are useful for definitively extracting a value out of a
 case class, eliminating the case class wrapping type entirely. The `getX` methods,
-meanwhile, are effective when feeding values into duck-typed systems, like the
-Janus view renderer: `.getSuccess()` would give you the actual success value, or
-else it will give you, for instance, the intact `progress('42%')` case. You could,
-in turn, specify a view to render any time a `progress[x]` case class is seen, to
-render a spinner or progressbar.
+meanwhile, are effective when feeding values into type-aware systems, like the
+Janus view renderer: `.getSuccess()` would give you the actual success value, which
+the renderer would dutifully draw on screen; otherwise it will give you, for instance,
+a full `progress('42%')` case instance. If the renderer has been taught what to
+draw any time a `progress[x]` case class is seen, like a spinner or progress bar,
+then by manipulating the data type using `.getSuccess()` you have taught your
+application how to manage loading periods.
 
-The `mapX` methods take a mapping function, and will always return the same type
-of case class, but will map the inner value only if it is of the specified type.
+The `mapX` methods take a mapping function, and will never affect the enclosing
+case class type. It will map the inner value only if it is of the specified type.
 
 ~~~
 const { even, odd } = Case.build('even', 'odd');
@@ -315,21 +327,20 @@ As you can see, `purple` is not a part of any case superclass. But the other col
 have been assigned `warm` or `cool` as appropriate, and these are the monikers
 we use to actually match on.
 
-The main limitation of case superclasses is that they cannot be used to actually
-construct value instances, only in match clauses: if you do construct a case superclass
-value, it will stubbornly do nothing, not even match `otherwise`, as you can see
-above. They will not do anything in particular when the `xOrElse`, `getX`, or `mapX`
-methods are called (nor will eg `mapWarm` exist on any true value case classes
-like `red`).
+The main limitation of case superclasses is that they may be used _only_ to define
+matches in `match` blocks. They cannot be constructed as value-carrying instances,
+and mapping functions (like `mapWarm` in this case) will not be generated. If you
+do construct a case superclass value, it will stubbornly do nothing, not even match
+`otherwise`, as you can see above.
 
-Case superclasses can also nest: just continue nesting objects and you can build
-a full hierarchy.
+Case superclasses can nest: just continue nesting objects and you can build a full
+hierarchy.
 
 Arity
 -----
 
 By default, Janus case classes contain exactly one value. This value can be anything
-you'd like, including arrays or objects, so with the destructuring available in
+you'd like, including an array or object, so with the destructuring available in
 modern Javascript there oughtn't be much need to deviate from this default.
 
 That said, sometimes it's just cleaner to, for instance, take two values for each
@@ -364,139 +375,11 @@ happen when `.getX` is called? Janus does its best to patch this together: `.map
 is still supported, but the resulting case will appear to have just one value.
 And methods like `.getX` will end up returning an array of the inner values.
 
-A better understanding of these awkward behaviors can be had by fully appreciating
-how case classes work under the covers.
-
-Custom Unapply (and some internals)
------------------------------------
-
-It turns out that case classes don't directly store the value you hand them.
-Instead, they store a function that applies its values to another function. Here,
-that's a confusing statement, so let's see a simplified example in code:
-
-~~~
-const applyTwoValues = (x, y) => (f) => f(x, y);
-const printPoint = (x, y) => `(${x}, ${y})`;
-
-const point = applyTwoValues(7, 8);
-return point(printPoint);
-~~~
-
-This little higher-order function trick lets us store two values, and forward
-them later on into some process that expects two values. This seems a little bit
-fussy in the above example, because all of the code directly understands that
-two values are involved, and what those values mean&mdash;it is all the equivalent
-of application code. But part of the point of our case classing system is that
-it doesn't want or need to understand these details.
-
-So, let's again build a simplified example in code, this time incorporating a
-boxing concept somewhat similar to our case classes:
-
-~~~
-class Point {
-  constructor(unapply) { this.unapply = unapply; }
-  extract(f) { return this.unapply(f); }
-  map(g) { return new Point(f => f(this.unapply(g))); }
-}
-
-const point2d = (x, y) => new Point(f => f(x, y));
-const point3d = (x, y, z) => new Point(f => f(x, y, z));
-
-const printPoint = (...scalars) => `(${scalars.join(', ')})`;
-
-return [
-  point2d(12, 31).extract(printPoint),
-  point3d(0, 3, 7).extract(printPoint),
-
-  point2d(3, 4)
-    .map((x, y) => (x > 0) && (y > 0))
-    .extract(isPositive => isPositive ? '+' : '-')
-];
-~~~
-
-By utilizing this trick, we can create a generic class that accepts points of
-any dimension and provides some basic, useful operations on top of them.
-
-And we can implement `map` just by remembering the mapping function, and slapping
-it between the original `unapply` and the final `extract` whenever it is actually
-required&mdash;we don't have to actually do the mapping work until someone wants
-it.
-
-But notice what happens, for example after we do the `.map` operation on the last
-point.  We end up with something that says `Point`, but contains only a single
-value which doesn't actually represent a point, exactly. Similarly, when you map
-on a multi-arity case class, the result isn't exactly really that case class anymore;
-it has some other shape.
-
-This awkwardness means that we recommend extreme caution when using multi-arity
-case classes, particularly with regards to the mapping and getting operations.
-`match` still works exactly as intended, because all match does is take your
-matching function and feed it to the `unapply` associated with that case class.
-But `map` and the other methods start to lose some of their meaning.
-
-> Why is the function called `unapply`? Partly because of historical reasons,
-> because this is what Scala calls it. But it does have some logic to it: you
-> apply your parameters into the case class, and then it unapplies them back out
-> into your matching function.
-
-And this last bit, the fact that we want to fulfill the `match(success((x) => …`
-syntax regardless of what a `success` case class may actually represent structurally,
-is the final detail we need in order to actually be able to write our own custom
-unapply functions on top of case classes, as the first argument must always be
-explicitly captured. (It's also why we contrived the Point class above instead
-of directly jumping to the real deal.)
-
-Let's take our previous magnitude example, for instance. Up above, we hardcoded
-a factor of `8`, but it would be nice to be able to specify some factor as a
-part of the data. This would mean that `raw` takes two values, `x` and `y`, while
-`scaled` wants three: `x`, `y`, and some `factor`.
-
-~~~
-const { sqrt } = Math;
-const square = (x) => x * x;
-
-const { raw, scaled } = Case.build({
-  raw: (kase) => (x, y) => new kase(x, f => f(x, y)),
-  scaled: (kase) => (x, y, factor) => new kase(x, f => f(x, y, factor))
-});
-
-const magnitude = match(
-  raw((x, y) => sqrt(square(x) + square(y))),
-  scaled((x, y, factor) => factor * magnitude(raw(x, y)))
-);
-
-return [
-  magnitude(raw(3, 4)),
-  magnitude(raw(5, 12)),
-  magnitude(scaled(20, 21, 8))
-];
-~~~
-
-This syntax will hopefully improve in the future with some sort of fancy functional
-trick, but the gist of it is that each custom unapply takes the actual case class
-constructor that represents it, then whichever arguments suits its purpose, and
-returns an actual instance of that constructor:
-
-~~~ noexec
-(kase) => (/* custom apply */) => new kase(firstArgument, f => f(/* custom unapply */))
-~~~
-
-The constructor wants two arguments: it always wants the very first parameter as-is,
-because this is what the matching syntax desires (again, `match(success((x) => …`).
-The second argument is your custom unapply, like we saw above with the Point example,
-which takes a function and applies the appropriate arguments into it.
-
-> Why do things in this roundabout way? For one, it sort of gives Janus an out.
-> Either you are using the default, in which case nice tools like `map` and `orElse`
-> are extremely well-defined and easy to use, or else you've wandered off the path,
-> and while this is a supported customization the opaqueness of the implementation
-> means there's no way we can guarantee the correctness of those nice tools.
->
-> As well, part of this is the fact that flexibility and power can be had out of
-> this inversion of control, and as Janus is young we'd like to see if people get
-> good use out of this abstraction. If nobody is interested, do not be surprised
-> to see this approach evolve out of the framework in favor of something more
-> straightforward.
+> # See Also
+> A better understanding of these awkward behaviors can be had by fully appreciating
+> how case classes work under the covers. This information, along with the custom
+> `unapply` Case feature, can be found in its own [Further Reading](/further-reading/case-unapply)
+> chapter.
 
 Recap
 =====
@@ -546,7 +429,7 @@ advanced than the vision we offered then. Don't worry&mdash;they are not hard to
 understand, and by learning the basics of case classes first, you've done some
 of the hardest work already.
 
-So, let's [get to it](/theory/from-chaining), then.
+So, let's [get to it](/theory/from-expressions), then.
 
 > If you're not feeling rock solid on case classes, it may not be the worst idea
 > to simply press on, and come back to this chapter after reading the next one.

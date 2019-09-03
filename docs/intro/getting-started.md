@@ -15,10 +15,9 @@ Janus is shipped exclusively over NPM. Add `janus` as a dependency to your
 `package.json` file (you can find the latest version in the header above), or
 run `npm install --save-prod janus` to have it automatically inserted.
 
-To import the Janus [Standard Library](/api/stdlib) as well, which provides
-useful, generic implementations for common needs like List Views, you will need
-to add it as well as a shim to feed it your DOM manipulation library of choice.
-Add `janus-stdlib` to your `package.json` file. You can find the current version
+You'll often also want to import the Janus [Standard Library](/api/stdlib), which
+provides useful, generic implementations for common needs like List Views. Add
+`janus-stdlib` to your `package.json` file. You can find the current version
 in the header above, or run `npm install --save-prod janus-stdlib`.
 
 Once you are done, you should end up with a `package.json` that looks something
@@ -101,10 +100,10 @@ $('#app').append(view.artifact());
 <div id="app"></div>
 ~~~
 
-As you can see, we require some tools from Janus, make an item for our shop to
-sell, and make a simple view that just tells us what it is and how much it costs.
-The template syntax selects each element we are interested in from the HTML
-fragment, and assigns it a text `from` some properties we care about. We then
+As you can see, we require some tools from Janus, make a simple shop item View
+that just tells us what it is and how much it costs, and create and display one
+such item. The template syntax selects each element we are interested in from the
+HTML fragment, and assigns it a text `from` some properties we care about. We then
 instantiate one of these views against a piece of data, and add it to the document.
 
 Run `browserify client.js > app.js` and you should now have a working initial
@@ -117,11 +116,6 @@ on screen. That may not seem very exciting, but think about what we've just done
 we've described how any piece of data of some particular shape should be displayed
 in our interface, and fed it some random piece of data to show&mdash;and it worked!
 
-> # Aside
-> Eagle-eyed observers may notice that `app.js` is somewhat large. This is because
-> Browserify tries to include `domino`, which we need server-side but not on the
-> client. Adding `--exclude domino` to the command will slim up the file by a lot.
-
 A Little Bit of Organization
 ----------------------------
 
@@ -133,7 +127,7 @@ some real `Model` to represent each item.
 And it's great that we can just render a `View` at whim and use it however we'd
 like, but it would be nicer if somehow the application just knew how items should
 be rendered. This will especially become important when we start nesting `View`s
-together.
+together, and building applications that work in both server and client environments.
 
 So, let's make those two changes now:
 
@@ -228,11 +222,11 @@ view.wireEvents();
 
 A lot of new code! But almost all of it you've seen already.
 
-We've done a few things here. We added a `Sale` model to represent this transaction
+We've done a few things here. We added a `Sale` model to represent a transaction
 as a whole, and made a view for it that shows our current inventory. We do this by
-using the `.render()` call, which takes something to be rendered and uses the same
-`app.view()` call we have been using in our own code to actually get an appropriate
-view for it.
+using the `.render()` call, which takes a data object that we wish to be drawn on
+screen, and uses the same `app.view()` call we have been using in our own code to
+actually get an appropriate view for it.
 
 We also show the current total price for the sale, by watching the `price` of the
 ordered item.
@@ -301,10 +295,15 @@ view.wireEvents();
 ~~~
 
 Not too much has actually changed. We now need the standard library, since it
-knows how to render `List`s. On `Sale`, our `inventory` and our `order` data are
-both now `List[item]`s instead of direct `item`s.
+knows how to render `List`s. The standard library doesn't come with its own DOM
+manipulation library but it does need access to one, so we give it jQuery when
+we access it (`stdlib.view($)`). We don't have to run through and register each
+standard library component with our `app` individually; `registerWith` does it
+all for us.
 
-When we place an order, we add the item to the `order` list.
+When we create our `sale`, our `inventory` and our `order` data are both now
+`List[Item]`s instead of direct `Item`s. When we place an order, we `add` the
+item to the `order` list.
 
 And when we display the total, we actually have to compute it now. We won't try
 to overexplain it now, but what's happening is that we are transforming the `order`
@@ -316,10 +315,10 @@ Then, we are taking the sum of that resulting list.
 > cover this in more depth in the next chapter, but whenever we say `flatMap` in
 > Janus, what we mean is that we want to perform a `map` just like you would on a
 > list or an Option type (don't worry if you don't know what that is), but our
-> mapping function might return a `Varying`: we might change our mind about what
-> value to map to at some point in the future. For example, in this case, the
-> `list.flatMap` ensures that if the item price changes in the future, our list
-> of prices remains correct.
+> mapping function might return a `Varying`: it might return a value that changes
+> over time. `flatMap` ensures that the final result always reflects the latest
+> change. For example, in this case, the `list.flatMap` ensures that if the item
+> price changes in the future, our list of prices remains correct.
 
 Next Steps
 ==========
@@ -331,8 +330,8 @@ We have just covered a lot of things:
 * How to organize components of code into an application.
 
 Hopefully, everything here made some amount of intuitive sense. It may still seem
-mysterious how any of this is working, and the part we glossed over where we sum
-up the prices might not make sense yet, but the goal is to walk away having:
+mysterious how any of this is working and some of the syntax and concepts we glossed
+over a little bit, but the goal is to walk away having:
 
 * Written some code from scratch and run it.
 * Gotten some idea of what some of these things do.

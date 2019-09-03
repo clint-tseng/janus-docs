@@ -59,16 +59,16 @@ addition of domain-specific business logic: attributes of particular types or
 with default values, or values that are automatically computed from other values.
 
 Behavior like asynchronous data requests, serialization and deserialization, and
-validation rules are all provided out of the box but are easy to enhance, override,
+validation logic are all provided out of the box but are easy to enhance, override,
 or ignore entirely.
 
 Views and Templating
 --------------------
 
 Janus Views map data directly onto the DOM, using CSS selectors and simple binding
-methods like `.classed(…)` and `.text(…)`. Actions are bound using
-a simple `.on('event', …)` with a callback, which can then directly manipulate
-model data to perform some action.
+methods like `.classed(…)` and `.text(…)`. Actions are bound using the familiar
+`.on('event', …)` with a callback, which can then directly manipulate model data
+to perform some action.
 
 Almost all view problems in Janus can be solved with data transformation using the
 collections library, or by inserting a View-Model between the actual data Model

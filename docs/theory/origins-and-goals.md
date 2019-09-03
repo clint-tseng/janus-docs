@@ -3,11 +3,11 @@ Origins
 
 Janus originally arose in 2013 out of two desires.
 
-1. To possess a framework that could, with a substantially shared codebase, render
+1. To obtain a framework that could, with a substantially shared codebase, render
    a web interface on both server and client. This was not something the primary
    options at the time could accomplish, but is important to those of us working
    within accessibility requirements, or SEO constraints.
-2. The second was to wield a system wherein complex user interactions could be
+2. The second was to create a system wherein complex user interactions could be
    expressed in some safe, organized manner which could be easily unit tested.
 
 One might recall that at that time, rich frontend applications were typically
@@ -17,31 +17,37 @@ Backbone had just caught on, and the following generation of ideas in frameworks
 like Angular were just coming onto the scene.
 
 That era was then followed by several years in which the prevailing methodology
-was to eschew the backend entirely and directly render _everything_ on the client.
+was to forget the backend entirely and directly render _everything_ on the client.
+This is still largely the case today.
 
-Neither of these situations were favorable for our goals. And so we created, and
-continued to develop, our own solution. Early on, functional or reactive programming
-philosophies were not a key component&mdash;you'll see that they're not mentioned
-in the above desires. But based on the desires we did have, some things were clear
-from the beginning.
+Neither of these situations were favorable for our goals: for accessibility and
+SEO requirements we needed our servers to be able to send ready-to-consume content,
+not application code that could eventually generate that content, and yet supporting
+this complication made the other goal of enabling maintainable yet highly complex
+user experiences more difficult.
+
+And so we created, and continued to develop, our own solution. Early on, functional
+or reactive programming philosophies were not a key part of the vision. They are
+not mentioned in the above desires. But based on these motivations we did have,
+some things were clear from the beginning.
 
 To be able to pick up a server-rendered page and resume maintaining it from the
 client side, page mutations should ideally be idempotent. This, in turn, implies
 some sort of binding system to source data, to actually kick off atomic mutations
 when they must occur.
 
-In turn, to be able to bind our idempotent page mutations to source data implies
+In turn, if we want to bind our idempotent page mutations to source data, we need
 some kind of model system which can express when data changes, through some kind
 of eventing system. Often, what needs to be displayed is some kind of transformation
 on the source data&mdash;a string munge or some logics must often be done&mdash;so
 this eventing system needs to provide the ability to somehow express and perform
-those computations.
+those transformation computations.
 
 You can go back and [look at Janus 0.1](https://github.com/issa-tseng/janus/tree/0.1)
 and see how it is a very direct translation of these central ideas into code, in
 a rough, object-oriented style reflective of the times. While those central ideas
-(and the grammatical form of the APIs) have not changed since then, we have slowly
-evolved the framework, listening to what it naturally wanted to be.
+(and the vocabulary of the APIs) have not changed since then, we have slowly evolved
+the framework, listening to what it naturally wanted to be.
 
 It turned out that the framework wanted to be heavily functional. Most of the
 headaches we ran into were due to the messiness of composition in object-oriented
@@ -67,13 +73,12 @@ Janus today is built on three higher-level goals:
   * Every default behavior in the framework is extensible and replaceable.
   * Each building block of the framework focuses on its mathematical essence.
 
-We see these principles as our primary unique offering to the world: we occupy
-a novel spot in the continuum of philosophy, one from which we try to further
-the functional programming cause by organizing its foundational ideas into concrete
-tools whose construction and syntax is familiar and navigable to the general
-audience.
+We see these principles as our most unique offering to the world: we occupy a novel
+spot in the continuum of philosophy, one from which we try to further the functional
+programming cause by organizing its foundational ideas into concrete tools whose
+construction and syntax are familiar and navigable to the general audience.
 
-And of course, we want to build some applications while we're at it.
+And of course, we want to build some great user experiences while we're at it.
 
 Next Up
 =======

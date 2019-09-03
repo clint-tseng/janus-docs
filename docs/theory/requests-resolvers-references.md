@@ -4,8 +4,8 @@ Requests, Resolvers, and References
 **Requests** describe remote resources, which **Resolvers** know how to go and fetch.
 In keeping with the type-oriented approach to matching needs with solutions (recall
 how `.render` uses the type-driven `app.views` Library to automatically find an
-appropriate view for any object), Resolvers are registered against Requests they
-know how to handle&mdash;fancy this, via a Library on the `app`.
+appropriate view for any object), Resolvers are registered by classtype against
+Requests they know how to handle&mdash;you guessed it, via a Library on the `app`.
 
 Relatedly, **References** are a Model `attribute` type which tie their data value
 to some `Request`. If the data value is missing and some part of the application
@@ -15,7 +15,7 @@ populate the data.
 We'll start by examining Requests and Resolvers as their own ecosystem and how
 caching is handled through Resolvers. Then, we will add References to the picture
 and see how the spider-web of plumbing needed to seamlessly handle Request resolution
-is mostly contained within `App`. This will be a great warm-up, since we are going
+is sequestered within `App`. This will be a great warm-up, since we are going
 to focus on `App` next.
 
 First, we'll take a look at `Request`.
@@ -65,10 +65,10 @@ a `Varying[types.result[x]]`. We covered the rationale behind this result type
 [back when we introduced Case Classes](/theory/case-classes#a-practical-example),
 and we won't belabor the point again here.
 
-Typically, since Requests are used to tie in data not already at hand, a Resolver
-will immediately return a `new Varying(types.result.pending())` while kicking
-off some asynchronous process that will eventually change the Varying value to
-`success(data)` or `failure(error)`.
+Typically, since this system is used to bring in data that isn't already at hand,
+a Resolver will immediately return a `new Varying(types.result.pending())` while
+kicking off some asynchronous process that will eventually change the Varying value
+to `success(data)` or `failure(error)`.
 
 Let's take a look at a concrete example, from this very project you are reading,
 copied verbatim [from source](https://github.com/issa-tseng/janus-docs/blob/master/src/model/app.js):
@@ -105,7 +105,7 @@ our Article requests are fully defined just by the path they represent. So rathe
 than faff about with an `.options` hash, we just ignore it entirely and define a
 constructor that takes an Article `path` and saves it off. Requests are always
 created by application code, never the framework, so changing the constructor
-isn't a big deal. Later, in the Resolver itself, we directly references `request.path`
+isn't a big deal. Later, in the `articleResolver` itself, we reference `request.path`
 to figure out what URL we ought to be fetching.
 
 That Resolver just does some really standard AJAX-type things, leaning on jQuery
@@ -121,7 +121,7 @@ But what does it even mean to _not_ return a Varying&mdash;how does that return
 value impact the rest of the request handling down the chain? To answer these
 questions, we'll have to look beyond these simple building blocks (really, all
 there is to Request and Resolver are "a thing that describes what I want" and
-"a function that takes that description and gives a `Varying[types.result[x]]`)
+"a function that takes that description and gives a `Varying[types.result[x]]`")
 and look towards bigger questions like applications and caching.
 
 Higher-order Resolvers
@@ -142,10 +142,10 @@ almost every open question by using higher-order functions:
 * How do we do caching? Caching seems important.
 
 In all of these cases, we rig up higher-order functions to take in some setup
-context, in some cases we define some additional conventions (like returning `null`
-or those caching-related Request properties you saw earlier), and ultimately
-return a function that conforms to the Resolver signature: taking in a Request
-and returning a `Varying[types.result[x]]`.
+context, in some cases we define some additional conventions (like those caching-related
+Request properties you saw earlier, or returning `null`), and ultimately return
+a function that conforms to the Resolver signature: taking in a Request and returning
+a `Varying[types.result[x]]`.
 
 In fact, let's take a look at how we use that `null` return value to answer the
 first question in that list, again by looking directly at the (again, Coffeescript)
@@ -159,11 +159,12 @@ oneOf: (resolvers...) -> (request) ->
   null
 ~~~
 
-The `Resolver.oneOf` Resolver takes in many resolvers, and tries each one in turn
-until it finds one that returns a non-null result, in which case the Request has
-been handled. If it can't find one, it returns `null` itself. Notice how once we
-have fed it our resolvers, it presents the standard function signature of a Resolver:
-take in a Request, return a `Varying[types.result[x]]` if it can.
+The `Resolver.oneOf` Resolver takes in many resolvers, and when given an actual
+`request` tries each one in turn until it finds one that returns a non-null result,
+in which case the Request has been handled. If it can't find one, it returns `null`
+itself. Notice how once we have fed it our resolvers, it presents the standard
+function signature of a Resolver: take in a Request, return a `Varying[types.result[x]]`
+if it can.
 
 Let's look at another example from the source code, and answer the second question
 on the list: how do App and Library figure into this picture?
@@ -213,17 +214,22 @@ Why is caching _that_ important? We'll get more into in the following section,
 but the on-demand nature of how References are reified (and thus Requests are made
 and Resolvers tasked with handling them) and the extremely decentralized nature
 of Janus together mean that it is not uncommon for more than one corner of your
-application to request the same data, independently and in parallel.
+application to request the same piece of data at once, independently and in parallel.
 
 This would be a critical and fundamental flaw in our approach were we not to offer
-some kind of canonical answer, and our answer is a caching layer that understands
-when it has already seen some Request already, and provide a cached value _even
-if the previous Request has not completed_. This is important if we are to actually
-address the redundant-request issue we just described.
+some kind of canonical answer: your application might make six or seven network
+requests for exactly the same data at once!
+
+Our answer is a caching layer that understands when it has already seen some Request
+already, and provides a cached value _even if the previous Request has not completed_.
+This is important if we are to actually address the redundant-request issue we
+just described. We can do this by using the `Varying` that eventually carries the
+request result as the cached value: "here, this object will eventually give you
+your answer."
 
 As with the other higher-order Resolvers, we'll take a quick glance at the actual
-implementation code of `Resolver.caching`, which incorporates a conventional Janus
-cacher into an actual Resolver process:
+implementation code of `Resolver.caching`, which incorporates the Janus caching
+convention into an actual Resolver process:
 
 ~~~ noexec
 caching: (cache, resolver) -> (request) ->
@@ -281,12 +287,12 @@ up, with a cache and Library and everything.
 
 > We will not cover every aspect of the Memory Cache Resolver here. In particular,
 > we won't discuss its various behaviours given different Request types. For more
-> information on that, please check the [API Reference](/api/TODO).
+> information on that, please check the [API Reference](/api/resolver#MemoryCache).
 
 We'll once again use Article as our basis, as we did above.
 
 ~~~
-// this is all the same:
+// you saw all of this already:
 const Article = Model.build(attribute('samples', attribute.List));
 
 class ArticleRequest extends Request {
@@ -329,13 +335,18 @@ just contain the same value, they resolve to the same Varying instance.
 It doesn't always make sense for caching layers to go through `Resolver.caching`.
 One idiom, for instance, is for any data involved with the server-side rendering
 of a page to be serialized onto the page itself, so that separate network requests
-doesn't need to be remade for that data. (It also helps ensure state constancy
-if you are using View `.attach`.)
+don't need to be immediately issued from the client for that data. (It also helps
+ensure state constancy if you are using View `.attach`, in case data changes between
+server- and client-side rendering.)
 
-In these cases, the cache never needs to be updated; these caches are initialized
-with all the data they will ever understand, and will never learn the results of
-additional Requests. We provide one simple implementation in the form of `Resolver.fromDom`.
-Here, finally, is where `Resolver.oneOf` becomes useful:
+> Though, [HTTP/2 Server Push](https://en.wikipedia.org/wiki/HTTP/2_Server_Push)
+> provides a promising alternative.
+
+In this cases, the cache never gets updated; it is initialized with all the data
+it will ever understand, and will never learn the results of additional Requests.
+We provide one simple implementation in the form of [`Resolver.fromDom`](/api/resolver#λfromDom),
+which looks for data hidden in invisible DOM nodes, `id`'d by `signature`. Here,
+finally, is where `Resolver.oneOf` becomes useful:
 
 ~~~ noexec
 const library = new Library();
@@ -389,7 +400,7 @@ return [
 
 We have such a limited problem space here that we save ourselves a lot of work
 by limiting our solution capability. Our system will never be able to effectively
-handle anything more complex than requests to Articles by `path`, but in return
+handle anything more complex than reading Articles by `path`, but in return
 we save ourselves the overhead of understanding and implementing `signature` and
 `type` and `MemoryCache` and `Resolver.caching`.
 
@@ -404,7 +415,7 @@ Requests) much like we've had App managing our Views in all our samples so far,
 we usually have App manage our Resolvers as well.
 
 ~~~
-// this is all the same:
+// this is once again all the same:
 const Article = Model.build(attribute('samples', attribute.List));
 
 class ArticleRequest extends Request {
@@ -431,8 +442,9 @@ return inspect(result);
 
 For now, the main difference is that we are using the Resolver library built in
 to App, and calling `app.resolve(request)` instead of directly invoking our assembled
-Resolver. We have temporarily lost our caching stack, but we will bring that back
-in the [next Chapter](/theory/app-and-applications), which covers App in detail.
+Resolver. We have temporarily lost our caching stack since we lack the incantation
+to teach it to App, but we will bring that back in the [next Chapter](/theory/app-and-applications),
+which covers all of App in detail.
 
 The important information for now is that `app.resolve` exists to handle Request
 resolution just as `app.view` exists to handle View instantiation, and that although
@@ -502,7 +514,7 @@ which reads up the `path` value on Site, and maps it to an `ArticleRequest` for
 that path.
 
 > You can use the shortcut `attribute.Reference.to(from(…))` if you tire of
-> declaring anonymous classes.
+> declaring anonymous classes. We'll give that a whirl in the next sample.
 
 You don't have to use `from` expressions here; you can return a `Request` directly
 when the `request` method is called if you'd prefer, or even a `Varying[Request]`.
@@ -517,7 +529,7 @@ that delves into `article`, to get at the `samples` List within it. It doesn't
 know that `article` is anything besides another data property (though of course
 you probably should).
 
-This implicit statement ("I care about this value"), combined with the Reference
+This implicit side effect ("I care about this value"), combined with the Reference
 attribute, together cause the Request to be formulated and resolved. Once the data
 comes in, the new `Article` Model is saved onto Site at the `article` key. You
 can verify this by removing the `find('.sample-count').text(…)` block from the
@@ -552,11 +564,11 @@ const articleResolver = (request) => {
 };
 
 const Site = Model.build(
-  attribute('article', class extends attribute.Reference {
-    request() { return from('path').map(path => new ArticleRequest(path)); }
-  }));
+  attribute('article', // except here, a little convenience shortcut:
+    attribute.Reference.to(from('path').map(path => new ArticleRequest(path))))
+);
 
-// but this is different:
+// and this is different:
 const SiteView = DomView.withOptions({ resolve: [ 'article' ] }).build(
   $('<div><div class="path"/><div class="sample-count"/><button>Check</button></div>'),
   template(
@@ -582,13 +594,13 @@ But as you can see, we had to go to some rather evil lengths to concoct a sample
 here: you'll learn in the following section and chapter that even if you avoid
 the typical `from` templating syntax and write `this.subject.get('article')`,
 the Reference will still end up getting automatically resolved. (The `.get` is
-the key.)
+the key; `from` eventually results in `.get` anyway.)
 
 Either way, the bottom line is that given the two keys we mentioned above: a
 Reference attribute that defines some Request whose resulting data should reside
-at that attribute's location on the Model, and an indication that this data value
-is somehow important to your application, Janus will skitter off and resolve that
-Request for you, dropping the result onto the Model.
+at that attribute's location on the Model, and then separately an indication that
+this data value is somehow important to your application, Janus will skitter off
+and resolve that Request for you, dropping the result onto the Model.
 
 We'll get into how exactly App, View, and Model work together to make all of this
 happen in the following chapter, which will focus on the various magicks that App
@@ -622,21 +634,23 @@ Reference is `.resolveWith`, which takes an `app` and does a laundry list of tas
   * If nobody is, halts the above Varying reaction if it exists.
 
 So Reference can only be given an `app` context once, since `.resolveWith(app)`
-may only be called once. But calling `.resolveWith` doesn't actually cause any
+may only be called once. But calling `.resolveWith` doesn't directly cause any
 Requests to be resolved; rather, it just gives context (`app`) on how resolution
 should occur.
 
-Once Reference has that `app` context, however, it wakes up. If it senses, by
-way of an observation on its Model key, that somebody cares about the data it could
+Once Reference has that `app` context, however, it becomes alert. If it senses, by
+way of an observer on its Model key, that somebody cares about the data it could
 provide, it will kick off that Request and write any successes it sees into the
 Model. If eventually nobody cares anymore, it terminates the Request by stopping
 its own observation on the result, and goes back to waiting for somebody to care.
 
 > Notice how it writes "any successes it sees" into the Model. If you have some
-> sort of procedure whereby a remote resource might change, and that change might
+> sort of procedure whereby a remote resource might update, and that change might
 > push down the pipe to your Janus application, all you have to do is
 > `varying.set(types.result.success("new result"))` again and that new value will
 > be written into the Model.
+>
+> This is a neat way to write highly real-time client applications.
 
 Notice that this dependence on `.get` observation means a `.get_('article')` call
 will _not_ trigger any Request resolution. Beacuse `.get_` returns synchronously

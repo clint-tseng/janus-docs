@@ -52,7 +52,7 @@ const data = new Map({ id: 42, initial: 'values', go: 'here' });
 data.set('but', 'more');
 data.set('can', { be: { provided: 'later' } });
 data.set('can.be.set', 'deeply');
-data.set({ or: 'without', a: 'key' });
+data.set({ or: 'directly', by: 'object' });
 
 const setter = data.set('currying');
 setter('is supported!');
@@ -81,9 +81,10 @@ return [
 ].map(inspect);
 ~~~
 
-Simple enough; you can even get an entire subobject at once if you want. But there
-are some things to watch out for if you do this, and it's generally a good idea
-to only get individual values at a time if you can help it.
+Simple enough; you can even get an entire subobject at once if you want (see `nested`
+in the sample above). But there are some things to watch out for if you do this,
+and it's generally a good idea to only get individual values at a time if you can
+help it.
 
 > # Warnings
 > To expand on that, think about what it means to `.get('nested')` here. Recall
@@ -145,8 +146,8 @@ shadow.revert('owner');
 return shadow.modified();
 ~~~
 
-The `.with({ … })` shortcut just makes a shadow and then immediately `.set`s
-the given data, which can be useful in single-expression mapping lambdas. `.original()`
+The `.with({ … })` shortcut makes a shadow and then immediately `.set`s the given
+data, which can be useful in single-expression mapping lambdas. `.original()`
 will always get you the root Map in a shadow chain; if you call it on an original
 rather than a shadow it'll give itself back.
 
@@ -186,8 +187,7 @@ structures in Janus, this List is kept up to date as the Map changes.
 const data = new Map({ name: 'Gadget', age: 8, owner: { name: 'Jane' } });
 
 const keys = data.enumerate();
-const pairs = keys.flatMap(key => data.get(key)
-  .map(value => `${key}: ${value}`));
+const pairs = keys.flatMap(key => data.get(key).map(value => `${key}: ${value}`));
 
 data.set('owner.age', 27);
 
@@ -231,11 +231,10 @@ of that Map.
 
 > # Aside
 > You may have noticed that we cheated a little bit in this example, and we
-> directly reference `people` as a closure scope variable from the template. There
-> are some ways around this, usually based around View Models or simply copying
-> parent references to child data, but this is actually an open, unsolved problem
-> in Janus at time of writing: how do we offer this kind of parent/child context
-> in a sane, safe way?
+> directly reference `people` as a closure scope variable from the template.
+> Typically, you would pass this sort of context using View Models, or copying
+> parent references, or skip passing context and rely on [View Navigation](/theory/views-templates-mutators#view-navigation)
+> to jump up the hierarchy to the `.closest_(People)`, for example.
 
 This time around, rather than all the homework of `.enumerate().flatMap(key => data.get(key).map(value =>  …))`
 we use `.enumerate().mapPairs((key, value) => …)`, which is a convenience
@@ -280,9 +279,9 @@ return inspect.panel(adjusted);
 ~~~
 
 Remember, this is Javascript so we're pretty loose and flexible about exact types.
-You can return static values to a `flatMap` and it'll just go along with it. We
-take advantage of this above to avoid all the work of counting the number of accounts
-unless it actually matters.
+You can return static (not `Varying`) values to a `flatMap` and it'll just go along
+with it. We take advantage of this above to avoid all the work of counting the number
+of accounts unless it actually matters.
 
 Models
 ======
@@ -326,10 +325,11 @@ that will be easy once we cover `attribute`s next.
 
 As you can see, `bind` works a lot like `find` did in templates earlier, and the
 Model itself is used as the context for the data references. These bindings can
-be cascaded to make complex series of operations more palatable. This example is
-quite long but it demonstrates some important points that are worth diving into,
-so give the sample result a try (drag your mouse around on it), study the code
-for a moment, and we'll chat about it afterwards.
+be cascaded to make complex series of operations more palatable.
+
+This example is quite long but it demonstrates some important points that are worth
+diving into, so give the sample result a try (drag your mouse around on it), study
+the code for a moment, and we'll chat about it afterwards.
 
 ~~~
 const { floor, ceil, min, max } = Math;
@@ -338,26 +338,26 @@ const makeTicks = (count => (new Array(count + 1)).fill().map((_, idx) => idx));
 
 // Segmented Axis:
 class SegmentedAxis extends Model.build(
-  // expects: width: px of draw area, ticks.count: count,
-  // mouse.clicking: bool, mouse.now: x px
+  // expects: width: px of draw area, ticks-count: count,
+  //          mouse-clicking: bool, mouse-now: x px
 
-  bind('mouse.min', from('mouse.down').and('mouse.now').all.map(min)),
-  bind('mouse.max', from('mouse.down').and('mouse.now').all.map(max)),
+  bind('segment-width', from('width').and('ticks-count').all.map((w, t) => w / t)),
 
-  bind('segment.width', from('width').and('ticks.count').all.map((w, t) => w / t)),
+  bind('mouse-min', from('mouse-down').and('mouse-now').all.map(min)),
+  bind('mouse-max', from('mouse-down').and('mouse-now').all.map(max)),
 
-  bind('selection.left', from('mouse.min').and('segment.width')
+  bind('selection-left', from('mouse-min').and('segment-width')
     .all.map((x, w) => floor(x / w) * w)),
-  bind('selection.right', from('mouse.max').and('segment.width')
+  bind('selection-right', from('mouse-max').and('segment-width')
     .all.map((x, w) => ceil(x / w) * w)),
 
-  bind('ticks.idxs', from('ticks.count').map(makeTicks)),
-  bind('ticks.objs', from('ticks.idxs').and.self().all.map((idxs, axis) =>
+  bind('ticks-idxs', from('ticks-count').map(makeTicks)),
+  bind('ticks-objs', from('ticks-idxs').and.self().all.map((idxs, axis) =>
     new List(idxs).map(index => new Tick({ index, axis }))))
 ) {
   _initialize() {
-    this.reactTo(this.get('mouse.clicking'), clicking => {
-      if (clicking === true) this.set('mouse.down', this.get_('mouse.now'));
+    this.reactTo(this.get('mouse-clicking'), clicking => {
+      if (clicking === true) this.set('mouse-down', this.get_('mouse-now'));
     });
   }
 }
@@ -366,20 +366,17 @@ class SegmentedAxisView extends DomView.build(
   $('<div class="axis"><div class="selection"/><div class="ticks"/></div>'),
   template(
     find('.selection')
-      .classed('hide', from('mouse.clicking').map(x => !x))
-      .css('left', from('selection.left').map(px))
-      .css('width', from('selection.right').and('selection.left')
+      .classed('hide', from('mouse-clicking').map(x => !x))
+      .css('left', from('selection-left').map(px))
+      .css('width', from('selection-right').and('selection-left')
         .all.map((right, left) => px(right - left))),
 
-    find('.ticks').render(from('ticks.objs')),
+    find('.ticks').render(from('ticks-objs')),
 
     find('.axis')
-      .on('mousedown', (_, subject) => {
-        subject.set('mouse.clicking', true); })
-      .on('mousemove', (event, subject) => {
-        subject.set('mouse.now', event.offsetX); })
-      .on('mouseup', (_, subject) => {
-        subject.set('mouse.clicking', false); })
+      .on('mousedown', (_, subject) => { subject.set('mouse-clicking', true); })
+      .on('mousemove', (e, subject) => { subject.set('mouse-now', e.offsetX); })
+      .on('mouseup', (_, subject) => { subject.set('mouse-clicking', false); })
 )) {
   _wireEvents() {
     const dom = this.artifact();
@@ -392,7 +389,7 @@ class SegmentedAxisView extends DomView.build(
 
 // Tick marks:
 const Tick = Model.build(
-  bind('left', from('index').and('axis').get('segment.width')
+  bind('left', from('index').and('axis').get('segment-width')
     .all.map((idx, segWidth) => idx * segWidth)));
 
 const TickView = DomView.build($('<div class="tick"/>'), find('.tick')
@@ -405,8 +402,8 @@ stdlib.view($).registerWith(app.get_('views'));
 app.get_('views').register(SegmentedAxis, SegmentedAxisView);
 app.get_('views').register(Tick, TickView);
 
-const axis = new SegmentedAxis({ ticks: { count: 10 } });
-return app.view(axis);
+const axis = new SegmentedAxis({ 'ticks-count': 10 });
+return [ app.view(axis), inspect.panel(axis) ];
 ~~~
 ~~~ styles
 .axis {
@@ -474,6 +471,10 @@ be seen by the way we manage `mouse.down`: rather than just set it as part of ou
 `mousedown` event handler, we have the Axis Model instead enforce itself that when
 `clicking` becomes true, we copy `mouse.now` to `mouse.down` at that moment.
 
+By making this relationship an inherent rule of computation, we ensure that if,
+say, a new spot in the code also sets `clicking` to be true, it doesn't have to
+concern itself with setting `mouse.down` correctly.
+
 The more concise and direct we are with core truth and how it is set, the more of
 our system we push into our purely-functional, always-correct land, and the fewer
 complications we introduce into our application.
@@ -488,7 +489,7 @@ complications we introduce into our application.
 
 The intermediate variables, then, each encapsulate some useful derived fact from
 that base truth, each of which is recomputed and updated only when it must be.
-Each fact is small, purely functional, and relatively easy to glance and verify.
+Each fact is small, purely functional, and relatively easy to glance at and verify.
 Line ordering is no longer a stylistic nor correctness concern: we only have to
 convince ourselves that each mapping function is correct, rather than having to
 worry about the ordering or invocation states of the whole assembly. There is some
@@ -519,7 +520,7 @@ class Person extends Model {}
 
 const Dog = Model.build(
   attribute('status', class extends attribute.Enum {
-    default() { return 'available'; }
+    initial() { return 'available'; }
     values() { return [ 'adopted', 'pending', 'available' ]; }
   }),
 
@@ -536,7 +537,7 @@ return [
 
 So `attribute` and `bind` statements live alongside each other in the Model builder,
 and the actual properties and behavior of specific attributes are defined by way
-of a class deriving from some `attribute` type. The default types are:
+of a class deriving from some `attribute` type. The initial types are:
 
 * Simple primitives: `Text`, `Boolean`, `Number`.
 * `Date`, which wants `Date` objects in working data but serializes to and from
@@ -548,22 +549,21 @@ of a class deriving from some `attribute` type. The default types are:
 * `Reference` manages a reference to a remote data resource. It gets its [own
   entire chapter](/theory/requests-resolvers-references).
 
-All attribute types share a few methods in common. One of these is `.default()`,
-which you see above. It doesn't show up in the inspector because default values
-are not eagerly injected into the data, but rather lazily pulled on `.get()` or
-`.get_()`. Alongside `.default` is `.writeDefault`, whose purpose we also
-demonstrate here:
+All attribute types share a few methods in common. One of these is `.initial()`,
+which you see above. Initial values are not eagerly injected into the data, but
+rather lazily pulled on `.get()` or `.get_()`. Alongside `.initial` is `.writeInitial`,
+whose purpose we also demonstrate here:
 
 ~~~
 class Person extends Model {}
 const Dog = Model.build(
   attribute('status', class extends attribute.Enum {
-    default() { return 'available'; }
+    initial() { return 'available'; }
     values() { return [ 'adopted', 'pending', 'available' ]; }
   }),
 
   attribute('owner', class extends attribute.Attribute {
-    default() { return new Person(); }
+    initial() { return new Person(); }
   })
 );
 
@@ -573,25 +573,26 @@ gadget.get_('owner').set('name', 'Jenny');
 
 return [
   spot.get_('status'),
-  spot,
+  spot.data.status, // a reference to the internal data structure
   gadget,
   gadget.get_('owner'),
   gadget.get_('owner').get_('name')
 ].map(inspect.panel);
 ~~~
 
-Spot didn't end up with a `status`, nor did Gadget end up with an owner named Jenny.
-This is because neither attribute set `.writeDefault` to true. In the case of `status`,
-this just means the value is ethereal each time it is fetched. In the case of `owner`,
-it's even more confusing: because a new default `Person` is generated each time,
-the Person we name Jenny just disappears immediately.
+Spot's internal data doesn't have a `status`, nor did Gadget end up with an owner
+named Jenny.  This is because neither attribute set `.writeInitial` to true. In
+the case of `status`, this just means the value is ethereal each time it is fetched.
 
-When `.writeDefault` is set to true, the default value is persisted whenever it
+In the case of `owner`, it's even more confusing: because a new initial `Person`
+is generated each time, the Person we name Jenny just disappears immediately.
+
+When `.writeInitial` is set to true, the initial value is persisted whenever it
 is fetched. (_Not_ when the Model is generated! It's still a lazy value.) Because
-forgetting this detail and neglecting to set `.writeDefault` can lead to especially
+forgetting this detail and neglecting to set `.writeInitial` can lead to especially
 confusing behavior for Models and Lists, `attribute.Model` and `attribute.List`
-actually default true for `.writeDefault`&mdash;this is why we use the generic base
-class `attribute.Attribute` in the sample above.
+set `true` for `.writeInitial`&mdash;this is why we used the generic base class
+`attribute.Attribute` in the sample above when we wanted to show the wrong behaviour.
 
 Here's another sample with these issues fixed, and which demonstrates a little
 shortcut for all this anonymous class stuff:
@@ -600,15 +601,16 @@ shortcut for all this anonymous class stuff:
 class Person extends Model {}
 const Dog = Model.build(
   attribute('status', class extends attribute.Enum {
-    get writeDefault() { return true; }
-    default() { return 'available'; }
+    get writeInitial() { return true; }
+    initial() { return 'available'; }
     values() { return [ 'adopted', 'pending', 'available' ]; }
   }),
 
-  dēfault.writing('listed', true, attribute.Boolean),
+  initial.writing('listed', true, attribute.Boolean),
 
   attribute('owner', class extends attribute.Model {
-    default() { return new Person(); }
+    get modelClass() { return Person; }
+    initial() { return new Person(); }
   })
 );
 
@@ -622,22 +624,24 @@ return [
 ].map(inspect.panel);
 ~~~
 
-We use the silly `ē` because `default` is a reserved keyword in Javascript. If
-you don't like it, you can also use `dfault`. If you don't want your attribute
-to write its default, you can omit `.writing`, and if you don't care about the
-type of the attribute, you don't need to provide the third argument.
+If you don't want your attribute to write its initial value, you can omit `.writing`,
+and if you don't care about the type of the attribute, you don't need to provide
+the third argument.
 
-If you ever want to get the actual instance of these (usually anonymous) Attribute
-classes, you can use `model.attribute('key')`. It'll be rare that you have to do
-this, but typically it would be for the purposes of serialization or editor
-rendering, which are the next two things we shall cover.
+The `Model` and `List` attributes have overridable instance properties `modelClass`
+and `listClass`, respectively, which define the type of value they expect to contain.
+This is used mostly for deserialization, which we will cover next.
+
+> There are also many shortcuts for these attributes. `attribute.Model.of(Person)`,
+> for example, will return an attribute class with a `modelClass` property of `Person`.
+> These are all described in the [API Documentation](/api/attribute).
 
 Attribute Serialization
 -----------------------
 
 The `.serialize` and `@deserialize` methods are also standard for all attributes.
-They can be called to override the standard (de)serialization option for the value
-at that key, and are straightforward:
+They can be implemented to override the standard (de)serialization behaviour for
+the value at that key, and are straightforward:
 
 ~~~
 const Dog = Model.build(
@@ -647,8 +651,8 @@ const Dog = Model.build(
     static deserialize(data) { return parseFloat(data); }
   }),
 
-  bind('dog_age', from('age').map(x => x * 7)),
-  attribute('dog_age', class extends attribute.Number {
+  bind('dog-age', from('age').map(x => x * 7)),
+  attribute('dog-age', class extends attribute.Number {
     get transient() { return true; }
   })
 );
@@ -659,12 +663,13 @@ return [
 ].map(inspect.panel);
 ~~~
 
-The default `Model` and `List` attribute deserializers just defer to the given
-`modelClass`'s `@deserialize` method, which you may also override. Marking an
-attribute as `.transient` will, if the default `.serialize` is in use, omit that
-property from the serialization.
+The default `Model` and `List` attribute deserializers find and use their declared
+`modelClass` or `listClass` `@deserialize` method, which you may also override.
 
-> As with `default`s, there is a shortcut to invoke this: `transient('key')`.
+Marking an attribute as `.transient` will, if the default `.serialize` is in use,
+omit that property from the serialization.
+
+> As with `initial`s, there is a shortcut to invoke this: `transient('key')`.
 
 Attribute Editors
 -----------------
@@ -678,14 +683,14 @@ types; a good example focuses around the `Enum` attribute type:
 ~~~
 // Models:
 const Document = Model.build(
-  dēfault('name', 'Untitled', attribute.Text),
+  initial('name', 'Untitled', attribute.Text),
   attribute('content', attribute.Text)
 );
 const Window = Model.build(
-  dēfault.writing('documents', () => new List([ new Document() ])),
+  initial.writing('documents', () => new List([ new Document() ])),
 
   attribute('current-document', class extends attribute.Enum {
-    default() { return this.model.get_('documents').at_(0); }
+    initial() { return this.model.get_('documents').at_(0); }
     _values() { return from('documents'); }
   })
 );
@@ -694,8 +699,10 @@ const Window = Model.build(
 const DocumentEditView = DomView.build(
   $('<div class="document"><div class="title"/><div class="content"/></div>'),
   template(
+    // here we use from.attribute:
     find('.title').render(from.attribute('name')).context('edit'),
-    find('.content').render(from.attribute('content'))
+    // here we directly call #attribute:
+    find('.content').render(from.subject().map(doc => doc.attribute('content')))
       .criteria({ context: 'edit', style: 'multiline' })));
 
 const DocumentSummaryView = DomView.build(
@@ -791,14 +798,14 @@ Once again, we demonstrate several points in this sample. We show how attribute
 editors are rendered with the standard library, but we also illustrate some broader
 points about problem-solving in Janus.
 
-As far as `render`ing attributes is concerned, the only truly canonical aspect
-demonstrated here is the use of `from.attribute('key')` to pull up the Attribute
+As far as `render`ing attributes is concerned, we show the use of `from.attribute('key')`
+as well as directly calling `.attribute` on a `Model` instance to pull up the Attribute
 object representing the behavior of that key, rather than the value residing at
 the key. Once that attribute class instance is resolved from the `from` chain,
 `render` will search for a matching view registration like it would for any other
 class instance.
 
-We register all the `stdlib` views so it'll find default views for our attributes.
+We register all the `stdlib` views so it'll find its views for our attribute classes.
 The particular `context` and `style` values you see are simply the convention
 applied throughout the standard library&mdash;they are not core to Janus itself.
 
@@ -806,7 +813,8 @@ You can also see that the Enum attribute `values()` method is allowed to return
 a `from` expression instead of a `List` (or, for that matter, a `Varying` would
 work too, so we could have written `this.model.get('documents')`). This fact
 is natural in the context of a framework where we strive to deal gracefully with
-changes, and it helps us solve the problem here of managing a set of tabbed views.
+changes, and in this case it helps us solve the problem here of managing a set
+of tabbed views.
 
 As we've began to stress, problem solving in Janus often boils down to data modelling.
 It would be entirely possible to create some ad-hoc jQuery-driven method for
@@ -856,7 +864,7 @@ some error page instead.
 On the other hand, we want to provide the smallest interface possible, to enable
 a broad range of approaches to the problem space. Do you want to encode information
 about which fields are failing the validation? Nest it (as another case class,
-perhaps?) within the `valid`/`warning`/`error` class. Do you want to declare
+perhaps?) within the `valid`/`warning`/`error` case class. Do you want to declare
 validation rules in some way other than the Janus default? You have exactly one
 method to implement to make the standard machinery work.
 
@@ -986,7 +994,7 @@ Here we define our own `Issue` class that we use to represent information about
 the validation failure: the message text to display and the fields involved in
 the problem. We don't bother making `fields` a List&mdash;it's just an array&mdash;since
 in our application the related fields never change. The `check` function helps us
-encapsulate this structure in a succinct declaration.
+automate the creation of this structure in a succinct declaration.
 
 Similarly, we create a helper for our editor view (which you could imagine using
 across all the different views in your application) which, for some field, checks
@@ -1035,13 +1043,13 @@ Recap
 =====
 
 Maps and Models are an important backbone in Janus. As one of the two fundamental
-data structures we provide, they serve a crucial purpose not just in directly
+data structure types we provide, they serve a crucial purpose not just in directly
 representing actual data, but also in gluing together the simple primitives you
 have thus far encountered into meaningful conglomerations.
 
 Maps are the pure data structure essence behind Models:
 
-* They perform all the key/value storage (`.get_`, `.set`) and key `.get`ting.
+* They perform all the key/value storage (`.get_`, `.set`) and Varying key `.get`ting.
   * Keys may be nested into subobjects, but you should take care when directly
     `.get`ting or `.get_`ting a subobject instead of a data leaf.
 * They support `.shadow` copying, allowing interrelated clones of your data.
@@ -1060,7 +1068,7 @@ Maps are the pure data structure essence behind Models:
 Models extend Maps to provide behavioral definition on top of the pure data.
 
 * Data `bind`ing of keys can help compute derived values that, for instance, the
-  server API requires.
+  user interface or the server API requires.
   * They're also very useful when used on View Models.
   * But perhaps more importantly, they help sequence complex computations based
     off of ground truth, turning Models into potent problem-solving spaces.
@@ -1068,7 +1076,7 @@ Models extend Maps to provide behavioral definition on top of the pure data.
   pieces on data in the Map:
   * They serve as class types that `render` can recognize for pulling up editor
     views for individual data attributes.
-  * `.default` values may be defined. You'll want to `.writeDefault` in some cases.
+  * `.initial` values may be defined. You'll want to `.writeInitial` in some cases.
   * Custom (de)serialization can be defined per key (though again, the full Traversal
     offers far more granular control).
   * And some attribute types, like Enum, Model, and List, have some domain-specific
@@ -1079,7 +1087,7 @@ Models extend Maps to provide behavioral definition on top of the pure data.
   * `validate()` declarations are made during Model `build`ing just like `bind` and
     `attribute`, and their only requirement is that they must resolve to a `Varying[types.validity]`.
 
-We've also began to see, now that we have more powerful tools at our disposal,
+We've also begun to see, now that we have more powerful tools at our disposal,
 what problem solving looks like in Janus.
 
 * Complex interaction patterns become tractable when time and care is taken to
@@ -1090,7 +1098,7 @@ what problem solving looks like in Janus.
   * Derived values based on that ground truth can then be bound in the same Model,
     and they will be recomputed only as necessary.
   * This essentially turns Model into a problem-solving space, one in which classical
-    concerns like line ordering and object state becomes irrelevant.
+    concerns like line ordering and object state become irrelevant.
   * You saw this when we created a modestly complicated dragging example. Ultimately,
     the entire interaction was driven off of four values.
 * Many, many problems can be solved by thinking of the problem in terms of data

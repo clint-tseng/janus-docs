@@ -1,7 +1,7 @@
 From Expressions
 ================
 
-After with `Varying` and `case` classes, `from` chains form the final core component
+After `Varying` and `case` classes, `from` chains form the final core component
 of Janus. In our last two deep dives, we looked at how Varying lets you build
 computations out of simple pure functions that work across the entirety of time,
 and how case classes augment this capability by offering a value container type
@@ -66,19 +66,20 @@ const name = from('name');
 const dogYears = from('age').map(x => x * 7);
 
 return [
+  inspect.panel(dog), // try changing the data!
   magic(dog, name),
-  magic(dog, dogYears)
+  inspect(magic(dog, dogYears))
 ];
 ~~~
 ~~~ env-additions
 return { magic: (subject, from) => from.all.point(subject.pointer()) };
 ~~~
 
-So as not to distract you just yet with the specifics of actually performing a
-`.point()` to feed data context to a from expression, we have resorted to calling
-that operation `magic()` for now. `magic` is actually only 32 characters long, but
-we'll get to that soon enough. In these examples, `magic` looks up the string we
-provide to `from` as a key in the model it's binding against.
+So as not to distract you just yet with the specifics of actually feeding context
+to a from expression using `.point()`, we have resorted to calling that operation
+`magic()` for now. `magic` is actually only 32 characters long, but we'll get to
+that soon enough. In these examples, `magic` looks up the string we provide to
+`from` as a key in the model it's binding against.
 
 Importantly, these computational units can be thrown reusably at any context you
 might need:
@@ -93,7 +94,7 @@ const dogYears = from('age').map(x => x * 7);
 return [
   magic(dog, name),
   magic(dog, dogYears),
-  magic(person, name),
+  inspect(magic(person, name)),
   magic(person, dogYears)
 ];
 ~~~
@@ -129,12 +130,16 @@ const dogGreeting = from('name').map(x => x.toUpperCase())
 
 return [
   magic(dog, greeting),
-  magic(dog, dogGreeting)
+  inspect(magic(dog, dogGreeting))
 ];
 ~~~
 ~~~ env-additions
 return { magic: (subject, from) => from.all.point(subject.pointer()) };
 ~~~
+
+> We keep adding these `inspect()s` here and there to remind you that the result
+> of this `from`/`magic` operation is actually a `Varying` which will reflect
+> changes to the source data.
 
 The `.and` keyword chains on a new `from` reference, while `.all` concludes the
 chain, allowing you to `map` or `flatMap` all the referenced parameters down to
@@ -165,7 +170,7 @@ return [
 return { magic: (subject, from) => from.all.point(subject.pointer()) };
 ~~~
 
-Here, the `.get` helper is [equivalent to writing](https://github.com/issa-tseng/janus/blob/7f81b0000c318de1bc6f9e5df4effa2b22f015c7/src/core/from.coffee#L27)
+Here, the `.get` helper is [equivalent to writing](https://github.com/issa-tseng/janus/blob/80b49bb899cf772532d1fcf2505018c409bbbf3f/janus/src/core/from.coffee#L27)
 `.flatMap(model => (model == null) ? null : model.get('name'))`, which is quite a
 mouthful. This little bit of simple syntactic sugar helps save a lot of typing
 and reading. Other such helpers are available; check the [API documentation](/api/from)
@@ -218,8 +223,8 @@ return { magic: (subject, from) => from.all.point(subject.pointer()) };
 So there are other methods available as alternatives to just calling `from` or
 `.and` directly, and three of them appear to be `.get()`, `.self()`, and `.varying()`.
 We call these different toplevel methods **source cases**. But how do these terms
-acquire meaning, where do they come from, and what does it mean when we don't
-directly reference one and just call `from` or `.and` directly with a string?
+acquire meaning, where do they come from, and what does it mean when we call `from`
+or `and` directly without referencing one of these names?
 
 To answer these questions, we'll have to demagick `magic`.
 
@@ -366,9 +371,9 @@ abstraction is to remember some description of data, allow mapping computations
 to be chained on, and provide plumbing to turn the whole abstract computation into
 a real working Varying.
 
-As such, it doesn't actually matter what set of cases `from` works off of; all
-it does is read the names and provide a method for each one, and eventually
-those case class instances are run through `point`.
+As such, `from` does not actually care about the set of cases it is working off
+of. All it does is read the names of the cases and provide a named chaining method
+for each one, and eventually those case class instances are handed off to `point`.
 
 If you want to use your own set of case classes, use `from.build()`:
 
@@ -403,9 +408,10 @@ are nested under `properties`, accessible via a source case whose handler scopes
 down to the appropriate part of the model structure. Meanwhile, `method` will call
 the given method on the model.
 
-It's important to note that just like we have now created a new semantic for accessing
-a Model even though we already had the default one, we also could back these new
-semantics with some concrete data implementation that has nothing to do with Model:
+It's important to note that we've now created a new semantic for accessing a Model
+even though we already had the default one provided by the framework; we could go
+further and back these new semantics with some concrete data implementation that
+has nothing to do with Model:
 
 ~~~
 const cases = Case.build('name', 'property', 'method');

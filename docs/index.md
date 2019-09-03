@@ -17,7 +17,7 @@ It features:
 <p>
 A simple, extensible views and templating library that uses plain HTML and
 Javascript with familiar, jQuery-like syntax.
-<a href="#views-and-templating">See examples</a>.
+<a href="#views-and-templating">See examples below</a>.
 </p>
 </div>
 
@@ -27,7 +27,7 @@ Javascript with familiar, jQuery-like syntax.
 <p>
 Core structures which treat data operations like <code>map</code> as declarative
 transformation rules which should always hold true, rather than as individual
-point-in-time mutations. <a href="#data-structures-and-models">See examples</a>.
+point-in-time mutations. <a href="#data-structures-and-models">See examples below</a>.
 </p>
 </div>
 
@@ -107,6 +107,7 @@ Data Structures and Models
 Janus provides a unique data structure library. All collection transformations
 in Janus handle changes over time, so that you don't have to. Here is a simple
 example. Here also you get a taste of `janus-inspect`, a visual debugging tool:
+try editing the values on the source list.
 
 ~~~
 const list = new List([ 4, 8, 15, 16, 23, 42 ]);
@@ -204,7 +205,7 @@ A Simple Application
 Here we create the classic Todo list sample. We define a model and a view for
 `Item`, then render a list of them. Notice how simple the event handling is:
 we just manipulate the data. Everything else, including the list management,
-is automatically handled.
+falls effortlessly out of our declarative bindings.
 
 ~~~
 const Item = Model.build(
@@ -226,17 +227,14 @@ const ItemView = DomView.build($(`
     .classed('done', from('done'))
     .render(from.attribute('description')).context('edit'),
 
-  find('.remove').on('click', (event, subject) => {
-    event.preventDefault();
-    subject.destroy();
-  })
+  find('.remove').on('click', (event, subject) => { subject.destroy(); })
 ));
 
 const TodoListView = DomView.build($(`
   <div class="todo-list">
     <span class="completed"/> of <span class="total"/> items done
     <div class="items"/>
-    <a href="#add" class="add">Add Item</a>
+    <button class="add">Add Item</button>
   </div>`), template(
 
   find('.completed').text(from('items').flatMap(items =>
