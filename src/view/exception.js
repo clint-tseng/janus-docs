@@ -41,7 +41,7 @@ const ExceptionViewModel = Model.build(
 // EXCEPTION ENTITY VIEW
 // mimicks janus-inspect entity inspector dom structure.
 
-const ExceptionEntityView = DomView.withOptions({ viewModelClass: ExceptionViewModel }).build($(`
+const ExceptionEntityView = DomView.build(ExceptionViewModel, $(`
   <span class="janus-inspect-entity janus-inspect-error">
     <span class="entity-title">Exception</span>
     <span class="entity-content"/>
@@ -80,7 +80,7 @@ const StackLineView = DomView.build($(`
     })
 ));
 
-const ExceptionView = DomView.withOptions({ viewModelClass: ExceptionViewModel }).build($(`
+const ExceptionView = DomView.build(ExceptionViewModel, $(`
   <div class="exception">
     <div class="exception-message"></div>
     <div class="exception-stack"></div>

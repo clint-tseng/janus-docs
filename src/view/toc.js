@@ -13,7 +13,7 @@ const TocViewModel = Model.build(
       ((current === '/') && (own === '/intro')))) // special case: show getting started on homepage
 );
 
-const TocView = DomView.withOptions({ viewModelClass: TocViewModel }).build($(`
+const TocView = DomView.build(TocViewModel, $(`
   <div class="toc-entry">
     <a/>
     <div class="toc-children"/>

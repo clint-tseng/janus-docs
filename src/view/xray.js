@@ -97,7 +97,7 @@ const XRayVM = Model.build(
       stack.mapPairs((own, view) => new XRayEntry({ view, sizing, idx: { own, selection } }))))
 );
 
-class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
+class XRayView extends DomView.build(XRayVM, $(`
   <div class="xray">
     <div class="xray-chrome"><label>X-Ray</label></div>
     <div class="xray-boxes"/>
@@ -133,7 +133,8 @@ class XRayView extends DomView.withOptions({ viewModelClass: XRayVM }).build($(`
 ////////////////////////////////////////
 // FLASH SIMPLIFIED VIEW
 
-class FlashView extends DomView.withOptions({ viewModelClass: XRayVM }).build(
+class FlashView extends DomView.build(
+  XRayVM,
   $(`<div class="xray flash"><div class="xray-boxes"/></div>`),
   XRayView.template
 ) {

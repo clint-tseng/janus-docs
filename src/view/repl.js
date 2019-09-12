@@ -40,7 +40,7 @@ class StatementVM extends Model.build(
   }
 }
 
-class StatementView extends DomView.withOptions({ viewModelClass: StatementVM }).build($(`
+class StatementView extends DomView.build(StatementVM, $(`
   <div class="statement">
     <div class="statement-left">
       <div class="statement-status">
@@ -112,7 +112,7 @@ class StatementView extends DomView.withOptions({ viewModelClass: StatementVM })
 }
 
 // TODO: repetitive with above; sort of awaiting janus#138
-const ReferenceView = DomView.withOptions({ viewModelClass: StatementVM }).build($(`
+const ReferenceView = DomView.build(StatementVM, $(`
   <div class="statement reference">
     <div class="statement-left">
       <div class="statement-placeholder">value</div>
