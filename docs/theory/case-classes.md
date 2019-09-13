@@ -284,24 +284,11 @@ of data, but you have some transformations you need to do on the inner data in
 particular cases; deserializing a successful network request value into an actual
 `Model` instance of some type, for example (`result.mapSuccess(Foo.deserialize)`).
 
-Advanced Case Classes
-=====================
-
-There are two advanced features to cover, each of which comes with a few warning
-labels. The first are case superclasses, which allow you to conveniently match
-on common subsets of your case classes (`success` and `failure` both being `complete`,
-for instance). The second is the ability to customize the contained value structure,
-for instance such that each case class instance takes two values rather than one.
-
-As with Varying, these advanced features, as well as the internals explanation
-we offer in this section, are not critical to understand to form a relatively
-deep and effective understanding of Janus as a whole. If you feel bored or lost,
-feel free to jump ahead.
-
 Case Superclasses
------------------
+=================
 
-Case superclasses are defined when the case class set is defined.
+Case superclasses let you create umbrella cases that will match any of their subclasses.
+They are specified when the case class set is defined.
 
 ~~~
 const color = Case.build('purple', {
@@ -336,51 +323,6 @@ do construct a case superclass value, it will stubbornly do nothing, not even ma
 Case superclasses can nest: just continue nesting objects and you can build a full
 hierarchy.
 
-Arity
------
-
-By default, Janus case classes contain exactly one value. This value can be anything
-you'd like, including an array or object, so with the destructuring available in
-modern Javascript there oughtn't be much need to deviate from this default.
-
-That said, sometimes it's just cleaner to, for instance, take two values for each
-case instead of one. We call this case arity, and there is a default mechanism
-for requesting this behavior, by calling `Case.withOptions().build()`:
-
-~~~
-const { sqrt } = Math;
-const square = (x) => x * x;
-
-const { raw, scaled } = Case.withOptions({ arity: 2 }).build('raw', 'scaled');
-
-const magnitude = match(
-  raw((x, y) => sqrt(square(x) + square(y))),
-  scaled((x, y) => 8 * sqrt(square(x) + square(y)))
-);
-
-return [
-  magnitude(raw(3, 4)),
-  magnitude(raw(5, 12)),
-  magnitude(scaled(20, 21))
-];
-~~~
-
-Now, each case instance takes and returns two values instead of one. Arities 0,
-1, 2, and 3 are supported out of the box. This can be really convenient in some
-cases, like this one! But doing this does have some consequences to be aware of.
-
-Consider a method like `.mapX`, for example: mapping functions only return one
-value, by virtue of the fact that functions return one value. And what should
-happen when `.getX` is called? Janus does its best to patch this together: `.mapX`
-is still supported, but the resulting case will appear to have just one value.
-And methods like `.getX` will end up returning an array of the inner values.
-
-> # See Also
-> A better understanding of these awkward behaviors can be had by fully appreciating
-> how case classes work under the covers. This information, along with the custom
-> `unapply` Case feature, can be found in its own [Further Reading](/further-reading/case-unapply)
-> chapter.
-
 Recap
 =====
 
@@ -407,9 +349,6 @@ those instances:
   particular cases.
 * But when trying to deal with many types of cases at once, `match` is the most
   effective tool.
-* Some customization is available: case superclassing, case arity, and custom
-  unapply. But these need to be used with some thought, as they come with strings
-  attached.
 
 You probably won't find yourself reaching for case classes _that_ often. But when
 they suit a task, they do so particularly well. You'll see one such case in the

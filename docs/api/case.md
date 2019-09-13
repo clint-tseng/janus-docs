@@ -32,18 +32,14 @@ return [
 ];
 ~~~
 
-#### Unapply: (@Case -> …\* -> Case), Part: String|{ String : Part|Unapply|Array[Part] } => Case.build(…Part): { String: (\* -> Case) }
-
-For more advanced usages, Arrays, Objects, and Functions are allowed inputs alongside
-Strings. We will not cover them exhaustively here; please see [this section](/case-classes#advanced-case-classes)
+For more advanced usages, simple structures are allowed in the definition alongside
+Strings. We will not cover them exhaustively here; please see [this section](/case-classes#case-superclasses)
 of the Case Classes chapter for full details. In brief:
 
-* Arrays and Objects allow hierarchically structured case class trees, in which
-  parent cases cannot be used to represent values but can be used to match against
-  any of their children (eg `complete` is the parent of `success` and `failure`).
-* Functions can be provided in Object format to create custom `unapply` functions
-  that allow arbitrary structures of values to be carried by the case class. (See
-  the [constructor](#@constructor) reference or the linked section for samples.)
+Arrays and Objects allow hierarchically structured case class trees, in which parent
+cases can be used to match against any of their children (eg `complete` is the
+parent of `success` and `failure`). Parent cases cannot, however, be used to hold,
+represent, and match against values.
 
 ~~~
 const food = Case.build({ fruit: [ 'apple', 'orange' ], vegetable: [ 'kale', 'lettuce' ] });
@@ -55,76 +51,19 @@ return [
 ];
 ~~~
 
-### @withOptions
-#### Case.withOptions(options: { String : * }): @Case
-
-As with some other Janus builders, Case allows the pattern `Case.withOptions(…).build(…)`
-to express additional `options` for the built artifacts. Right now, only one option
-is supported:
-
-* `arity: Integer` allows values from `0` to `3`, and affects the number of values
-  that will be taken into and returned back out of all case classes in the set.
-  Note that if a custom unapply function is supplied for some case, then this
-  option is superceded.
-
-For more information about case arity, please see [this section](/theory/case-classes#arity).
-
-~~~
-const { cartesian, polar } = Case.withOptions({ arity: 2 }).build('cartesian', 'polar');
-
-return [
-  cartesian(3, 4),
-  polar(3.14, 6)
-];
-~~~
-
-### @constructor
-#### new Case(x1: T, (…\* -> (…\* -> U) -> U)): Case[…\*]
-
-The _only_ case in which you should ever have to invoke this constructor directly
-is when declaring a [custom unapply](/theory/case-classes#custom-unapply-and-some-internals-).
-In all other cases, the builder will provide functions that instantiate Cases for
-you.
-
-As described in the linked article, the provided function takes an arbitrary number
-of parameters and returns an unapplying function. The first argument taken by the
-function should always be provided explicitly as `x1`, to make `match`ing work.
-
-The unapplying function _takes_ a function that expects some arbitrary number of
-parameters and returns a result, applies those parameters to the function, and
-returns the result.
-
-~~~
-const { cartesian, polar } = Case.build({
-  cartesian: (Kase) => (x, y, z) => new Kase(x, (f => f(x, y, z))),
-  polar: (Kase) => (r, theta, phi) => new Kase(r, (f => f(r, theta, phi)))
-});
-
-return [
-  cartesian(4, 15, 18),
-  polar(1, 3.14, 1.57)
-];
-~~~
-
 ## Instance Value Extraction
 
 ### #get
-#### .get(): \*|[\*]
+#### c: Case[T] => .get(): T
 
-In standard case classes (without custom arity or unapply), `.get()` will always
-return the single value that the case class was instantiated with. In all other
-cases, it will return an array containing the arguments that would have been
-provided to a matching function.
+Returns the value held within the case instance.
 
 ~~~
-const { normal, custom } = Case.build(
-  'normal',
-  { custom: (Kase) => (a, b, c) => new Kase(a, (f => f(a, b, c))) }
-);
+const { up, down } = Case.build('up', 'down');
 
 return [
-  normal(42).get(),
-  custom(1, 2, 4).get()
+  up(42).get(),
+  down().get()
 ];
 ~~~
 
@@ -132,7 +71,7 @@ return [
 #### c: Case[T] => .{x}OrElse(else: U): T|U
 
 `.get()`s the value if the case is of `{x}` type, or else returns the given value
-`else`. This is a generally preferred way to extract values, as it has some notion
+`else`. This is one generally preferred way to extract values, as it has some notion
 of type constrainedness (unlike `#get`, for instance, which indiscriminately returns
 the contained value(s)).
 
@@ -177,24 +116,13 @@ return up(42).toString();
 
 ### #map
 #### c: Case[T] => c.map(T -> U): Case[U]
-#### c: Case[…\*] => c.map(…\* -> U): Case[U]
 
 No matter the type of the case, applies the value(s) to the mapping function and
 returns a new case class instance of the same type containing the new mapped value.
 
-Note that no matter the arity of the case originally, the mapping function can
-only return a single value and so the resulting case will only contain a single
-value. This can be confusing because the type loses its structural meaning. For
-this reason, `#map` is not recommended for multi-arity or custom unapply cases.
-
 ~~~
 const { single } = Case.build('single');
-const { multi } = Case.withOptions({ arity: 2 }).build('multi');
-
-return [
-  single(42).map(x => x * 2),
-  multi(4, 12).map((x, y) => x + y)
-];
+return single(42).map(x => x * 2);
 ~~~
 
 ### #map{X}

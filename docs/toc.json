@@ -55,9 +55,6 @@
   "title": "Further Reading",
   "path": "/further-reading",
   "children": [{
-    "title": "Advanced Case Classes",
-    "path": "/further-reading/case-unapply"
-  }, {
     "title": "Attaching Views",
     "path": "/further-reading/view-attach"
   }, {
