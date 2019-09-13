@@ -60,6 +60,9 @@
   }, {
     "title": "View Custom Rendering",
     "path": "/further-reading/view-custom-render"
+  }, {
+    "title": "Traversal",
+    "path": "/further-reading/traversal"
   }]
 }, {
   "title": "Cookbook",

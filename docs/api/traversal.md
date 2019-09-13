@@ -11,14 +11,14 @@ a `map` function, and may optionally contain a `reduce` and a `recurse` function
 The `map` function is called for each data value in the structure, and is expected
 to return one of the following `types.traversal` case class instances:
 
+* `value(x)` uses value `x` as the mapping result.
 * `recurse(obj)` will continue traversal into a `List` or `Map` `obj` structure.
 * `delegate(f)` will call `f` as the mapping function instead, and use its result,
   for only this data value.
-* `defer(f)` will call `f` as the mapping function instead, and use its result,
+* `defer({ recurse?, map?, reduce? })` will merge the given configuration and use it
   for this and all data values nested recursively within this point in the tree.
 * `varying(v)` returns a `Varying` `v`, where `v` contains one of these case class
   instances.
-* `value(x)` uses value `x` as the mapping result.
 * `nothing` indicates that this data value should not be mapped onto the output
   structure.
 
@@ -49,18 +49,18 @@ no deviation from standard behavior.
 
 For all of the below, the following function signatures apply:
 
-* `recurse: (obj: List|Map, context) -> types.traversal` where `obj` is the original
-  structure pre-traversal, and `context` isa  freeform data object which should be
-  treated as immutable for proper function. See the [full chapter](/further-reading/traversal)
-  for further details on `context`.
-* `map: (key: Int|String, value: \*, attribute: Attribute?, context) -> types.traversal`
+* `recurse: (obj: List|Map) -> types.traversal` where `obj` is the original structure
+  pre-traversal. This function will be the first thing called when Traversal begins.
+* `map: (key: Int|String, value: \*, obj: List|Map, attribute: Attribute?) -> types.traversal`
   where `key` and `value` relate to the original data, `attribute` gives an instance
   of the `Attribute` at that `key` if the structure is a `Model` and has an attribute
-  defined for it, and `context` is as described above for `recurse`.
+  defined for it.
 * `reduce: (obj: Array|List) -> \*` where `obj` is the mapped structure post-traversal.
 
 ### λnatural
-#### Traversal.natural(obj: Enumerable, { recurse?, map }, context = {}): Map|List
+#### Traversal.natural({ recurse?, map }, obj: Enumerable): Map|List
+
+* !CURRIES
 
 Performs traversal, preserving structure (`Map`s stay `Map`s, and `List`s stay
 `List`s) and returning an eagerly updated structure which will continue to maintain
@@ -80,7 +80,9 @@ return inspect.panel(result); // TODO: why does this not panel?
 ~~~
 
 ### λnatural_
-#### Traversal.natural_(obj: Enumerable, { recurse?, map }, context = {}): Object|Array
+#### Traversal.natural_({ recurse?, map }, obj: Enumerable): Object|Array
+
+* !CURRIES
 
 Like `#natural`, but performs the traversal only once, returning a static structure
 of plain Javascript `Object`s and `Array`s.
@@ -97,7 +99,9 @@ return Traversal.natural_(data, {
 ~~~
 
 ### λlist
-#### Traversal.list(obj: Enumerable, { recurse?, map, reduce? }, context = {}): List
+#### Traversal.list({ recurse?, map, reduce? }, obj: Enumerable): List
+
+* !CURRIES
 
 Performs traversal, crushing `Map`s to `List`s (with no particular guaranteed indexing
 order), and returning an eagerly updated structure which will continue to maintain
@@ -117,7 +121,9 @@ return inspect.panel(result);
 ~~~
 
 ### λlist_
-#### Traversal.list_(obj: Enumerable, { recurse?, map, reduce? }, context = {}): Array
+#### Traversal.list_({ recurse?, map, reduce? }, obj: Enumerable): Array
+
+* !CURRIES
 
 Like `#list`, but performs the traversal only once, returning a static structure
 of plain Javascript `Array's. Note that despite the name `list_` (chose for consistency
@@ -166,7 +172,7 @@ It `recurse`s as follows:
 * If the number of members do not match, `false` is returned.
 * Otherwise, recurses into both structures.
 
-It 'map's as follows:
+It `map`s as follows:
 
 * If both values are enumerable and of the same type, recursion is invoked.
 * Otherwise, the values are directly compared by `===` equality, and a boolean
@@ -189,12 +195,12 @@ const data2 = new Map({
   friend: new Map({ name: 'Bob', meta: new Map({ clicked: 2 }) }),
   meta: new Map({ clicked: 1 })
 });
-return Traversal.list(data1, {
+return Traversal.list({
   recurse: Traversal.default.diff.recurse,
   map: k => (k === 'meta')
     ? types.traversal.value(false)
     : types.traversal.delegate(Traversal.default.diff.map),
   reduce: Traversal.default.diff.reduce
-}, { other: data2 });
+}, [ data1, data2 ]);
 ~~~
 

@@ -377,13 +377,13 @@ here are some simple examples to give you a sense for them:
 const { recurse, varying, value } = types.traversal;
 const includesDeep = (data, target) => {
   target = Varying.of(target);
-  return Traversal.list(data, {
+  return Traversal.list({
     map: (k, v) => ((v != null) && (v.isEnumerable === true))
       ? recurse(v)
       : varying(target.map(tgt => value(tgt === v))),
 
     reduce: (list => list.any())
-  });
+  }, data);
 };
 
 const data = new Map({
@@ -426,11 +426,11 @@ const Business = Model.build();
 const Person = Model.build();
 
 const { delegate, value } = types.traversal;
-const serialize = (data, personIdsOnly) => Traversal.natural_(data, {
+const serialize = (data, personIdsOnly) => Traversal.natural_({
   map: (k, v) => ((v instanceof Person) && (personIdsOnly === true))
     ? value(v.get_('id'))
     : delegate(Traversal.default.serialize.map)
-});
+}, data);
 
 // some example data:
 const alice = new Person({ name: 'Alice', id: 1 });
