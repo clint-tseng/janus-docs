@@ -30,7 +30,10 @@ const isMarkup = (selector) => {
 // quick and dirty view that simply hosts an fragment instance.
 const htmlView = (html) => {
   if (html == null) return null;
-  class HtmlView extends DomView { _render() { return $(html); } }
+  class HtmlView extends DomView {
+    redraw() { this.artifact().contents().replaceWith(html); }
+    _render() { return $(`<div>${html}</div>`); }
+  }
   return new HtmlView();
 };
 
@@ -60,7 +63,7 @@ class Sample extends Model.build(
     ? $
     : ((selector) => isMarkup(selector)
       ? $(selector)
-      : view.artifact().filter(selector).add(view.artifact().find(selector))))),
+      : view.artifact().find(selector)))),
 
   // some samples want to define magic handwavy functions without having to expose
   // the source; returning an object from env-additions adds those members to the
@@ -89,7 +92,11 @@ class Sample extends Model.build(
   // actual compilation and computation of the final code block:
 
   bind('compiled', from('env.final').and('main').all.map(compile)),
-  bind('result.raw', from('compiled').flatMap((proc) => proc.flatMap((f) => f()))),
+  bind('result.raw', from.self().and('compiled').all.flatMap((self, proc) => {
+    const customView = self.get_('env.view');
+    if (customView != null) customView.redraw();
+    return proc.flatMap((f) => f());
+  })),
 
   // apply noexec and inspect flags.
   bind('result.final', from('result.raw').and('noexec').and('inspect')
