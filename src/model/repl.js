@@ -4,7 +4,7 @@ const stdlib = require('janus-stdlib');
 const { Map, Model, attribute, initial, bind, from, List, Varying } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
 const { blank, nonblank, ifExists } = require('../util/util');
-const { atomize, dereturn } = require('../util/code');
+const { atomize, filterRequires, dereturn } = require('../util/code');
 const { inspect } = require('../util/inspect');
 
 const rootEnv = Object.assign({ $, stdlib, inspect }, janus);
@@ -28,7 +28,7 @@ class Statement extends Model.build(
   commit() {
     // parse and atomize. bail if we can't run the thing.
     const code = this.get_('code');
-    const atomized = atomize(code);
+    const atomized = filterRequires(atomize(code));
     if (atomized === false) return false;
 
     const own = atomized.shift();

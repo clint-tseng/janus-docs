@@ -46,6 +46,10 @@ const atomize = (code) => {
   return (tree.body.length === 0) ? false : _atomize(tree.body);
 };
 
+const filterRequires = (pairs) => pairs.filter((p) =>
+  !((p[1].type === 'CallExpression') &&
+    (p[1].callee.type === 'Identifier') && (p[1].callee.name === 'require')));
+
 // recevies a code string, and returns a new code string with any root-level
 // return statements removed. we do this because in the samples we return to
 // output result data, but the repl shows expression results directly and won't
@@ -87,5 +91,5 @@ const dereturn = (code) => {
   return result;
 };
 
-module.exports = { atomize, dereturn };
+module.exports = { atomize, filterRequires, dereturn };
 

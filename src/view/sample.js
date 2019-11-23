@@ -31,6 +31,8 @@ class SampleView extends DomView.build($(`
     .classed('disabled', from('main').and('initial').all.map(equals))
     .on('click', (e, subject) => { subject.set('main', subject.get_('initial')); }),
 
+  // TODO: on target-html, inject a line creating the fragment from markup and
+  // redirecting $ at that fragment.
   find('.sample-transfer')
     .classed('disabled', from('result.final').map(fail.match))
     .on('click', (e, subject, view) => {
