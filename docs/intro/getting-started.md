@@ -146,7 +146,7 @@ const ItemView = DomView.build(
 );
 
 const app = new App();
-app.get_('views').register(Item, ItemView);
+app.views.register(Item, ItemView);
 
 const item = new Item({ name: 'Red Potion', price: 120 });
 const view = app.view(item);
@@ -161,16 +161,15 @@ that class instead of `Map`. `Model`s are really just fancy `Map`s, so we can us
 them in exactly the same way.
 
 The other change we made was to make an `App`, and teach it with the `.register()`
-call that `Item`s can be rendered with `ItemView`s. It may seem a little odd that
-there's a `.get_('views')` in there, especially with that underscore, but it will
-make more sense later (it turns out that `App`s are really themselves just `Model`s
-too).
+call that `Item`s can be rendered with `ItemView`s.
 
 The other thing to notice here is that a structure for organizing our code into
 multiple files is beginning to emerge, too. We have a single line which declares
-a `Model` which could be its own file that exports that `Model` class for use
+a `Model`: this could be its own file that exports that `Model` class for use
 elsewhere. Likewise with the `DomView`. Then finally, we have the last section
-which glues it all together and makes it run.
+which glues it all together and makes it run. If we were to split this code into
+separate files, that last section would `require` all the components from across
+your code to spin it all up.
 
 Making Something Happen
 -----------------------
@@ -209,8 +208,8 @@ const item = new Item({ name: 'Red Potion', price: 120 });
 const sale = new Sale({ inventory: item });
 
 const app = new App();
-app.get_('views').register(Item, ItemView);
-app.get_('views').register(Sale, SaleView);
+app.views.register(Item, ItemView);
+app.views.register(Sale, SaleView);
 
 const view = app.view(sale);
 $('#app').append(view.artifact());
@@ -269,8 +268,8 @@ const SaleView = DomView.build($(`
   </div>`),
   template(
     find('.inventory').render(from('inventory')),
-    find('.total').text(from('order').flatMap(list =>
-      list.flatMap(item => item.get('price')).sum()))
+    find('.total').text(from('order')
+      .flatMap(list => list.flatMap(item => item.get('price')).sum()))
   )
 );
 
@@ -282,9 +281,9 @@ const inventory = new List([
 const sale = new Sale({ inventory, order: new List() });
 
 const app = new App();
-stdlib.view($).registerWith(app.get_('views'));
-app.get_('views').register(Item, ItemView);
-app.get_('views').register(Sale, SaleView);
+stdlib.view($).registerWith(app.views);
+app.views.register(Item, ItemView);
+app.views.register(Sale, SaleView);
 
 const view = app.view(sale);
 $('#app').append(view.artifact());
