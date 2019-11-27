@@ -352,12 +352,11 @@ is independently useful, and you may well end up perusing some or all of both.
 For now, pick your path based on what you're most curious about, and your learning
 style:
 
-* The [practical guide](/hands-on) picks up where we leave off here. It takes a
-  short break to cover some fundamentals, but with an eye toward getting back to
-  practical code as quickly as possible, continuing to build on the application
-  we've worked on here.
+* The [practical guide](/hands-on) picks up where we leave off here, continuing
+  to build on the application we've worked on here.
 * The [first principles guide](/theory) takes a different approach, starting with
-  a more complete picture of the theory underlying Janus before rederiving the
-  entire framework a step at a time to build a deep understanding of its pieces.
-  It might sound boring, but it's actually quite snappy.
+  a more complete picture of the theory underlying Janus, rederiving the basics
+  of the framework a step at a time to build a deep understanding of its pieces,
+  and using that understanding to introduce each component. It might sound boring,
+  but it's actually quite snappy.
 

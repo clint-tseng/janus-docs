@@ -10,7 +10,11 @@
   }]
 }, {
   "title": "A Practical Guide",
-  "path": "/hands-on"
+  "path": "/hands-on",
+  "children": [{
+    "title": "Shoring Up the Basics",
+    "path": "/hands-on/shoring-up-basics"
+  }]
 }, {
   "title": "First Principles",
   "path": "/theory",
