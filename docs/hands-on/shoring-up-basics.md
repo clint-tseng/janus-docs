@@ -344,6 +344,27 @@ to activate client-side interactivity (the button `.on` handler we declared is
 useless in a server-rendering context, so we don't want to run that code unless
 we have to). Finally, we return the `view` as our result.
 
+Recap
+=====
+
+In this chapter, we reëxamined our sample code and talked through the concepts
+in detail.
+
+* We learned how our template declarations are translated into the things you see
+  on screen:
+  * When a `from('property')` expression is processed, the relevant `property`
+    is found and its value retrieved.
+  * But it is not retrieved as a value at a point in time, but rather a `Varying`
+    wrapper _around_ that value.
+  * That wrapper lets us describe operations on top of the value itself using `.map`,
+    so that we don't have to worry about the value changing.
+  * But if our mapping operation _also_ returns a `Varying` as its result, we want
+    to `.flatMap` rather than `.map`. It's okay if we `.flatMap` when we didn't
+    need to.
+  * In the case that we are `.render`ing something, the final result of our data
+    reference and transformation is used to look up an appropriate View classtype
+    using the `.views` Library within our App.
+
 Next Up
 =======
 
