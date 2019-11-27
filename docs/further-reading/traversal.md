@@ -211,7 +211,7 @@ Recursing into structures with Traversal
 
 Recursion is a critical piece of the Traversal operation. If not for the need to
 manage the recursion of substructures, you could simply use [`#mapPairs`](/api/map#mapPairs)
-or `#flatMapPairs`](/api/map#flatMapPairs).
+or [`#flatMapPairs`](/api/map#flatMapPairs).
 
 > Though it's a good idea to understand how the recursing operation and function
 > work, it's also important to note that it is optional to actually provide a
@@ -238,7 +238,8 @@ computed value.
 Moreover, the recursing function is called after the mapping function has asked
 to `recurse` for two reasons: one is to allow control over _how_ a substructure
 is recursed, but as well it is important in case you have `delegate`d mapping control
-to some other function to give you the ability to affirm the course of action.
+to some other function to give you the ability to affirm the course of action, and
+to handle any structural concerns that a mapping function might not understand.
 
 Here is a basic example of a recursing function in action:
 
