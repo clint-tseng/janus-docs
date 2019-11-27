@@ -14,6 +14,9 @@
   "children": [{
     "title": "Shoring Up the Basics",
     "path": "/hands-on/shoring-up-basics"
+  }, {
+    "title": "Views, View Models, and You",
+    "path": "/hands-on/views-too"
   }]
 }, {
   "title": "First Principles",

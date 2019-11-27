@@ -369,7 +369,7 @@ Next Up
 =======
 
 Those of you who were unhappy with using CSS to hide the buttons for the order
-listing will be pleased: our [next chapter](/hands-on/view-models) will explore
+listing will be pleased: our [next chapter](/hands-on/views-too) will explore
 other ways of accomplishing the same task, as part of learning about View Models,
 how they're useful, and different ways to go about implementing them.
 
