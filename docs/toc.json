@@ -17,6 +17,9 @@
   }, {
     "title": "Views, View Models, and You",
     "path": "/hands-on/views-too"
+  }, {
+    "title": "From Views to Models",
+    "path": "/hands-on/views-to-models"
   }]
 }, {
   "title": "First Principles",

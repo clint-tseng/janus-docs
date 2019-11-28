@@ -583,7 +583,7 @@ create them:
 Next Up
 =======
 
-As mentioned, in the [next chapter](/hands-on/views-models-attributes) we will
+As mentioned, in the [next chapter](/hands-on/views-to-models) we will
 actually discuss _why_ you'd want to create View Models, and see how they can
 help us solve interface-related problems just by creating some additional space
 to work with.
