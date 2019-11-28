@@ -344,6 +344,85 @@ to activate client-side interactivity (the button `.on` handler we declared is
 useless in a server-rendering context, so we don't want to run that code unless
 we have to). Finally, we return the `view` as our result.
 
+One Last Thing
+==============
+
+We've been cheating this entire time. You may have spotted it. When we handle the
+Order button click, we just directly manipulate the `sale` object as if it'll
+always be there. Of course, this would not be the case in a real application,
+especially if the Item code lives in, for example, `/your-project/src/views/item.js`.
+
+You could solve this by manually passing the `Sale` context into the child Views,
+allowing access to that reference. But this is frustrating homework to have to do.
+
+Instead, we can use View Navigation to solve this problem. Let's look at a simplified
+example.
+
+~~~
+class Item extends Model {};
+class Sale extends Model {};
+
+const ItemView = DomView.build(
+  $('<button/>'),
+  find('button')
+    .text(from('name'))
+    .on('click', (event, subject, view) => {
+      view.closest_(Sale).subject.get_('order').add(subject);
+    })
+);
+
+const SaleView = DomView.build(
+  $('<div><div class="inventory"/><div class="order"/></div>'),
+  template(
+    find('.inventory').render(from('inventory')),
+    find('.order').text(from('order')
+      .flatMap(order => order.flatMap(item => item.get('name')).join(', ')))
+  )
+);
+
+const inventory = new List([
+  new Item({ name: 'Green Potion', price: 60 }),
+  new Item({ name: 'Red Potion', price: 120 }),
+  new Item({ name: 'Blue Potion', price: 160 })
+]);
+const sale = new Sale({ inventory, order: new List() });
+
+const app = new App();
+stdlib.view($).registerWith(app.views);
+app.views.register(Item, ItemView);
+app.views.register(Sale, SaleView);
+
+const view = app.view(sale);
+view.wireEvents();
+return view;
+~~~
+
+View Navigation allows you to reason about the tree of Views you have drawn on
+the page. You can navigate in or out: `.into` and `.into_` will move one level
+toward the leaves, while `.closest`, `.parent`, and their underscored counterparts
+move towards the root.
+
+The navigation is done using a selector system. You do not have to provide a selector
+at all in some cases, like `.parent`. But there are a variety of ways you can limit
+your navigation search by providing a selector: in this example, we have used the
+Subject Model classtype as our descriptor; we could also have used the View classtype,
+or in some cases a data key name.
+
+> You can find a detailed description of the navigation methods and selectors in
+> the [API documentation](/api/views#navigation).
+
+When you navigate the tree of Views, you will always get back a View instance as
+the result. All Views store their subject at the `.subject` property, so we use
+that to fetch the actual `Sale` once we have a `SaleView` in hand.
+
+> # Exercise
+> Now that you understand View Navigation, return to the sample at the start of
+> this chapter, and amend it so that it doesn't depend on `sale` being available
+> in the local closure scope.
+>
+> The samples on the next page will stop cheating and use navigation instead, so
+> if you aren't sure about your solution, you can always move on and check.
+
 Recap
 =====
 

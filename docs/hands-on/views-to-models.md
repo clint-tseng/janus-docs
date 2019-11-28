@@ -28,8 +28,9 @@ const ItemView = DomView.build(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
     find('button').on('click', (event, item, view, dom) => {
+      const order = view.closest_(Sale).subject.get_('order');
       for (let i = 0; i < parseInt(dom.find('input').val()); i++)
-        sale.get_('order').add(item);
+        order.add(item);
     })
   )
 );
@@ -84,8 +85,9 @@ const ItemView = DomView.build(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
     find('button').on('click', (event, item, view, dom) => {
+      const order = view.closest_(Sale).subject.get_('order');
       for (let i = 0; i < parseInt(dom.find('input').val()); i++)
-        sale.get_('order').add(item);
+        order.add(item);
     }),
     find('input').on('input change', (event, item, view, dom) => {
       const subtotal = parseInt(dom.find('input').val()) * item.get_('price');
@@ -164,8 +166,8 @@ const ItemView = DomView.build(
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))
       .on('click', (event, item, view, dom) => {
-        for (let i = 0; i < view.vm.get_('qty'); i++)
-          sale.get_('order').add(item);
+        const order = view.closest_(Sale).subject.get_('order');
+        for (let i = 0; i < view.vm.get_('qty'); i++) order.add(item);
       })
   )
 );
@@ -389,82 +391,11 @@ reference the Subject Model, we need to use `from.subject`.
 >
 > You can see an example demonstrating this principle [over there](/theory/maps-and-models#model-bindings).
 
-One Last Thing
-==============
-
-We've been cheating this entire time. You may have spotted it. When we handle the
-Order button click, we just directly manipulate the `sale` object as if it'll
-always be there. Of course, this would not be the case in a real application,
-especially if the Item code lives in, for example, `/your-project/src/views/item.js`.
-
-You could solve this by passing the `Sale` context into the child Views, allowing
-access to that reference. But again, this is frustrating homework to have to do.
-
-Instead, we can use View Navigation to solve this problem. Let's look again at
-a simplified example.
-
-~~~
-class Item extends Model {};
-class Sale extends Model {};
-
-const ItemView = DomView.build(
-  $('<button/>'),
-  find('button')
-    .text(from('name'))
-    .on('click', (event, subject, view) => {
-      view.closest_(Sale).subject.get_('order').add(subject);
-    })
-);
-
-const SaleView = DomView.build(
-  $('<div><div class="inventory"/><div class="order"/></div>'),
-  template(
-    find('.inventory').render(from('inventory')),
-    find('.order').text(from('order')
-      .flatMap(order => order.flatMap(item => item.get('name')).join(', ')))
-  )
-);
-
-const inventory = new List([
-  new Item({ name: 'Green Potion', price: 60 }),
-  new Item({ name: 'Red Potion', price: 120 }),
-  new Item({ name: 'Blue Potion', price: 160 })
-]);
-const sale = new Sale({ inventory, order: new List() });
-
-const app = new App();
-stdlib.view($).registerWith(app.views);
-app.views.register(Item, ItemView);
-app.views.register(Sale, SaleView);
-
-const view = app.view(sale);
-view.wireEvents();
-return view;
-~~~
-
-View Navigation allows you to reason about the tree of Views you have drawn on
-the page. You can navigate in or out: `.into` and `.into_` will move one level
-toward the leaves, while `.closest`, `.parent`, and their underscored counterparts
-move towards the root.
-
-The navigation is done using a selector system. You do not have to provide a selector
-at all in some cases, like `.parent`. But there are a variety of ways you can limit
-your navigation search by providing a selector: in this example, we have used the
-Subject Model classtype as our descriptor; we could also have used the View classtype,
-or in some cases a data key name.
-
-> You can find a detailed description of the navigation methods and selectors in
-> the [API documentation](/api/views#navigation).
-
-When you navigate the tree of Views, you will always get back a View instance as
-the result. All Views store their subject at the `.subject` property, so we use
-that to fetch the actual `Sale` once we have a `SaleView` in hand.
-
 Putting It All Together
 =======================
 
 You should now be able to look at that sample again, now with the ordered item
-list restored and cheating removed, and understand it completely.
+list restored, and understand it completely.
 
 ~~~
 // models:
@@ -577,6 +508,8 @@ you can learn about pretty quickly by referencing the documentation:
 
 And, there are some advanced capabilities that you might never need:
 
+* You can always create [your own mutators](/theory/views-templates-mutators#bring-your-own-mutators)
+  and teach them to Janus if there's anything more you need.
 * Sometimes direct mutator binding won't do what you need, performantly or at all.
   In these cases, you might want to [render the View yourself](/further-reading/view-custom-render).
 * Janus allows you to render markup server-side, then pick the same markup back
