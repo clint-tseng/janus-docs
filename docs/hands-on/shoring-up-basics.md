@@ -433,16 +433,18 @@ in detail.
   on screen:
   * When a `from('property')` expression is processed, the relevant `property`
     is found and its value retrieved.
-  * But it is not retrieved as a value at a point in time, but rather a `Varying`
-    wrapper _around_ that value.
+* But it is not retrieved as a value at a point in time, but rather a `Varying`
+  wrapper _around_ that value.
   * That wrapper lets us describe operations on top of the value itself using `.map`,
     so that we don't have to worry about the value changing.
   * But if our mapping operation _also_ returns a `Varying` as its result, we want
     to `.flatMap` rather than `.map`. It's okay if we `.flatMap` when we didn't
     need to.
-  * In the case that we are `.render`ing something, the final result of our data
-    reference and transformation is used to look up an appropriate View classtype
-    using the `.views` Library within our App.
+* In the case that we are `.render`ing something, the final result of our data
+  reference and transformation is used to look up an appropriate View classtype
+  using the `.views` Library within our App.
+* We used View Navigation to take advantage of hierarchical context, reaching upwards
+  from inside an Item to manipulate the Sale that we know is there.
 
 Next Up
 =======

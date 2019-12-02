@@ -492,8 +492,6 @@ looking at Models:
   source values as part of a `from` expression.
 * As part of the above, we learned about additional `from` contexts, like `from.subject`,
   `from.attribute`, and `from.vm`.
-* We used View Navigation to take advantage of hierarchical context, reaching upwards
-  from inside an Item to manipulate the Sale that we know is there.
 
 Next Up
 =======
