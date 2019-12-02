@@ -273,6 +273,99 @@ In truth, all `from.attribute()` does is provide a little shortcut. Behind the
 scenes, it is equivalent to: `from.subject().map(subject => subject.attribute('name'))`.
 This gets tiresome to write out, so we have the shortcut.
 
+Quick Aside: The Enum Attribute
+-------------------------------
+
+While we are on the topic of attributes: most of the built-in Model attributes
+are pretty straightforward, and are discussed at length both [in the API documentation](/api/attribute#text-attribute)
+as well as over on the [theory side of things](/theory/maps-and-models#model-attributes).
+
+But one worth discussing briefly is the Enum attribute.
+
+~~~
+// models:
+class Item extends Model {};
+const Sale = Model.build(
+  attribute('shipping', class extends attribute.Enum {
+    _values() {
+      return from('order').flatMap(order => order.length).map(l =>
+        (l > 4) ? [ 'Big Freight', 'Fast Mail' ]
+        : [ 'National Post', 'Big Freight', 'Fast Mail' ]);
+    }
+  });
+);
+
+// views:
+const ItemOrderer = Model.build(
+  attribute('qty', class extends attribute.Number {
+    initial() { return 1; }
+  })
+);
+const ItemView = DomView.build(
+  ItemOrderer,
+  $(`<div>
+    <div class="name"/><div class="price"/>
+    <label class="qty">Qty <span/></label> <button/>
+  </div>`),
+  template(
+    find('.name').text(from('name')),
+    find('.price').text(from('price')),
+    find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    find('button')
+      .text(from.vm('qty').and('price')
+        .all.map((qty, price) => `Order (${qty * price})`))
+      .on('click', (event, item, view, dom) => {
+        const order = view.closest_(Sale).subject.get_('order');
+        for (let i = 0; i < view.vm.get_('qty'); i++) order.add(item);
+      })
+  )
+);
+
+const SaleView = DomView.build($(`
+  <div>
+    <h1>Inventory</h1> <div class="inventory"/>
+    <h1>Order Total</h1> <div class="total"/>
+    <h1>Shipping</h1><div class="shipping"/>
+  </div>`),
+  template(
+    find('.inventory').render(from('inventory')),
+    find('.total').text(from('order')
+      .flatMap(list => list.flatMap(item => item.get('price')).sum())),
+    find('.shipping').render(from.attribute('shipping')).context('edit')
+  )
+);
+
+// data:
+const inventory = new List([
+  new Item({ name: 'Green Potion', price: 60 }),
+  new Item({ name: 'Red Potion', price: 120 }),
+  new Item({ name: 'Blue Potion', price: 160 })
+]);
+const sale = new Sale({ inventory, order: new List() });
+
+// application assembly:
+const app = new App();
+stdlib.view($).registerWith(app.views);
+app.views.register(Item, ItemView);
+app.views.register(Sale, SaleView);
+
+const view = app.view(sale);
+view.wireEvents();
+return view;
+~~~
+
+The Enum attribute has an overridable method `_values`, which is expected to return
+one of `Array` or `List`. It can be given directly, or wrapped in a `from` expression
+referencing other Model properties, as you see here, or it can be wrapped in a
+`Varying`. In any case, the available options for the attribute will update as
+necessary.
+
+The values themselves need not be Strings. They can be any object type, as long
+as you provide a `stringify` in the render `.options` in the case of a dropdown,
+or an appropriate View in the case of a clickable List. You can see an example
+of the latter [here](/theory/maps-and-models#attribute-editors), where we also
+demonstrate the data modelling powers of locally-referenced Enum attributes.
+
 Fancier From Expressions
 ------------------------
 
