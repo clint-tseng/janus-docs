@@ -292,7 +292,7 @@ const Sale = Model.build(
         (l > 4) ? [ 'Big Freight', 'Fast Mail' ]
         : [ 'National Post', 'Big Freight', 'Fast Mail' ]);
     }
-  });
+  })
 );
 
 // views:
