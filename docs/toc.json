@@ -23,6 +23,9 @@
   }, {
     "title": "Maps and Models",
     "path": "/hands-on/maps-and-models"
+  }, {
+    "title": "Client and Server",
+    "path": "/hands-on/client-and-server"
   }]
 }, {
   "title": "First Principles",

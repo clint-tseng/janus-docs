@@ -718,5 +718,5 @@ Next Up
 
 The only thing we haven't yet discussed about Maps and Models is serialization.
 We will do this in our next chapter, where we will turn our attention away from
-the interface itself, and start thinking about [how to communicate with a server](/hands-on/client-server).
+the interface itself, and start thinking about [how to communicate with a server](/hands-on/client-and-server).
 
