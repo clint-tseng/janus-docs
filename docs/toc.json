@@ -26,6 +26,9 @@
   }, {
     "title": "Client and Server",
     "path": "/hands-on/client-and-server"
+  }, {
+    "title": "And the Server, Too",
+    "path": "/hands-on/and-the-server-too"
   }]
 }, {
   "title": "First Principles",

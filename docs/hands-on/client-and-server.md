@@ -1176,9 +1176,10 @@ We're almost done with our practical tour.
 
 Most of what we've left unexplored lives on the server-side: one of the unique
 strengths of Janus is how it's built to allow your application to adapt to different
-contexts, most particularly between the client and the server.
+contexts, most particularly between the client and the server. It's why, for example,
+the App and its Libraries work the way that they do.
 
-While we do that, we're going to swing back around to some of the things we've
+While we explore that, we're going to swing back around to some of the things we've
 glossed over in driving to this point.
 
 Don't worry, the sample has gotten as long as it's going to get. We'll actually
