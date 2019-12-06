@@ -26,8 +26,8 @@ these concerns from the beginning.
 
 Let's take a look at server-side rendering.
 
-Getting Started
-===============
+Running On A Server
+===================
 
 The first step here we won't actually need to do in these samples: import a DOM
 implementation. We don't need anything full and heavy like JSDom, because we won't
@@ -379,7 +379,7 @@ and `Varying` is the best way to feed it a value asynchronously.
 But why is there a `types.result` in there, and can this Promise ever be rejected?
 
 Failed Renders
-==============
+--------------
 
 It's important to have some mechanism by which to communicate that something went
 wrong in the course of our page render, so that we don't try to send a broken page
@@ -510,6 +510,18 @@ appropriate.
 Our other little trick here is to call `Sale.build` to subclass Sale with some
 additional schema declarations. Sale is a Model, after all, and Model.build is
 always available.
+
+Picking Up Where You Left Off
+-----------------------------
+
+Of course, it's one thing to send all this beautiful prerendered content over the
+wire. It's another if the first thing you do on the client side is blow it all
+away and draw it over again.
+
+Janus provides a powerful tool to help avoid this: View `.attach`. Covering it in
+full is beyond the scope of this article, but if you're interested in learning
+more about it, there is a [Further Reading chapter](/further-reading/view-attach)
+devoted to the subject.
 
 Accounting for Environment Differences
 ======================================
