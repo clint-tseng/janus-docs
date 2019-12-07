@@ -31,6 +31,18 @@ work. We think it's still an effective tool used this way. But we hope you stick
 with this first principles overview, and we promise to keep it as brief and as
 interesting as we can.
 
+A Note About the Samples in this Section
+========================================
+
+In most of the Janus documentation, including all the First Principles articles,
+we automatically import all members of the `janus` package into the local scope,
+along with some basics like jQuery `$`. This is to cut down on boilerplate noise
+in the samples.
+
+So any time you see some function or class get used out of thin air, it is something
+you can import from the `janus` package. In an actual application, you'll want to
+`require` these objects yourself.
+
 Next Up
 =======
 
