@@ -46,6 +46,8 @@ that would process might like:
 // models:
 class Item extends Model {};
 class Sale extends Model {
+  //! rather than try to do a bunch of data manipulation in the event handler,
+  //  we declare a Model method to take control of that process:
   order(item, qty) {
     const id = item.get_('id');
     const order = this.get_('order');
@@ -143,12 +145,14 @@ const ItemOrdererView = DomView.build(
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))
       .on('click', (event, item, view, dom) => {
+        //! here we call that new order() method
         view.closest_(Sale).subject.order(item, view.vm.get_('qty'));
       })
   )
 );
 
 const OrderedItem = Model.build(
+  //! in both these bindings we reference through the id to get the data we need:
   bind('item', from('sale').get('inventory').and('id')
     .all.flatMap((inventory, id) => inventory.get(id))),
   bind('qty', from('sale').get('order').and('id')
@@ -173,6 +177,8 @@ const SaleView = DomView.build($(`
   </div>`),
   template(
     find('.inventory').render(from('inventory').map(inventory => inventory.values())),
+    //! and in both these bindings we have to .enumerate to reason about the
+    //  ordered Items:
     find('.order').render(from.subject().and('order').all.map((sale, order) =>
       order.enumerate().map(id => new OrderedItem({ sale, id })))),
     find('.total').text(from('inventory').and('order').all.flatMap((inventory, order) =>
@@ -231,7 +237,7 @@ have to be a Map at all.
 // models:
 class Item extends Model {};
 class Sale extends Model {
-  order(item, qty) {
+  order(item, qty) { //! this method gets quite a bit more complex:
     const id = item.get_('id');
     const order = this.get_('order');
     let orderedItem = order.get_(id);
@@ -275,6 +281,8 @@ const OrderedItem = Model.build(
 const OrderedItemView = DomView.build(
   $('<div><span class="qty"/>x <span class="name"/> (<span class="subtotal"/>)</div>'),
   template(
+    //! but these bindings become trivial now that they don't have to dereference
+    //  through the IDs:
     find('.qty').text(from('qty')),
     find('.name').text(from('item').get('name')),
     find('.subtotal').text(from('subtotal'))
@@ -288,6 +296,7 @@ const SaleView = DomView.build($(`
     <h1>Order Total</h1> <div class="total"/>
   </div>`),
   template(
+    //! as do these, now that we don't have to enumerate anything.
     find('.inventory').render(from('inventory')),
     find('.order').render(from('order').map(order => order.values())),
     find('.total').text(from('order').flatMap(order =>
@@ -354,7 +363,7 @@ class Sale extends Model {
 }
 
 const product = (x, y) => x * y;
-class OrderedItem extends Model.build(
+class OrderedItem extends Model.build( //! this is our new View Model:
   attribute('order-qty', attribute.Number),
   bind('order-subtotal', from('price').and('order-qty').all.map(product)),
 
@@ -365,6 +374,8 @@ class OrderedItem extends Model.build(
 }
 
 // views:
+//! here we use the shared template approach, except that the template is returned
+//  in response to a given prefix.
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
   find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
@@ -377,6 +388,7 @@ const ItemOrdererView = DomView.build(
   template(
     itemCommon('action'),
     find('.price').text(from('price')),
+    //! now ordering an item is just done locally; no manipulation of Sale at all
     find('button').on('click', (event, item) => { item.order(); })
   )
 );
@@ -395,6 +407,8 @@ const SaleView = DomView.build($(`
   template(
     find('.inventory').render(from('order'))
       .options({ renderItem: (item => item.context('orderer')) }),
+    //! we filter the entire manipulable inventory so we only show items with
+    //  at least one unit ordered:
     find('.order').render(from('order').map(order =>
       order.filter(orderedItem => orderedItem.get('order-qty').map(qty => qty > 0)))),
     find('.total').text(from('order').flatMap(order =>
@@ -616,6 +630,7 @@ class OrderedItem extends Model.build(
   initial('action-qty', 1, attribute.Number),
   bind('action-subtotal', from('price').and('action-qty').all.map(product)),
 
+  //! here we add validate() to our OrderedItem schema
   validate(from('action-qty').map(qty => (qty < 0) ? error() : valid()))
 ) {
   order() { this.set('order-qty', this.get_('order-qty') + this.get_('action-qty')); }
@@ -633,6 +648,7 @@ const ItemOrdererView = DomView.build(
   $(`<div><span class="qty"/>x <span class="name"/> @<span class="price"/>
     <button>Order (<span class="subtotal"/>)</button></div>`),
   template(
+    //! here we set a class (which we style on in CSS) based on item validity:
     find('div').classed('error', from.subject().flatMap(s => s.valid().map(not))),
     itemCommon('action'),
     find('.price').text(from('price')),

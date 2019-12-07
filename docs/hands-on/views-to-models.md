@@ -19,7 +19,7 @@ class Item extends Model {};
 class Sale extends Model {};
 
 // views:
-const ItemView = DomView.build(
+const ItemView = DomView.build( //! we add an <input/> here..
   $(`<div>
     <div class="name"/><div class="price"/>
     <label>Qty <input type="number" value="1"/></label> <button>Order</button>
@@ -28,6 +28,7 @@ const ItemView = DomView.build(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
     find('button').on('click', (event, item, view, dom) => {
+      //! ..and this handler is rewritten to pull the input value.
       const order = view.closest_(Sale).subject.get_('order');
       for (let i = 0; i < parseInt(dom.find('input').val()); i++)
         order.add(item);
@@ -90,6 +91,8 @@ const ItemView = DomView.build(
         order.add(item);
     }),
     find('input').on('input change', (event, item, view, dom) => {
+      //! here we do things an old-fashioned way: react to an event, and
+      //  independently update everything that event should touch.
       const subtotal = parseInt(dom.find('input').val()) * item.get_('price');
       dom.find('button').text(`Order (${subtotal})`);
     })
@@ -147,7 +150,7 @@ class Item extends Model {};
 class Sale extends Model {};
 
 // views:
-const ItemOrderer = Model.build(
+const ItemOrderer = Model.build( //! we now actually provide some schema here:
   attribute('qty', class extends attribute.Number {
     initial() { return 1; }
   })
@@ -161,7 +164,9 @@ const ItemView = DomView.build(
   template(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
+    //! here, we .render the attribute we declare above
     find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    //! and everything to do with button updates a little in response.
     find('button')
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))
@@ -287,7 +292,7 @@ But one worth discussing briefly is the Enum attribute.
 class Item extends Model {};
 const Sale = Model.build(
   attribute('shipping', class extends attribute.Enum {
-    _values() {
+    _values() { //! we implement this _values() method inline:
       return from('order').flatMap(order => order.length).map(l =>
         (l > 4) ? [ 'Big Freight', 'Fast Mail' ]
         : [ 'National Post', 'Big Freight', 'Fast Mail' ]);

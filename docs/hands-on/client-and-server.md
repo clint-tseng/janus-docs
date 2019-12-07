@@ -19,7 +19,7 @@ reading and writing. We are going to skip over most of it to start, and go strai
 to using the highest-level, most convenient tools.
 
 ~~~
-// "server":
+// "server": //! new!
 const getInventory = (callback) => {
   const data = [
     { name: 'Green Potion', price: 60 },
@@ -29,7 +29,7 @@ const getInventory = (callback) => {
   setTimeout(callback.bind(null, data), 300);
 };
 
-// resolvers:
+// resolvers: //! new!
 class InventoryRequest extends Request {};
 const inventoryResolver = (request) => {
   const result = new Varying(types.result.pending());
@@ -43,7 +43,10 @@ const inventoryResolver = (request) => {
 class Item extends Model {};
 const Inventory = List.of(Item);
 const Sale = Model.build(
+  //! we define the inventory attribute as a Reference to one of our new classes
   attribute('inventory', attribute.Reference.to(new InventoryRequest())),
+  //! and we base the actual order off of that, accounting for the case where
+  //  we don't yet have the inventory
   bind('order', from('inventory').map(inventory =>
     (inventory == null) ? new List()
     : inventory.map(item => item.shadow(OrderedItem))))
@@ -105,6 +108,7 @@ app.views.register(OrderedItem, ItemOrdererView, { context: 'orderer' });
 app.views.register(OrderedItem, OrderedItemView);
 app.views.register(Sale, SaleView);
 
+//! an additional registration, this time for our "resolver" things
 app.resolvers.register(InventoryRequest, inventoryResolver);
 
 const view = app.view(new Sale());
@@ -251,7 +255,7 @@ But what if we need to parameterize our request? What does that look like?
 
 ~~~
 // "server":
-const getInventory = (type, callback) => {
+const getInventory = (type, callback) => { //! now we take different types
   const data = {
     potions: [
       { name: 'Green Potion', price: 60 },
@@ -270,7 +274,7 @@ const getInventory = (type, callback) => {
 class InventoryRequest extends Request {};
 const inventoryResolver = (request) => {
   const result = new Varying(types.result.pending());
-  getInventory(request.options.type, inventory => {
+  getInventory(request.options.type, inventory => { //! we pass type through here
     result.set(types.result.success(Inventory.deserialize(inventory)));
   });
   return result;
@@ -280,12 +284,12 @@ const inventoryResolver = (request) => {
 class Item extends Model {};
 const Inventory = List.of(Item);
 const Sale = Model.build(
-  attribute('type', class extends attribute.Enum {
+  attribute('type', class extends attribute.Enum { //! we define possible types
     initial() { return 'potions'; }
     _values() { return [ 'potions', 'equipment' ]; }
   }),
   attribute('inventory', attribute.Reference.to(from('type')
-    .map(type => new InventoryRequest({ type })))),
+    .map(type => new InventoryRequest({ type })))), //! and base the Request off it
   bind('order', from('inventory').map(inventory =>
     (inventory == null) ? new List()
     : inventory.map(item => item.shadow(OrderedItem))))
@@ -332,6 +336,7 @@ const SaleView = DomView.build($(`
     <h1>Order Total</h1> <div class="total"/>
   </div>`),
   template(
+    //! and we let the user choose a type
     find('.type').render(from.attribute('type')).context('edit'),
     find('.inventory').render(from('order'))
       .options({ renderItem: (item => item.context('orderer')) }),
@@ -402,7 +407,7 @@ const getInventory = (type, callback) => {
 };
 
 // resolvers:
-class InventoryRequest extends Request {
+class InventoryRequest extends Request { //! we implement some methods here
   get type() { return types.operation.read(); }
   signature() { return this.options.type; }
   expires() { return 10; }
@@ -482,7 +487,7 @@ const SaleView = DomView.build($(`
 );
 
 // application:
-class ShopApp extends App {
+class ShopApp extends App { //! and we override the resolver() method of App here
   resolver() {
     return Resolver.caching(new Resolver.MemoryCache(),
       Resolver.fromLibrary(this.resolvers));
@@ -616,7 +621,7 @@ const getInventory = (type, callback) => {
   };
   setTimeout(callback.bind(null, data[type]), 2000);
 };
-const makeOrder = (items, callback) => {
+const makeOrder = (items, callback) => { //! a new "server" API
   // do something with items.
   setTimeout(callback.bind(null, { success: true }), 1000);
 };
@@ -635,7 +640,7 @@ const inventoryResolver = (request) => {
   return result;
 };
 
-class OrderRequest extends Request {};
+class OrderRequest extends Request {}; //! and a new Request/resolver pair
 const orderResolver = (request) => {
   const result = new Varying(types.result.pending());
   makeOrder(request.options.items, () => { result.set(types.result.success()); });
@@ -709,8 +714,10 @@ const SaleView = DomView.build(SaleViewModel, $(`
     find('.order').render(from.vm('ordered-items')),
     find('.total').text(from('order').flatMap(order =>
       order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum())),
+    //! we add an Order button for the whole Sale, allow it to work when there
+    //  /is/ an order, and send off the OrderRequest
     find('button')
-      .attr('disabled', from.vm('ordered-items').flatMap(items =>
+      .prop('disabled', from.vm('ordered-items').flatMap(items =>
         items.length.map(l => l === 0)))
       .on('click', (event, sale, view) => {
         const items = view.vm.get_('ordered-items').serialize();
@@ -742,8 +749,9 @@ view.wireEvents();
 return view;
 ~~~
 
-…okay, so nothing you haven't seen before, but this isn't terribly spectacular.
-Let's recycle the Sale once it's been sent, and start a new one over.
+…okay, so nothing you haven't seen before, but this isn't terribly spectacular
+in action. Nothing really happens.  Let's recycle the Sale once it's been sent,
+and start a new one over.
 
 ~~~
 // "server":
@@ -860,6 +868,8 @@ const SaleView = DomView.build(SaleViewModel, $(`
       .on('click', (event, sale, view) => {
         const app = view.options.app;
         const items = view.vm.get_('ordered-items').serialize();
+        //! we actually pay attention to the fate of our OrderRequest now,
+        //  and reset the Sale if it went through
         app.resolve(new OrderRequest({ items })).react(status => {
           if (types.result.success.match(status)) app.newSale();
         });
@@ -869,12 +879,15 @@ const SaleView = DomView.build(SaleViewModel, $(`
 
 // application:
 class ShopApp extends App {
+  //! we store the current Sale on the App now, so we implement a simple method
+  //  to actually set/reset that Sale
   newSale() { this.set('sale', new Sale()); }
   resolver() {
     return Resolver.caching(new Resolver.MemoryCache(),
       Resolver.fromLibrary(this.resolvers));
   }
 }
+//! a simple wrapper to render the Sale within our App
 const ShopView = DomView.build($('<div/>'), find('div').render(from('sale')));
 
 // application assembly:
@@ -888,7 +901,7 @@ app.views.register(App, ShopView);
 app.resolvers.register(InventoryRequest, inventoryResolver);
 app.resolvers.register(OrderRequest, orderResolver);
 
-app.newSale();
+app.newSale(); //! here we call that method
 const view = app.view(app);
 view.wireEvents();
 return view;
@@ -935,9 +948,10 @@ Tracking App Events
 ===================
 
 But it would be better still if we had some indication that things were in process.
-Let's add a loading spinner mechanism.
+Let's add a loading spinner mechanism. We are going to omit the bulk of the sample
+code here, as it has not changed at all.
 
-~~~
+~~~ env-additions
 // "server":
 const getInventory = (type, callback) => {
   const data = {
@@ -1059,12 +1073,21 @@ const SaleView = DomView.build(SaleViewModel, $(`
   )
 );
 
+return {
+  InventoryRequest, inventoryResolver, OrderRequest, orderResolver,
+  Item, OrderedItem, ItemOrdererView, OrderedItemView,
+  Sale, SaleView
+};
+~~~
+~~~
 // application:
 class ShopApp extends App.build(
+  //! some new schema bits to track and count Requests
   attribute('requests', attribute.List.withInitial()),
   bind('requesting', from('requests').flatMap(requests => requests.nonEmpty()))
 ) {
   _initialize() {
+    //! and some event listening to actually do that tracking
     const requests = this.get_('requests');
     this.on('resolvedRequest', (request, result) => {
       requests.add(request);
@@ -1183,7 +1206,7 @@ While we explore that, we're going to swing back around to some of the things we
 glossed over in driving to this point.
 
 Don't worry, the sample has gotten as long as it's going to get. We'll actually
-pare it back a little bit in the next chapter, just to keep things under control.
+pare it back a little bit in the next chapter, as you just saw.
 
 When you're feeling ready for the last big push, [click here](/hands-on/and-the-server-too).
 

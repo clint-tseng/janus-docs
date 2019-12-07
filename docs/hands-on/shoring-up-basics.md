@@ -33,7 +33,7 @@ const SaleView = DomView.build($(`
   </div>`),
   template(
     find('.inventory').render(from('inventory')),
-    find('.order').render(from('order')),
+    find('.order').render(from('order')), //! added .render Order List
     find('.total').text(from('order')
       .flatMap(list => list.flatMap(item => item.get('price')).sum()))
   )
@@ -366,7 +366,7 @@ const ItemView = DomView.build(
   $('<button/>'),
   find('button')
     .text(from('name'))
-    .on('click', (event, subject, view) => {
+    .on('click', (event, subject, view) => { //! this is the important bit.
       view.closest_(Sale).subject.get_('order').add(subject);
     })
 );

@@ -108,7 +108,7 @@ const ItemOrderingView = DomView.build($(`
     <div class="name"/><div class="price"/> <button>Order</button>
   </div>`),
   template(
-    template('basic',
+    template('basic', //! note the string parameter here
       find('.name').text(from('name')),
       find('.price').text(from('price'))
     ),
@@ -119,7 +119,7 @@ const ItemSummaryView = DomView.build($(`
   <div class="item">
     <div class="name"/><div class="price"/>
   </div>`),
-  ItemOrderingView.template.basic
+  ItemOrderingView.template.basic //! it's used here
 );
 
 const item = new Item({ name: 'Blue Potion', price: 160 });
@@ -170,7 +170,7 @@ const item = new Item({ name: 'Blue Potion', price: 160 });
 
 const app = new App();
 app.views.register(Item, ItemOrderingView);
-app.views.register(Item, ItemSummaryView, { context: 'summary' });
+app.views.register(Item, ItemSummaryView, { context: 'summary' }); //! context
 
 return [
   app.view(item),
@@ -225,7 +225,7 @@ const ContainerView = DomView.build(
   template(
     find('.ordering').render(from('item')),
     find('.summary').render(from('item'))
-      .context('summary')
+      .context('summary') //! this chained method expresses the context
   )
 );
 
@@ -271,7 +271,10 @@ const ItemOrderingView = DomView.build($(`
       find('.name').text(from('name')),
       find('.price').text(from('price'))
     ),
-    find('button').on('click', (event, item) => { sale.get_('order').add(item); })
+    find('button').on('click', (event, item, view) => {
+      //! here we use the non-cheating view navigation approach
+      view.closest_(Sale).subject.get_('order').add(item);
+    })
   )
 );
 const ItemSummaryView = DomView.build($(`
@@ -279,7 +282,7 @@ const ItemSummaryView = DomView.build($(`
     <div class="name"/><div class="price"/>
   </div>`),
   ItemOrderingView.template.basic
-);
+); //! ^ here is our new view
 
 const SaleView = DomView.build($(`
   <div>
@@ -289,7 +292,7 @@ const SaleView = DomView.build($(`
   </div>`),
   template(
     find('.inventory').render(from('inventory')),
-    find('.order').render(from('order'))
+    find('.order').render(from('order')) //! and here we use the new view
       .options({ renderItem: (item => item.context('summary')) }),
     find('.total').text(from('order')
       .flatMap(list => list.flatMap(item => item.get('price')).sum()))
@@ -383,14 +386,16 @@ class ItemOrderer extends Model {};
 const ItemOrdererView = DomView.build(
   $('<div><div class="info"/> <button>Order</button></div>'),
   template(
-    find('.info').render(from('item')),
-    find('button').on('click', (event, orderer) => {
-      sale.get_('order').add(orderer.get_('item'));
+    find('.info').render(from('item')), //! we now .render this information
+    find('button').on('click', (event, orderer, view) => {
+      //! because our subject now wraps Item rather than /being/ Item, we
+      //  have to .get_('item')
+      view.closest_(Sale).subject.get_('order').add(order.get_('item'));
     })
   )
 );
 
-const ItemView = DomView.build(
+const ItemView = DomView.build( //! this is now a separate view
   $('<div><div class="name"/><div class="price"/></div>'),
   template(
     find('.name').text(from('name')),
@@ -406,6 +411,7 @@ const SaleView = DomView.build($(`
   </div>`),
   template(
     find('.inventory').render(from('inventory')
+      //! and here, we map the Models to our custom View Models:
       .map(items => items.map(item => new ItemOrderer({ item })))),
     find('.order').render(from('order')),
     find('.total').text(from('order')
@@ -462,11 +468,15 @@ class Sale extends Model {};
 // views:
 class ItemOrderer extends Model {};
 const ItemOrdererView = DomView.build(
-  ItemOrderer,
+  ItemOrderer, //! passing this classtype here first sets the View Model
   $('<div><div class="info"/> <button>Order</button></div>'),
   template(
     find('.info').render(from.subject()),
-    find('button').on('click', (event, item) => { sale.get_('order').add(item); })
+    find('button').on('click', (event, item, view) => {
+      //! in this case, our subject is the Item, as we'd want. so we go back to
+      //  just passing it in.
+      view.closest_(Sale).subject.get_('order').add(item);
+    })
   )
 );
 
@@ -486,6 +496,7 @@ const SaleView = DomView.build($(`
   </div>`),
   template(
     find('.inventory').render(from('inventory'))
+      //! and here, we request a View context rather than mapping our Models.
       .options({ renderItem: (item => item.context('orderer')) }),
     find('.order').render(from('order')),
     find('.total').text(from('order')
