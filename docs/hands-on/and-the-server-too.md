@@ -26,6 +26,10 @@ these concerns from the beginning.
 
 Let's take a look at server-side rendering.
 
+> # A Note on the Samples Here
+> We're not going to change the application code itself in many of these cases,
+> and in those cases we aren't going to include the entire sample code every time.
+
 Running On A Server
 ===================
 
@@ -44,10 +48,9 @@ work off browser DOM. But if you get `$` using either of the above (paired with
 jQuery or Zepto in the case of Domino), everything here will work in Node.js exactly
 as we promise. That's how this very documentation works, in fact.
 
-So let's try rendering some markup. We'll use a slightly cut-down version of our
-sample code here, since most of it doesn't really matter.
+So let's try rendering some markup.
 
-~~~
+~~~ env-additions
 // "server":
 const getInventory = (type, callback) => {
   const data = {
@@ -63,14 +66,29 @@ const getInventory = (type, callback) => {
   };
   setTimeout(callback.bind(null, data[type]), 200);
 };
+const makeOrder = (items, callback) => {
+  // do something with items.
+  setTimeout(callback.bind(null, { success: true }), 100);
+};
 
 // resolvers:
-class InventoryRequest extends Request {};
+class InventoryRequest extends Request {
+  get type() { return types.operation.read(); }
+  signature() { return this.options.type; }
+  expires() { return 10; }
+};
 const inventoryResolver = (request) => {
   const result = new Varying(types.result.pending());
   getInventory(request.options.type, inventory => {
     result.set(types.result.success(Inventory.deserialize(inventory)));
   });
+  return result;
+};
+
+class OrderRequest extends Request {};
+const orderResolver = (request) => {
+  const result = new Varying(types.result.pending());
+  makeOrder(request.options.items, () => { result.set(types.result.success()); });
   return result;
 };
 
@@ -101,16 +119,25 @@ class OrderedItem extends Model.build(
 }
 
 // views:
+const itemCommon = (prefix) => template(
+  find('.name').text(from('name')),
+  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.subtotal').text(from(`${prefix}-subtotal`))
+);
+
 const ItemOrdererView = DomView.build(
   $(`<div><span class="qty"/>x <span class="name"/> @<span class="price"/>
     <button>Order (<span class="subtotal"/>)</button></div>`),
   template(
-    find('.name').text(from('name')),
-    find('.qty').render(from.attribute('action-qty')).context('edit'),
-    find('.subtotal').text(from('action-subtotal')),
+    itemCommon('action'),
     find('.price').text(from('price')),
     find('button').on('click', (event, item) => { item.order(); })
   )
+);
+
+const OrderedItemView = DomView.build(
+  $('<div><span class="qty"/>x <span class="name"/> (<span class="subtotal"/>)</div>'),
+  itemCommon('order')
 );
 
 const SaleViewModel = Model.build(
@@ -121,23 +148,73 @@ const SaleView = DomView.build(SaleViewModel, $(`
   <div class="sale">
     <div class="type"/>
     <h1>Inventory</h1> <div class="inventory"/>
+    <h1>Order</h1> <div class="order"/>
     <h1>Order Total</h1> <div class="total"/>
+    <button>Order</button>
   </div>`),
   template(
+    find('.sale').classed('requesting', from.app('requesting')),
     find('.type').render(from.attribute('type')).context('edit'),
-    find('.inventory').render(from('order')),
+    find('.inventory').render(from('order'))
+      .options({ renderItem: (item => item.context('orderer')) }),
+    find('.order').render(from.vm('ordered-items')),
     find('.total').text(from('order').flatMap(order =>
-      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum()))
+      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum())),
+    find('button')
+      .prop('disabled', from.vm('ordered-items').flatMap(items => items.empty()))
+      .on('click', (event, sale, view) => {
+        const app = view.options.app;
+        const items = view.vm.get_('ordered-items').serialize();
+        app.resolve(new OrderRequest({ items })).react(status => {
+          if (types.result.success.match(status)) app.newSale();
+        });
+      })
   )
 );
 
-// application assembly:
-const app = new App();
+// application:
+class ShopApp extends App.build(
+  attribute('requests', attribute.List.withInitial()),
+  bind('requesting', from('requests').flatMap(requests => requests.nonEmpty()))
+) {
+  _initialize() {
+    const requests = this.get_('requests');
+    this.on('resolvedRequest', (request, result) => {
+      requests.add(request);
+      result.react(function(status) {
+        if (types.result.complete.match(status)) {
+          requests.remove(request);
+          this.stop();
+        }
+      });
+    });
+  }
+  newSale() { this.set('sale', new Sale()); }
+  resolver() {
+    return Resolver.caching(new Resolver.MemoryCache(),
+      Resolver.fromLibrary(this.resolvers));
+  }
+}
+const ShopView = DomView.build($('<div/>'), find('div').render(from('sale')));
+
+
+return {
+  InventoryRequest, inventoryResolver, OrderRequest, orderResolver,
+  Item, OrderedItem, ItemOrdererView, OrderedItemView,
+  Sale, SaleView,
+  ShopApp, ShopView
+};
+~~~
+~~~
+const app = new ShopApp();
 stdlib.view($).registerWith(app.views);
-app.views.register(OrderedItem, ItemOrdererView);
+app.views.register(OrderedItem, ItemOrdererView, { context: 'orderer' });
+app.views.register(OrderedItem, OrderedItemView);
 app.views.register(Sale, SaleView);
+app.views.register(App, ShopView);
 
 app.resolvers.register(InventoryRequest, inventoryResolver);
+app.resolvers.register(OrderRequest, orderResolver);
 
 return app.view(new Sale()).markup();
 ~~~
@@ -157,7 +234,7 @@ for example. That definitely complicates our homework.
 Thankfully, Janus has already done this for us, and provides an answer in the form
 of the `Manifest`.
 
-~~~
+~~~ env-additions
 // "server":
 const getInventory = (type, callback) => {
   const data = {
@@ -173,14 +250,29 @@ const getInventory = (type, callback) => {
   };
   setTimeout(callback.bind(null, data[type]), 200);
 };
+const makeOrder = (items, callback) => {
+  // do something with items.
+  setTimeout(callback.bind(null, { success: true }), 100);
+};
 
 // resolvers:
-class InventoryRequest extends Request {};
+class InventoryRequest extends Request {
+  get type() { return types.operation.read(); }
+  signature() { return this.options.type; }
+  expires() { return 10; }
+};
 const inventoryResolver = (request) => {
   const result = new Varying(types.result.pending());
   getInventory(request.options.type, inventory => {
     result.set(types.result.success(Inventory.deserialize(inventory)));
   });
+  return result;
+};
+
+class OrderRequest extends Request {};
+const orderResolver = (request) => {
+  const result = new Varying(types.result.pending());
+  makeOrder(request.options.items, () => { result.set(types.result.success()); });
   return result;
 };
 
@@ -211,16 +303,25 @@ class OrderedItem extends Model.build(
 }
 
 // views:
+const itemCommon = (prefix) => template(
+  find('.name').text(from('name')),
+  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.subtotal').text(from(`${prefix}-subtotal`))
+);
+
 const ItemOrdererView = DomView.build(
   $(`<div><span class="qty"/>x <span class="name"/> @<span class="price"/>
     <button>Order (<span class="subtotal"/>)</button></div>`),
   template(
-    find('.name').text(from('name')),
-    find('.qty').render(from.attribute('action-qty')).context('edit'),
-    find('.subtotal').text(from('action-subtotal')),
+    itemCommon('action'),
     find('.price').text(from('price')),
     find('button').on('click', (event, item) => { item.order(); })
   )
+);
+
+const OrderedItemView = DomView.build(
+  $('<div><span class="qty"/>x <span class="name"/> (<span class="subtotal"/>)</div>'),
+  itemCommon('order')
 );
 
 const SaleViewModel = Model.build(
@@ -231,23 +332,73 @@ const SaleView = DomView.build(SaleViewModel, $(`
   <div class="sale">
     <div class="type"/>
     <h1>Inventory</h1> <div class="inventory"/>
+    <h1>Order</h1> <div class="order"/>
     <h1>Order Total</h1> <div class="total"/>
+    <button>Order</button>
   </div>`),
   template(
+    find('.sale').classed('requesting', from.app('requesting')),
     find('.type').render(from.attribute('type')).context('edit'),
-    find('.inventory').render(from('order')),
+    find('.inventory').render(from('order'))
+      .options({ renderItem: (item => item.context('orderer')) }),
+    find('.order').render(from.vm('ordered-items')),
     find('.total').text(from('order').flatMap(order =>
-      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum()))
+      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum())),
+    find('button')
+      .prop('disabled', from.vm('ordered-items').flatMap(items => items.empty()))
+      .on('click', (event, sale, view) => {
+        const app = view.options.app;
+        const items = view.vm.get_('ordered-items').serialize();
+        app.resolve(new OrderRequest({ items })).react(status => {
+          if (types.result.success.match(status)) app.newSale();
+        });
+      })
   )
 );
 
+// application:
+class ShopApp extends App.build(
+  attribute('requests', attribute.List.withInitial()),
+  bind('requesting', from('requests').flatMap(requests => requests.nonEmpty()))
+) {
+  _initialize() {
+    const requests = this.get_('requests');
+    this.on('resolvedRequest', (request, result) => {
+      requests.add(request);
+      result.react(function(status) {
+        if (types.result.complete.match(status)) {
+          requests.remove(request);
+          this.stop();
+        }
+      });
+    });
+  }
+  newSale() { this.set('sale', new Sale()); }
+  resolver() {
+    return Resolver.caching(new Resolver.MemoryCache(),
+      Resolver.fromLibrary(this.resolvers));
+  }
+}
+const ShopView = DomView.build($('<div/>'), find('div').render(from('sale')));
+
+
+return {
+  InventoryRequest, inventoryResolver, OrderRequest, orderResolver,
+  Item, OrderedItem, ItemOrdererView, OrderedItemView,
+  Sale, SaleView,
+  ShopApp, ShopView
+};
+~~~
+~~~
 // application assembly:
 const app = new App();
 stdlib.view($).registerWith(app.views);
-app.views.register(OrderedItem, ItemOrdererView);
+app.views.register(OrderedItem, ItemOrdererView, { context: 'orderer' });
+app.views.register(OrderedItem, OrderedItemView);
 app.views.register(Sale, SaleView);
 
 app.resolvers.register(InventoryRequest, inventoryResolver);
+app.resolvers.register(OrderRequest, orderResolver);
 
 return inspect(Manifest.run(app, new Sale()).result);
 ~~~
@@ -272,7 +423,7 @@ But, if as typically is the case, you're plugging this all into some framework
 like [Express](https://expressjs.com), it will likely be more straightforward
 to use `.then`:
 
-~~~
+~~~ env-additions
 // "server":
 const getInventory = (type, callback) => {
   const data = {
@@ -288,14 +439,29 @@ const getInventory = (type, callback) => {
   };
   setTimeout(callback.bind(null, data[type]), 200);
 };
+const makeOrder = (items, callback) => {
+  // do something with items.
+  setTimeout(callback.bind(null, { success: true }), 100);
+};
 
 // resolvers:
-class InventoryRequest extends Request {};
+class InventoryRequest extends Request {
+  get type() { return types.operation.read(); }
+  signature() { return this.options.type; }
+  expires() { return 10; }
+};
 const inventoryResolver = (request) => {
   const result = new Varying(types.result.pending());
   getInventory(request.options.type, inventory => {
     result.set(types.result.success(Inventory.deserialize(inventory)));
   });
+  return result;
+};
+
+class OrderRequest extends Request {};
+const orderResolver = (request) => {
+  const result = new Varying(types.result.pending());
+  makeOrder(request.options.items, () => { result.set(types.result.success()); });
   return result;
 };
 
@@ -326,16 +492,25 @@ class OrderedItem extends Model.build(
 }
 
 // views:
+const itemCommon = (prefix) => template(
+  find('.name').text(from('name')),
+  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.subtotal').text(from(`${prefix}-subtotal`))
+);
+
 const ItemOrdererView = DomView.build(
   $(`<div><span class="qty"/>x <span class="name"/> @<span class="price"/>
     <button>Order (<span class="subtotal"/>)</button></div>`),
   template(
-    find('.name').text(from('name')),
-    find('.qty').render(from.attribute('action-qty')).context('edit'),
-    find('.subtotal').text(from('action-subtotal')),
+    itemCommon('action'),
     find('.price').text(from('price')),
     find('button').on('click', (event, item) => { item.order(); })
   )
+);
+
+const OrderedItemView = DomView.build(
+  $('<div><span class="qty"/>x <span class="name"/> (<span class="subtotal"/>)</div>'),
+  itemCommon('order')
 );
 
 const SaleViewModel = Model.build(
@@ -346,23 +521,73 @@ const SaleView = DomView.build(SaleViewModel, $(`
   <div class="sale">
     <div class="type"/>
     <h1>Inventory</h1> <div class="inventory"/>
+    <h1>Order</h1> <div class="order"/>
     <h1>Order Total</h1> <div class="total"/>
+    <button>Order</button>
   </div>`),
   template(
+    find('.sale').classed('requesting', from.app('requesting')),
     find('.type').render(from.attribute('type')).context('edit'),
-    find('.inventory').render(from('order')),
+    find('.inventory').render(from('order'))
+      .options({ renderItem: (item => item.context('orderer')) }),
+    find('.order').render(from.vm('ordered-items')),
     find('.total').text(from('order').flatMap(order =>
-      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum()))
+      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum())),
+    find('button')
+      .prop('disabled', from.vm('ordered-items').flatMap(items => items.empty()))
+      .on('click', (event, sale, view) => {
+        const app = view.options.app;
+        const items = view.vm.get_('ordered-items').serialize();
+        app.resolve(new OrderRequest({ items })).react(status => {
+          if (types.result.success.match(status)) app.newSale();
+        });
+      })
   )
 );
 
+// application:
+class ShopApp extends App.build(
+  attribute('requests', attribute.List.withInitial()),
+  bind('requesting', from('requests').flatMap(requests => requests.nonEmpty()))
+) {
+  _initialize() {
+    const requests = this.get_('requests');
+    this.on('resolvedRequest', (request, result) => {
+      requests.add(request);
+      result.react(function(status) {
+        if (types.result.complete.match(status)) {
+          requests.remove(request);
+          this.stop();
+        }
+      });
+    });
+  }
+  newSale() { this.set('sale', new Sale()); }
+  resolver() {
+    return Resolver.caching(new Resolver.MemoryCache(),
+      Resolver.fromLibrary(this.resolvers));
+  }
+}
+const ShopView = DomView.build($('<div/>'), find('div').render(from('sale')));
+
+
+return {
+  InventoryRequest, inventoryResolver, OrderRequest, orderResolver,
+  Item, OrderedItem, ItemOrdererView, OrderedItemView,
+  Sale, SaleView,
+  ShopApp, ShopView
+};
+~~~
+~~~
 // application assembly:
 const app = new App();
 stdlib.view($).registerWith(app.views);
-app.views.register(OrderedItem, ItemOrdererView);
+app.views.register(OrderedItem, ItemOrdererView, { context: 'orderer' });
+app.views.register(OrderedItem, OrderedItemView);
 app.views.register(Sale, SaleView);
 
 app.resolvers.register(InventoryRequest, inventoryResolver);
+app.resolvers.register(OrderRequest, orderResolver);
 
 // do weird things because samples do not work asynchronously:
 const result = new Varying();
@@ -395,7 +620,7 @@ communicating details about that result.
 the requested Inventory `type` might not be a value we expect, and modify our
 sample to account for this.
 
-~~~
+~~~ env-additions
 // "server":
 const getInventory = (type, callback) => {
   const data = {
@@ -411,15 +636,30 @@ const getInventory = (type, callback) => {
   };
   setTimeout(callback.bind(null, data[type]), 200);
 };
+const makeOrder = (items, callback) => {
+  // do something with items.
+  setTimeout(callback.bind(null, { success: true }), 100);
+};
 
 // resolvers:
-class InventoryRequest extends Request {};
+class InventoryRequest extends Request {
+  get type() { return types.operation.read(); }
+  signature() { return this.options.type; }
+  expires() { return 10; }
+};
 const inventoryResolver = (request) => {
   const result = new Varying(types.result.pending());
   getInventory(request.options.type, inventory => {
     if (inventory == null) result.set(types.result.failure());
     else result.set(types.result.success(Inventory.deserialize(inventory)));
   });
+  return result;
+};
+
+class OrderRequest extends Request {};
+const orderResolver = (request) => {
+  const result = new Varying(types.result.pending());
+  makeOrder(request.options.items, () => { result.set(types.result.success()); });
   return result;
 };
 
@@ -450,16 +690,25 @@ class OrderedItem extends Model.build(
 }
 
 // views:
+const itemCommon = (prefix) => template(
+  find('.name').text(from('name')),
+  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.subtotal').text(from(`${prefix}-subtotal`))
+);
+
 const ItemOrdererView = DomView.build(
   $(`<div><span class="qty"/>x <span class="name"/> @<span class="price"/>
     <button>Order (<span class="subtotal"/>)</button></div>`),
   template(
-    find('.name').text(from('name')),
-    find('.qty').render(from.attribute('action-qty')).context('edit'),
-    find('.subtotal').text(from('action-subtotal')),
+    itemCommon('action'),
     find('.price').text(from('price')),
     find('button').on('click', (event, item) => { item.order(); })
   )
+);
+
+const OrderedItemView = DomView.build(
+  $('<div><span class="qty"/>x <span class="name"/> (<span class="subtotal"/>)</div>'),
+  itemCommon('order')
 );
 
 const SaleViewModel = Model.build(
@@ -470,23 +719,73 @@ const SaleView = DomView.build(SaleViewModel, $(`
   <div class="sale">
     <div class="type"/>
     <h1>Inventory</h1> <div class="inventory"/>
+    <h1>Order</h1> <div class="order"/>
     <h1>Order Total</h1> <div class="total"/>
+    <button>Order</button>
   </div>`),
   template(
+    find('.sale').classed('requesting', from.app('requesting')),
     find('.type').render(from.attribute('type')).context('edit'),
-    find('.inventory').render(from('order')),
+    find('.inventory').render(from('order'))
+      .options({ renderItem: (item => item.context('orderer')) }),
+    find('.order').render(from.vm('ordered-items')),
     find('.total').text(from('order').flatMap(order =>
-      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum()))
+      order.flatMap(orderedItem => orderedItem.get('order-subtotal')).sum())),
+    find('button')
+      .prop('disabled', from.vm('ordered-items').flatMap(items => items.empty()))
+      .on('click', (event, sale, view) => {
+        const app = view.options.app;
+        const items = view.vm.get_('ordered-items').serialize();
+        app.resolve(new OrderRequest({ items })).react(status => {
+          if (types.result.success.match(status)) app.newSale();
+        });
+      })
   )
 );
 
+// application:
+class ShopApp extends App.build(
+  attribute('requests', attribute.List.withInitial()),
+  bind('requesting', from('requests').flatMap(requests => requests.nonEmpty()))
+) {
+  _initialize() {
+    const requests = this.get_('requests');
+    this.on('resolvedRequest', (request, result) => {
+      requests.add(request);
+      result.react(function(status) {
+        if (types.result.complete.match(status)) {
+          requests.remove(request);
+          this.stop();
+        }
+      });
+    });
+  }
+  newSale() { this.set('sale', new Sale()); }
+  resolver() {
+    return Resolver.caching(new Resolver.MemoryCache(),
+      Resolver.fromLibrary(this.resolvers));
+  }
+}
+const ShopView = DomView.build($('<div/>'), find('div').render(from('sale')));
+
+
+return {
+  InventoryRequest, inventoryResolver, OrderRequest, orderResolver,
+  Item, OrderedItem, ItemOrdererView, OrderedItemView,
+  Sale, SaleView,
+  ShopApp, ShopView
+};
+~~~
+~~~
 // application assembly:
 const app = new App();
 stdlib.view($).registerWith(app.views);
-app.views.register(OrderedItem, ItemOrdererView);
+app.views.register(OrderedItem, ItemOrdererView, { context: 'orderer' });
+app.views.register(OrderedItem, OrderedItemView);
 app.views.register(Sale, SaleView);
 
 app.resolvers.register(InventoryRequest, inventoryResolver);
+app.resolvers.register(OrderRequest, orderResolver);
 
 // page wrapper to hold our validations:
 const SalePage = Sale.build(
