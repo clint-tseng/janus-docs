@@ -7,8 +7,8 @@ HTML fragment views. It provides tools for drawing fragments, reattaching to
 already-drawn fragments, wiring up client events, and fetching the final HTML
 markup, among other things.
 
-In general, you will want to use the `withOptions` and `build` class methods to
-define `DomView` classes, though you may also derive from it if you prefer.
+In general, you will want to use the `build` class method to define `DomView`
+classes, though you may also derive from it if you prefer.
 
 A detailed account of `DomView` and its constituent tools can be found [in its
 own chapter](/theory/views-templates-mutators).
@@ -16,41 +16,18 @@ own chapter](/theory/views-templates-mutators).
 ## Building a DomView
 
 To define your own `DomView`, you will at least wish to call `DomView.build`,
-though in some cases you will also wish to call `DomView.withOptions` and/or directly
-extend the result of `@build` in order to implement `_wireEvents`.
-
-### @withOptions
-#### DomView.withOptions({ viewModelClass: @Model?, resolve: [String]? }): @DomView
-
-Two possible options may be given to `DomView.withOptions`, which returns a new
-`DomView` class definition with those options applied:
-
-* `viewModelClass` defines a [`@viewModelClass`](view#@viewModelClass) property.
-* `resolve` defines a `resolve` property. If provided, it must be an array of
-  `String` keys referring to [`Reference`](attribute#reference-attribute) attributes
-  on the subject `Model` which ought to be specifically resolved in the event that
-  `autoResolve` is set to `false`. More information [here](/theory/app-and-applications#app-resolver-handling).
-
-Compare the following sample to the sample for [View@viewModelClass](view#@viewModelClass):
-
-~~~ inspect-panel
-class SampleViewModel extends Model.build(
-  bind('greeting', from('subject').get('name').map(name => `Hello, ${name}!`))
-) {};
-
-const SampleView = DomView.withOptions({ viewModelClass: SampleViewModel });
-
-const model = new Model({ name: 'Jane' });
-const view = new SampleView(model, { app });
-return view.subject;
-~~~
+or directly extend the result of `@build` in order to implement `_wireEvents`.
 
 ### @build
 #### DomView.build(fragment: $Node, template: Template): @DomView
+#### DomView.build(viewModelClass: @Model, fragment: $Node, template: Template): @DomView
 
 The `@build` class method is the primary interface for creating `DomView` class
 definitions. It takes a `fragment` target HTML fragment, wrapped in a jQuery-like
 interface, and a `template`, which defines how data should be bound to that fragment.
+
+The optional leading parameter `viewModelClass` will set the [`@viewModelClass`](view#@viewModelClass)
+property on the resulting DomView class.
 
 In general, the results of calling `find(…).operation(…)` (where `operation`
 is any [mutator](#mutators)) or `template(…)` may be passed as the `template`.

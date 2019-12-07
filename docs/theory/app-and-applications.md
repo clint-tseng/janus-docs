@@ -156,12 +156,6 @@ If you flag Reference attributes with `.autoResolve = false`, those attributes
 will be skipped in this process. You can still have App plumb `.resolveWith` for you
 in particular cases.
 
-To force resolution for attributes on a View definition level, use
-`.withOptions({ resolve: [ keys ] }).build(` and attributes at those key names,
-if they exist, will be forcibly `.resolveWith(app)`ed. Similarly, to force resolution
-on a per-_instance_ level, you can instead specify the option in the template:
-`.render(…).options({ resolve: [ keys ] })`.
-
 Again, you will rarely need to do any of this. As we discussed in the previous
 chapter, References try to be lazy: they will only run off and perform their request
 if they sense that the data they could provide is actually needed. It is exceedingly
@@ -247,13 +241,13 @@ class AppViewModel extends Model.build(
 ) {
   _initialize() {
     const app = this.get_('subject');
-    const pending = this.get_('pending_requests');
+    const pending = this.get_('pending-requests');
     app.on('resolvedRequest', (_, result) => { pending.add(result); });
   }
 }
 
 // Application view:
-const AppView = DomView.withOptions({ viewModelClass: AppViewModel }).build($(`
+const AppView = DomView.build(AppViewModel, $(`
   <div>
     <div id="demo-main">Content! <button>Load more.</button></div>
     <div id="demo-loader">LOADING</div>

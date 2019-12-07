@@ -682,7 +682,7 @@ const PersonViewModel = Model.build(
   bind('children.count', from.subject('children')
     .flatMap(cs => (cs == null) ? 0 : cs.length))
 );
-const PersonView = DomView.withOptions({ viewModelClass: PersonViewModel }).build($(`
+const PersonView = DomView.build(PersonViewModel, $(`
   <div>
     <div class="name"/>
     <div class="child-count">

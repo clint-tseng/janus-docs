@@ -542,66 +542,6 @@ will be issued. Without, nothing.
 > which means the populated data value will _not_ be included in any serialization
 > of the Model. You can override this on the `attribute` you declare.
 
-There is another way to say that you care about some value, in case you do need
-a Reference to resolve but for whatever reason `from` doesn't fit the bill:
-
-~~~
-// this is still the same:
-const Article = Model.build(attribute('samples', attribute.List));
-
-class ArticleRequest extends Request {
-  constructor(path) { super(); this.path = path; }
-  signature() { return this.path; }
-}
-
-const articleResolver = (request) => {
-  const result = new Varying(types.result.pending());
-  const path = (request.path === '/') ? '/index.json' : `${request.path}.json`;
-  $.getJSON(path)
-    .done((data) => { result.set(types.result.success(Article.deserialize(data))) })
-    .fail((error) => { result.set(types.result.failure(error)) });
-  return result;
-};
-
-const Site = Model.build(
-  attribute('article', // except here, a little convenience shortcut:
-    attribute.Reference.to(from('path').map(path => new ArticleRequest(path))))
-);
-
-// and this is different:
-const SiteView = DomView.withOptions({ resolve: [ 'article' ] }).build(
-  $('<div><div class="path"/><div class="sample-count"/><button>Check</button></div>'),
-  template(
-    find('.path').text(from('path')),
-    find('button').on('click', (event, subject, view, dom) => {
-      const article = subject.get_('article');
-      if (article == null) return;
-      dom.find('.sample-count').text(article.get_('samples').length_ + ' samples');
-    })));
-
-const app = new App();
-app.resolvers.register(ArticleRequest, articleResolver);
-app.views.register(Site, SiteView);
-
-const site = new Site({ path: '/theory/requests-resolvers-references' });
-return app.view(site);
-~~~
-
-What we are trying to show here is the `DomView.withOptions` option of `resolve`,
-which indicates some set of Model keys you wish to resolve.
-
-But as you can see, we had to go to some rather evil lengths to concoct a sample
-here: you'll learn in the following section and chapter that even if you avoid
-the typical `from` templating syntax and write `this.subject.get('article')`,
-the Reference will still end up getting automatically resolved. (The `.get` is
-the key; `from` eventually results in `.get` anyway.)
-
-Either way, the bottom line is that given the two keys we mentioned above: a
-Reference attribute that defines some Request whose resulting data should reside
-at that attribute's location on the Model, and then separately an indication that
-this data value is somehow important to your application, Janus will skitter off
-and resolve that Request for you, dropping the result onto the Model.
-
 We'll get into how exactly App, View, and Model work together to make all of this
 happen in the following chapter, which will focus on the various magicks that App
 performs. For now, we will focus on just the Reference attribute and try to explain
