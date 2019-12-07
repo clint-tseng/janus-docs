@@ -311,7 +311,7 @@ would force the entire list to be recomputed were the first element to change.
 
 > # Aside
 > Just as you should get a bad feeling in your stomach when you see a lot of static
-> `.get()`s and imperative code in a Janus application, you should be suspicious
+> `.get_()`s and imperative code in a Janus application, you should be suspicious
 > any time you see `.on` (or even `.react`) used directly. Unless you are sure
 > those handlers should run forever, it is better to use `.listenTo` and `.reactTo`,
 > as we will cover in the [resource management](/theory/resource-management)
