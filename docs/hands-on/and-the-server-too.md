@@ -590,18 +590,15 @@ app.resolvers.register(InventoryRequest, inventoryResolver);
 app.resolvers.register(OrderRequest, orderResolver);
 
 // do weird things because samples do not work asynchronously:
-const result = new Varying();
+const result = $('<div/>');
 Manifest.run(app, new Sale()).then(view => {
-  result.set(view.markup());
+  result.text(view.markup());
 });
 return result;
 ~~~
 
-Okay, so yeah, we end up just dumping the result back into a `Varying` because
-the samples system on this documentation site really expects the results synchronously,
-and `Varying` is the best way to feed it a value asynchronously.
-
-But why is there a `types.result` in there, and can this Promise ever be rejected?
+But why do we deal with a `types.result` in our previous sample, and can this Promise
+ever be rejected?
 
 Failed Renders
 --------------
