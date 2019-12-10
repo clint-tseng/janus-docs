@@ -24,7 +24,7 @@ for detailed information.
 
 The Model builder takes any number of `builder`s, each of which takes a schema
 definition and directly mutates it. The builder functions `attribute`, `bind`,
-`validate`, `transient`, and `dēfault` all conform to this signature, and you
+`validate`, `transient`, and `initial` all conform to this signature, and you
 may create your own builder functions so long as they do as well.
 
 * `attributes` is a plain object whose keys are (potentially dot-delimited) property
@@ -39,7 +39,7 @@ definition, the last write will win should conflicts occur.
 ~~~ inspect-panel
 const MyModel = Model.build(
   bind('y', from('x').map(x => x * 2)),
-  dēfault.writing('z', 8)
+  initial.writing('z', 8)
 );
 return new MyModel({ x: 2 });
 ~~~
@@ -64,7 +64,7 @@ const { EnumAttributeEditView } = stdlib.view($).enumAttribute;
 
 const ExampleModel = Model.build(
   attribute('name', class extends attribute.Text {
-    default() { return 'anonymous'; }
+    initial() { return 'anonymous'; }
   }),
   attribute('status', class extends attribute.Enum {
     _values() { return [ 'online', 'away', 'offline' ]; }
@@ -95,32 +95,30 @@ const SampleModel = Model.build(
 return new SampleModel({ name: 'alice' });
 ~~~
 
-### λdēfault
-#### dfault: (key: String, value: \*) -> Schema -> void
-#### dēfault: (key: String, value: \*) -> Schema -> void
+### λinitial
+#### initial: (key: String, value: \*) -> Schema -> void
 
 Used with `Model.build`. Given a string `key` and a `value` of any kind, will
-create an `Attribute` class with a `defaultValue` of the given `value`.
+create an `Attribute` class with a `initialValue` of the given `value`.
 
 This is a convenience shortcut which is exactly equivalent to using `attribute()`
-to attach a full `Attribute` class with `defaultValue() { return value; }`. It
+to attach a full `Attribute` class with `initialValue() { return value; }`. It
 will not work in conjunction with other attribute declarations at the key, including
 `attribute` and `transient` (but `bind` works great).
 
 ~~~
-const SampleModel = Model.build(dēfault('name', 'anonymous'));
+const SampleModel = Model.build(initial('name', 'anonymous'));
 const model = new SampleModel();
 return model.get_('name');
 ~~~
 
-### λdēfault.writing
-#### dfault.writing: (key: String, value: \*) -> Schema -> void
-#### dēfault.writing: (key: String, value: \*) -> Schema -> void
+### λinitial.writing
+#### initial.writing: (key: String, value: \*) -> Schema -> void
 
-Like `dēfault`, but also marks `writeDefault` as true.
+Like `initial`, but also marks `writeInitial` as true.
 
 ~~~
-const SampleModel = Model.build(dēfault.writing('name', 'anonymous'));
+const SampleModel = Model.build(initial.writing('name', 'anonymous'));
 const model = new SampleModel();
 model.get_('name');
 return model.serialize();
@@ -135,7 +133,7 @@ which is marked `transient`, which excludes the data value from serialization.
 This is a convenience shortcut which is exactly equivalent to using `attribute()`
 to attach a full `Attribute` class with `get transient() { return true; }`. It
 will not work in conjunction with other attribute declarations at the key, including
-`attribute` and `dēfault` (but `bind` works great).
+`attribute` and `initial` (but `bind` works great).
 
 ~~~
 const SampleModel = Model.build(
@@ -202,7 +200,7 @@ const Entity = Trait(HasStatus, WithGreeting);
 
 const Person = Model.build(
   Entity,
-  dēfault('name', 'anonymous person')
+  initial('name', 'anonymous person')
 );
 
 return new Person({ status: 'online' });
@@ -268,16 +266,16 @@ return Person.deserialize({
 
 The `Model` version of `#get_` differs from [the `Map` version](/api/map#get_) in
 precisely one way: if there is no present value but there is an `Attribute` associated
-with the requested `key` that provides a `default` value, then that default value
-will be returned. If the `Attribute` additionally specifies `writeDefault` to be
-true, then the default value will be `.set` directly onto the `Model` before it
+with the requested `key` that provides a `initial` value, then that initial value
+will be returned. If the `Attribute` additionally specifies `writeInitial` to be
+true, then the initial value will be `.set` directly onto the `Model` before it
 is returned.
 
 If there is no value, `null` will be returned.
 
 ~~~
 const SampleModel = Model.build(
-  dēfault('status', 'unknown')
+  initial('status', 'unknown')
 );
 
 const model = new SampleModel({ name: 'Alice' });
