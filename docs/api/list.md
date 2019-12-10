@@ -335,6 +335,22 @@ return [
 ];
 ~~~
 
+### .list
+#### .list: Array
+
+Returns the `Array` that is used internally by the `List` to store its values.
+It is not a good idea to directly modify this structure. If possible, use `for..of`
+iteration on the `List` instead.
+
+~~~
+const list = new List([ 4, 8, 15, 16, 23, 42 ]);
+
+const iterated = [];
+for (const x of list) iterated.push(x);
+
+return [ list.list, iterated ];
+~~~
+
 ## Mapping and Transformation
 
 ### #map

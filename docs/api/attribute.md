@@ -214,6 +214,38 @@ return [
 ];
 ~~~
 
+### .model
+#### .model: Model
+
+Set at construction by the `Model` that creates the `Attribute` instance, this
+property records the `Model` that the instance is attached to. It is not a good
+idea to change this value.
+
+~~~
+class SampleModel extends Model.build(
+  attribute('prop', attribute.Attribute)
+) {}
+
+const model = new SampleModel();
+return model.attribute('prop').model;
+~~~
+
+### .key
+#### .key: Model
+
+Set at construction by the `Model` that creates the `Attribute` instance, this
+property records the data property key on that `Model` that the instance is attached
+to. It is not a good idea to change this value.
+
+~~~
+class SampleModel extends Model.build(
+  attribute('prop', attribute.Attribute)
+) {}
+
+const model = new SampleModel();
+return model.attribute('prop').key;
+~~~
+
 ## Text Attribute
 
 Found at `attribute.Text`, this attribute type represents `String` values.
