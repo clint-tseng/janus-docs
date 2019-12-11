@@ -594,91 +594,6 @@ footer
 
 
 ////////////////////////////////////////
-// LAYOUT: lesser widths
-
-@media (max-width: 1260px)
-  #main
-    .sample-code
-      float: none
-
-    .sample-result
-      padding-top: 3em
-
-
-@media (max-width: 810px)
-  header
-    &:before
-      box-shadow: 0 0 1.2em rgba(0, 0, 0, 0)
-      width: 85rem
-    &:after
-      display: none
-    .header-right
-      left: 22rem
-
-    #show-toc
-      display: block
-
-  #left
-    box-shadow: 0 0 0.6em rgba(0, 0, 0, 0)
-    left: 100vw
-    transform: translateX(0)
-    transition: transform 0.2s ease-in
-    z-index: $z-mobile-toc
-
-  #main
-    margin-left: 0
-    transition: filter 0.1s
-
-  .show-toc
-    #show-toc:after
-      transform: rotate(-90deg)
-
-    #left
-      animation-duration: 0.3s
-      animation-name: left-motion-sidebar
-      animation-timing-function: $ease-extreme-out
-      animation-iteration-count: 1
-      box-shadow: 0 0 1.4em rgba(0, 0, 0, 0.6)
-      transform: translateX(#{-1 * $sidebar-width})
-      transition: none
-    #main
-      filter: blur(0.2em)
-
-@media (max-width: 600px)
-  header
-    &:before
-      top: -7rem - $header-overdraw
-      transform: skewY(-2deg)
-
-    .header-left
-      padding: 1em
-
-    h1
-      font-size: 3em
-      padding-top: 0.2em
-
-    #logo
-      background-color: $color-accent
-      border: 8px solid $color-accent
-
-    .header-right
-      left: 16.5em
-      padding: 2.65em
-
-      nav
-        font-size: 1.5em
-
-    #show-toc
-      top: 1.9em
-
-  #left nav
-    top: 4rem
-
-  .sample .sample-code .CodeMirror .CodeMirror-scroll
-    max-height: auto
-
-
-////////////////////////////////////////
 // LAYOUT: flyouts
 
 .flyout
@@ -2488,6 +2403,121 @@ $thinker-effect-height: 60em
   transform: rotate($thinker-angle)
   &:before
     animation-delay: 0.4s;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SPECIAL LAYOUT: lesser widths
+// at the bottom to win some specificity wars
+
+@media (max-width: 1260px)
+  #main
+    .sample-code
+      float: none
+
+    .sample-result
+      clear: left
+      padding-left: 0
+      padding-top: 1em
+
+
+@media (max-width: 810px)
+  header
+    &:before
+      box-shadow: 0 0 1.2em rgba(0, 0, 0, 0)
+      width: 85rem
+    &:after
+      display: none
+    .header-right
+      left: 22rem
+
+    #show-toc
+      display: block
+
+  #left
+    box-shadow: 0 0 0.6em rgba(0, 0, 0, 0)
+    left: 100vw
+    transform: translateX(0)
+    transition: transform 0.2s ease-in
+    z-index: $z-mobile-toc
+
+  #main
+    margin-left: 0
+    transition: filter 0.1s
+
+  .show-toc
+    #show-toc:after
+      transform: rotate(-90deg)
+
+    #left
+      animation-duration: 0.3s
+      animation-name: left-motion-sidebar
+      animation-timing-function: $ease-extreme-out
+      animation-iteration-count: 1
+      box-shadow: 0 0 1.4em rgba(0, 0, 0, 0.6)
+      transform: translateX(#{-1 * $sidebar-width})
+      transition: none
+    #main
+      filter: blur(0.2em)
+
+@media (max-width: 600px)
+  header
+    &:before
+      top: -7rem - $header-overdraw
+      transform: skewY(-2deg)
+
+    .header-left
+      padding: 1em
+
+    h1
+      font-size: 3em
+      padding-top: 0.2em
+
+    #logo
+      background-color: $color-accent
+      border: 8px solid $color-accent
+
+    .header-right
+      left: 16em
+      padding: 2.65em
+
+      nav
+        font-size: 1.5em
+
+        a
+          margin-right: 0.7em
+
+    #show-toc
+      top: 1.9em
+
+  #left nav
+    top: 4rem
+
+  #main
+    padding-top: 12rem
+
+  .article
+    h2 .self-link
+      display: inline
+
+    p.splash
+      font-size: 2.5em
+      margin-bottom: 1em
+
+    .feature
+      h2
+        align-items: center
+        display: flex
+        height: 3em
+
+        .self-link
+          display: none
+
+      p
+        clear: left
+        margin-left: 0.5em
+
+  .sample .sample-code .CodeMirror .CodeMirror-scroll
+    max-height: none
 
 
 ////////////////////////////////////////////////////////////////////////////////
