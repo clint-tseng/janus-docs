@@ -622,7 +622,7 @@ footer
     box-shadow: 0 0 0.6em rgba(0, 0, 0, 0)
     left: 100vw
     transform: translateX(0)
-    transition: transform 0.3s ease-in
+    transition: transform 0.2s ease-in
     z-index: $z-mobile-toc
 
   #main
@@ -634,20 +634,48 @@ footer
       transform: rotate(-90deg)
 
     #left
+      animation-duration: 0.3s
+      animation-name: left-motion-sidebar
+      animation-timing-function: $ease-extreme-out
+      animation-iteration-count: 1
       box-shadow: 0 0 1.4em rgba(0, 0, 0, 0.6)
       transform: translateX(#{-1 * $sidebar-width})
-      transition: transform 0.3s $ease-extreme-out
+      transition: none
     #main
       filter: blur(0.2em)
 
 @media (max-width: 600px)
-  header .header-right
-    left: $logo-size
-    padding: 6em
-    top: 1.5em
+  header
+    &:before
+      top: -7rem - $header-overdraw
+      transform: skewY(-2deg)
 
-    nav
-      font-size: 1.5em
+    .header-left
+      padding: 1em
+
+    h1
+      font-size: 3em
+      padding-top: 0.2em
+
+    #logo
+      background-color: $color-accent
+      border: 8px solid $color-accent
+
+    .header-right
+      left: 16.5em
+      padding: 2.65em
+
+      nav
+        font-size: 1.5em
+
+    #show-toc
+      top: 1.9em
+
+  #left nav
+    top: 4rem
+
+  .sample .sample-code .CodeMirror .CodeMirror-scroll
+    max-height: auto
 
 
 ////////////////////////////////////////
@@ -2489,6 +2517,12 @@ $thinker-effect-height: 60em
     transform: translateX(60px)
   to
     transform: translateX(0)
+
+@keyframes left-motion-sidebar
+  from
+    transform: translateX(#{-1 * $sidebar-width + 6rem})
+  to
+    transform: translateX(#{-1 * $sidebar-width})
 
 @keyframes right-motion
   from
