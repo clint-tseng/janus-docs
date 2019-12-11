@@ -398,9 +398,9 @@ const TickView = DomView.build($('<div class="tick"/>'), find('.tick')
 
 // Final assembly:
 const app = new App();
-stdlib.view($).registerWith(app.get_('views'));
-app.get_('views').register(SegmentedAxis, SegmentedAxisView);
-app.get_('views').register(Tick, TickView);
+stdlib.view($).registerWith(app.views);
+app.views.register(SegmentedAxis, SegmentedAxisView);
+app.views.register(Tick, TickView);
 
 const axis = new SegmentedAxis({ 'ticks-count': 10 });
 return [ app.view(axis), inspect.panel(axis) ];
@@ -727,10 +727,10 @@ const WindowView = DomView.build($(`
 
 // Assembly:
 const app = new App();
-stdlib.view($).registerWith(app.get_('views'));
-app.get_('views').register(Document, DocumentEditView);
-app.get_('views').register(Document, DocumentSummaryView, { context: 'summary' });
-app.get_('views').register(Window, WindowView);
+stdlib.view($).registerWith(app.views);
+app.views.register(Document, DocumentEditView);
+app.views.register(Document, DocumentSummaryView, { context: 'summary' });
+app.views.register(Window, WindowView);
 
 return app.view(new Window());
 ~~~
@@ -962,9 +962,9 @@ const IssueView = DomView.build($('<span/>'),
   find('span').text(from('message')));
 
 const app = new App();
-stdlib.view($).registerWith(app.get_('views'));
-app.get_('views').register(Issue, IssueView);
-app.get_('views').register(Dog, DogEditor);
+stdlib.view($).registerWith(app.views);
+app.views.register(Issue, IssueView);
+app.views.register(Dog, DogEditor);
 
 return app.view(new Dog());
 ~~~

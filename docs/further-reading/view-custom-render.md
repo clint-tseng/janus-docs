@@ -43,8 +43,8 @@ class ArticleView extends DomView {
 const SampleView = DomView.build($('<code/>'), find('code').text(from('code')));
 
 const app = new App();
-app.get_('views').register(Article, ArticleView);
-app.get_('views').register(Sample, SampleView);
+app.views.register(Article, ArticleView);
+app.views.register(Sample, SampleView);
 
 const article = new Article({
   html: `
@@ -124,8 +124,8 @@ class ArticleView extends DomView {
 const SampleView = DomView.build($('<code/>'), find('code').text(from('code')));
 
 const app = new App();
-app.get_('views').register(Article, ArticleView);
-app.get_('views').register(Sample, SampleView);
+app.views.register(Article, ArticleView);
+app.views.register(Sample, SampleView);
 
 const article = new Article({
   html: `

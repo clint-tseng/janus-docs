@@ -480,7 +480,7 @@ const NameTag = DomView.build(
     find('.child').render(from('pup'))));
 
 const app = new App();
-app.get_('views').register(Dog, NameTag);
+app.views.register(Dog, NameTag);
 
 const dog = new Dog({
   name: 'Spot',
@@ -530,7 +530,7 @@ const NameTag = DomView.build(
   ));
 
 const app = new App();
-app.get_('views').register(Dog, NameTag);
+app.views.register(Dog, NameTag);
 
 const dog = new Dog({ name: 'Spot',
   pup: new Dog({ name: 'Tot',
@@ -644,8 +644,8 @@ const EligibilityView = DomView.build(
       .all.map((age, min) => (age >= min) ? 'is' : 'is not'))));
 
 const app = new App();
-app.get_('views').register(Policy, PolicyView);
-app.get_('views').register(EligibilityViewModel, EligibilityView);
+app.views.register(Policy, PolicyView);
+app.views.register(EligibilityViewModel, EligibilityView);
 
 // say we set this somewhere as a part of logging in:
 app.set('current_user', new Person({ name: 'Jane', age: 34 }));
@@ -713,8 +713,8 @@ const PersonView = DomView.build(PersonViewModel, $(`
 ));
 
 const app = new App();
-stdlib.view($).registerWith(app.get_('views'));
-app.get_('views').register(Person, PersonView);
+stdlib.view($).registerWith(app.views);
+app.views.register(Person, PersonView);
 
 const person = new Person({ name: 'Alice', children: new List([
   new Person({ name: 'Bob', children: new List([ new Person({ name: 'Bobbi' }) ]) }),
@@ -828,9 +828,9 @@ const ParentView = DomView.build(
 ));
 
 const app = new App();
-stdlib.view($).registerWith(app.get_('views'));
-app.get_('views').register(Child, ChildView);
-app.get_('views').register(Parent, ParentView);
+stdlib.view($).registerWith(app.views);
+app.views.register(Child, ChildView);
+app.views.register(Parent, ParentView);
 
 const children = new List((new Array(10)).fill().map((_, id) => new Child({ id })));
 const parent = new Parent({ children });

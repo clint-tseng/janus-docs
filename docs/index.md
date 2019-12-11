@@ -250,9 +250,9 @@ const TodoListView = DomView.build($(`
 ));
 
 const app = new App();
-stdlib.view($).registerWith(app.get_('views'));
-app.get_('views').register(Item, ItemView);
-app.get_('views').register(Main, TodoListView);
+stdlib.view($).registerWith(app.views);
+app.views.register(Item, ItemView);
+app.views.register(Main, TodoListView);
 const view = app.view(new Main({ items: new List() }));
 view.wireEvents();
 return view;
