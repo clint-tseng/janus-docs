@@ -54,7 +54,7 @@ return [
 ## Instance Value Extraction
 
 ### #get
-#### c: Case[T] => .get(): T
+#### c: Case[T] => c.get(): T
 
 Returns the value held within the case instance.
 
@@ -68,7 +68,7 @@ return [
 ~~~
 
 ### #{x}OrElse
-#### c: Case[T] => .{x}OrElse(else: U): T|U
+#### c: Case[T] => c.{x}OrElse(else: U): T|U
 
 `.get()`s the value if the case is of `{x}` type, or else returns the given value
 `else`. This is one generally preferred way to extract values, as it has some notion
@@ -85,7 +85,7 @@ return [
 ~~~
 
 ### #get{X}
-#### .get{X}: \*|Case[\*]
+#### c: Case[T] => c.get{X}: T|Case[\*]
 
 If the case is of type `{X}`, returns the inner value(s) by way of `#get`. Otherwise
 returns the case instance itself as-is. This can be useful when for instance one
@@ -98,6 +98,40 @@ const { up, down } = Case.build('up', 'down');
 return [
   up(42).getUp(),
   up(42).getDown()
+];
+~~~
+
+### #match
+#### c: Case[T] => c.match(value: Case): Boolean
+
+Given some case class instance `value`, returns `true` if `value` matches `c`.
+This includes the scenario where `value` is a [case subclass](/theory/case-classes#case-superclasses)
+of `c`.
+
+~~~
+const { up, down, low } = Case.build('up', { down: [ 'low' ] });
+
+return [
+  up.match(low(4)),
+  down.match(low(8)),
+  low.match(low(15))
+];
+~~~
+
+#### c: Case[T] => c.match(value: Case, f: (T -> U)): U?
+
+Like the single-parameter version above, but instead of returning a Boolean, the
+given function `f` will only be called in the case of a match. `f` will be given
+the inner value of the case, and the return value of `f` will be returned by `match`.
+
+If `value` does not match, there is no return value.
+
+~~~
+const { up, down } = Case.build('up', 'down');
+
+return [
+  up.match(down(4), (x => x * 5)),
+  down.match(down(15), (x => x * 5))
 ];
 ~~~
 

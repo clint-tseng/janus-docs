@@ -84,6 +84,56 @@ const manifest = new Manifest(app, new PageModel());
 return manifest.result;
 ~~~
 
+### #then
+#### .then(onFulfilled: (types.result -> void)?, onRejected: (types.result -> void)?): Promise
+
+The `Manifest` offers a compliant `.then` method, which will fulfill with the
+result of [`.result`](#result) whenever it reaches a `complete` state (`success`
+or `failure`).
+
+Given a `success`, the returned Promise will fulfill with the `View` that the
+`Manifest` has created and managed.
+
+Given a `failure`, the returned Promise will reject with the [`#errors`](model#errors)
+of the Model being rendered, which is a [`List`](list) of the errors.
+
+In compliance with the [Promises/A+ spec](//promisesaplus.com), either of the
+callbacks may be omitted.
+
+~~~
+// just waits 3 seconds and parrots back the request `content`:
+class SampleRequest extends Request {}
+const sampleResolver = (request) => {
+  const result = new Varying(types.result.pending());
+  setTimeout((() => {
+    result.set(types.result.success(request.options.content));
+  }), 3000);
+  return result;
+};
+
+const PageModel = Model.build(
+  attribute('remote_resource', attribute.Reference.to(
+    new SampleRequest({ content: new Model({ text: 'echo' }) })
+  ))
+);
+const PageView = DomView.build(
+  $('<div><h1>my cool page</h1><p/></div>'),
+  template(
+    find('p').text(from('remote_resource').get('text'))
+  )
+);
+
+const app = new App();
+app.resolvers.register(SampleRequest, sampleResolver);
+app.views.register(PageModel, PageView);
+
+const manifest = new Manifest(app, new PageModel());
+
+const result = $('<div/>');
+manifest.then(view => { result.text(view.markup()); });
+return result;
+~~~
+
 ### .requests
 #### .requests: List[{ request: Request, result: Varying[types.result] }]
 
