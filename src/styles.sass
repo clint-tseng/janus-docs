@@ -749,7 +749,25 @@ footer
       code
         background-color: transparent
 
-  .feature // TODO: move this out.
+
+
+////////////////////////////////////////
+// CONTENT: splash page
+
+.article
+  p.splash
+    color: $color-splash
+    font-family: $font-heading
+    font-size: 3em
+    letter-spacing: -0.02em
+
+    .splash-two
+      color: $color-accent2
+
+    ~ div .eval-success > .janus-list > .janus-list > .janus-literal
+      display: block
+
+  .feature
     svg
       $size: 8em
       float: left
@@ -769,21 +787,6 @@ footer
 
     h2 a.self-link
       display: none
-
-////////////////////////////////////////
-// CONTENT: splash page
-
-.article p.splash
-  color: $color-splash
-  font-family: $font-heading
-  font-size: 3em
-  letter-spacing: -0.02em
-
-  .splash-two
-    color: $color-accent2
-
-  ~ div .eval-success > .janus-list > .janus-list > .janus-literal
-    display: block
 
 
 ////////////////////////////////////////
@@ -816,6 +819,7 @@ footer
     background-color: #eee
     color: #666
     margin-left: 0.3em
+
 
 ////////////////////////////////////////
 // CONTENT: API reference
