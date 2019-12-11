@@ -192,7 +192,10 @@ class ReplView extends DomView.build($(`
   find('.repl').classed('autopaneled', from('autopanel')),
   find('.repl-close').on('click', (e, s, view) => { view.options.app.hideRepl(); }),
   find('.repl-xray').on('click', (e, repl, view) => {
-    view.options.app.xray((result) => { repl.reference(result); });
+    view.options.app.xray((result) => {
+      repl.reference(result);
+      view.options.app.showRepl();
+    });
   }),
   find('.repl-autopanel').render(from.attribute('autopanel'))
     .criteria({ context: 'edit', style: 'button' })
