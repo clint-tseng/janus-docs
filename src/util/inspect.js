@@ -24,7 +24,7 @@ inspect.panel = (x) => asPanel(inspect(x));
 const { ListView } = require('janus-stdlib').view($).list;
 const { Mutation, DomViewInspector } = jInspect.inspector.domview;
 const listViewExtractor = (view) => view._mappedBindings.mapPairs((idx, binding) =>
-  new Mutation({ operation: `[${idx}]`, binding: binding.parent }));
+  new Mutation({ operation: `[${idx}]`, binding: (binding ? binding.parent : null) }));
 DomViewInspector.extractors.register(ListView, listViewExtractor);
 
 module.exports = { inspect };
