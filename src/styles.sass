@@ -749,6 +749,29 @@ footer
       code
         background-color: transparent
 
+  .article-toc
+    border-left: 1px dotted #ddd
+    left: $sidebar-width + $main-max-width + $main-padding + 2rem
+    top: $header-height + 7rem
+    padding: 0 2em
+    position: absolute
+
+    h2
+      padding-top: 0.2em
+
+    a
+      color: $color-accent2
+      display: block
+      font-size: 1.4em
+      margin-bottom: 0.3em
+      padding-left: 1em
+      text-decoration: none
+
+      &.major
+        padding-left: 0.15em
+
+      &:hover
+        text-decoration: underline
 
 
 ////////////////////////////////////////
@@ -2415,6 +2438,11 @@ $thinker-effect-height: 60em
 
 @media (max-width: 1260px)
   #main
+    .article-toc
+      border-left: none
+      padding: 0
+      position: static
+
     .sample-code
       float: none
 

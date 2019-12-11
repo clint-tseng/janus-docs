@@ -40,6 +40,9 @@ const addMemberAnnotation = (note, ptr) => {
   headers.append(node);
 };
 
+const articleToc = () =>
+  $('<div class="article-toc"><h2>Contents</h2><div class="article-headings"/></div>');
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // BEGIN PROCESSING
@@ -138,8 +141,35 @@ if (isApiRef === true) {
   } while ((ptr = ptr.next()).length > 0);
 } else {
   // ARTICLE
-  // move around some of the markup.
-  dom.find('h1, h2').each((_, h) => { reanchor($(h)); });
+  article.headings = [];
+  dom.find('h1, h2').each((_, hdom) => {
+    const h = $(hdom);
+    if (h.closest('blockquote').length > 0) return;
+
+    // record information about the headings, unless we are the homepage.
+    if (dom.find('.splash').length === 0)
+      article.headings.push({
+        title: h.text(),
+        major: h.is('h1'),
+        href: '#' + h.attr('id')
+      });
+
+    // if we have found the second heading, inject a toc node.
+    if (article.headings.length === 2) h.before(articleToc());
+
+    // move around some of the markup.
+    reanchor(h);
+  });
+
+  // now, inject our headings into the article toc.
+  const html = article.headings
+    .map(({ title, major, href }) => $('<a/>')
+      .attr('href', href)
+      .text(title)
+      .toggleClass('major', major)
+      .get(0).outerHTML)
+    .join('');
+  dom.find('.article-headings').html(html);
 }
 
 // extract code samples as long as they exist in the document.
