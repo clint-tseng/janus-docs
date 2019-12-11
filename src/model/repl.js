@@ -1,11 +1,12 @@
 const janus = require('janus');
 const stdlib = require('janus-stdlib');
 
-const { Map, Model, attribute, initial, bind, from, List, Varying } = janus;
+const { Map, Model, attribute, initial, bind, from, List, Varying, App } = janus;
 const { compile, success, fail, inert, Env } = require('../util/eval');
 const { blank, nonblank, ifExists } = require('../util/util');
 const { atomize, filterRequires, dereturn } = require('../util/code');
 const { inspect } = require('../util/inspect');
+const { baseViews } = require('../base');
 
 const rootEnv = Object.assign({ $, stdlib, inspect }, janus);
 
@@ -66,8 +67,11 @@ class Statement extends Model.build(
   }
 
   run() {
+    // default an app reference:
+    const app = new App({ views: baseViews() });
+
     // build a context of previous statement bindings.
-    const context = Object.assign({}, this.get_('env.base'));
+    const context = Object.assign({ app }, this.get_('env.base'));
     for (const statement of this.get_('statements')) {
       if (statement === this) break;
 
