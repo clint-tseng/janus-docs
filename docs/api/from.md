@@ -76,6 +76,10 @@ of the following methods:
   on the `App` Model.
 * `from.self()` gives the `DomView` itself as the value in `DomView`s, or the
   `Model` itself in `Model`s.
+* `from.subject(key: String)` gives the `.subject` of the `DomView` in a `DomView`, 
+  or the true View subject in a View Model (which is the value stored on the
+  View Model at `'subject'`). If a `key` is given, that key of the subject will
+  be `.get`ted.
 
 Here we demonstrate each of these:
 
