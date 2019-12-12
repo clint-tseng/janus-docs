@@ -18,11 +18,12 @@ const _atomize = (nodes) => {
 
     // then, our atomic ones.
     else if ((node.type === 'ExpressionStatement') &&
-      (node.expression.type === 'AssignmentExpression'))
+      (node.expression.type === 'AssignmentExpression') &&
+      (node.expression.left.type === 'Identifier'))
       result.push([ node.expression.left, node.expression.right ]);
-    else if (node.type === 'AssignmentExpression')
+    else if ((node.type === 'AssignmentExpression') && (node.left.type === 'Identifier'))
       result.push([ node.left, node.right ]);
-    else if (node.type === 'VariableDeclarator')
+    else if ((node.type === 'VariableDeclarator') && (node.left.type === 'Identifier'))
       result.push([ node.id, node.init ]);
     else
       result.push([ null, node ]);
