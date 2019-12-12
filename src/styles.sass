@@ -2336,6 +2336,19 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
       content: " (This view was moved; events may not work)"
       font-weight: normal
 
+.janus-inspect-object
+  .object-update
+    @include no-appearance
+    margin-left: 0.3em
+    &:before
+      @include icon($icon-load)
+
+  &.janus-inspect-panel .object-update
+    color: #fff
+    font-size: 1.2em
+    margin-left: 0.4em
+    position: absolute
+
 .janus-inspect-entity.janus-inspect-date
   .entity-content
     color: #999
