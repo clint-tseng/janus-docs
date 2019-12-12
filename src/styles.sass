@@ -66,6 +66,7 @@ $icon-close-circle: '\e903'
 $icon-console-add: '\e90d'
 $icon-eye: '\e917'
 $icon-ffwd: '\e905'
+$icon-inspect: '\e919'
 $icon-load: '\e916'
 $icon-pencil: '\e904'
 $icon-pin: '\e906'
@@ -1027,6 +1028,19 @@ footer
       @include icon($icon-revert)
     .sample-transfer:before
       @include icon($icon-console-add)
+    .sample-inspect
+      font-family: $font-monospace
+      &:before
+        @include icon($icon-inspect)
+        line-height: 1.2em
+        margin-left: 0.1em
+        margin-right: 0.3em
+      span
+        bottom: 0.3em
+        position: relative
+
+    .vr
+      padding: 0 0.5em
 
   &.activated .sample-toolbar
     animation-duration: 1s

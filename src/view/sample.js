@@ -10,6 +10,8 @@ class SampleView extends DomView.build($(`
     <div class="sample-toolbar">
       <button class="sample-revert" title="Revert to Original"/>
       <button class="sample-transfer" title="Copy to Console"/>
+      <span class="vr"/>
+      <button class="sample-inspect" title="Toggle Result Inspection"><span/></button>
     </div>
     <div class="sample-result"></div>
     <div class="sample-error"></div>
@@ -42,6 +44,15 @@ class SampleView extends DomView.build($(`
       app.get_('repl.obj').transfer(subject.get_('main'));
       app.get_('repl.view').focusLast();
     }),
+
+  find('.sample-inspect span').text(from('inspect').map((i) => i || 'none')),
+  find('.sample-inspect').on('click', (_, subject) => {
+    const prev = subject.get_('inspect')
+    subject.set('inspect',
+      (prev === 'entity') ? 'panel' :
+      (prev === 'panel') ? null :
+      'entity');
+  }),
 
   find('.sample-error').render(from('result.final').map((x) => x.failOrElse(null)).pipe(filter(exists))),
   find('.sample-styles').text(from('styles'))
