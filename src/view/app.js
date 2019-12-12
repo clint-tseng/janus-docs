@@ -69,6 +69,13 @@ class AppView extends DomView.build($('body').clone(), template(
     // it and it is essentially singleton.
     app.set('repl.view', this.into_(Repl));
 
+    // set the page title.
+    const pageTitle = $('title');
+    app.get('article').flatMap((article) => article.get('title')).react((title) => {
+      const fullTitle = (title == null) ? 'Janus' : `Janus | ${title}`;
+      pageTitle.text(fullTitle);
+    });
+
     ////////////////////////////////////////
     // GLOBAL EVENTS
 

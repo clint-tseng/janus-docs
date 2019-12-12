@@ -68,6 +68,7 @@ if (isApiRef === true) {
   let obj, section, member;
   do {
     if (ptr.is('h1')) {
+      article.title = ptr.text();
       obj = { name: ptr.text(), path: apiPath, sections: [], members: [] };
       article.exports.push(obj);
       reanchor(ptr);
@@ -153,6 +154,9 @@ if (isApiRef === true) {
         major: h.is('h1'),
         href: '#' + h.attr('id')
       });
+
+    // if we have found the first heading, it is the article title.
+    if (article.headings.length === 1) article.title = h.text();
 
     // if we have found the second heading, inject a toc node.
     if (article.headings.length === 2) h.before(articleToc());

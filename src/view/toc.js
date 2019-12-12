@@ -2,7 +2,7 @@ const { DomView, template, find, from, Model, bind } = require('janus');
 const { Toc } = require('../model/toc');
 const { ApiBrowser } = require('./api');
 
-class TocViewModel extends Model.build(
+const TocViewModel = Model.build(
   bind('active', from.subject('path')
     .and.app('path').map((path) => path.replace(/^(.+)\/$/, '\\1'))
     .all.map((own, current) => own === current)),
@@ -11,14 +11,7 @@ class TocViewModel extends Model.build(
     .and.app('path')
     .all.map((own, current) => current.startsWith(own) ||
       ((current === '/') && (own === '/intro')))) // special case: show getting started on homepage
-) {
-  _initialize() {
-    // TODO: sort of hackish but this information is sort of scattered around.
-    this.reactTo(this.get('active'), (active) => {
-      if (active) $('title').text(`Janus | ${this.get_('subject').get_('title')}`);
-    });
-  }
-};
+);
 
 const TocView = DomView.build(TocViewModel, $(`
   <div class="toc-entry">
