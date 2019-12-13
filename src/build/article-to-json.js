@@ -43,6 +43,8 @@ const addMemberAnnotation = (note, ptr) => {
 const articleToc = () =>
   $('<div class="article-toc"><h2>Contents</h2><div class="article-headings"/></div>');
 
+const reverse = (str) => str.split('').reverse().join('');
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // BEGIN PROCESSING
@@ -103,10 +105,18 @@ if (isApiRef === true) {
       ptr.text(invocation);
       member.invocations.push(invocation);
 
-      // TODO: what if different invocations have different types? doesn't exist yet though.
-      if (member.return_type == null) {
-        const returnType = /(?::|→) ([^:→]+)$/.exec(invocation);
-        if (returnType != null) member.return_type = returnType[1];
+      // parse the return type and add it to the return types.
+      //                 ( (…)       | {…}     | Abc[…]   [T]                | etc ) :term|abc →    | Abc[…] →          term|→term
+      const returnType = /^(\)[^(]+\(|\}[^{]+\{|\](?:[^[]|\][a-z]\[)+\[[a-z]+|[^ ]+) (?::|(→ [a-z.]+|→ \][^[]+\[[a-z]+) [:→]|→)/i.exec(reverse(invocation));
+
+      if (returnType != null) {
+        const secondary = returnType[2] ? (' ' + returnType[2]) : '';
+        const parsed = reverse(returnType[1] + secondary);
+
+        const types = member.return_type ? member.return_type.split('|') : [];
+        for (const ins of parsed.split('|'))
+          if (!types.includes(ins)) types.push(ins);
+        member.return_type = types.join('|');
       }
 
       ptr.prop('id', '');
