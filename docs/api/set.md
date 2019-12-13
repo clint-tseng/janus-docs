@@ -27,7 +27,7 @@ that value.
 return new Set(42);
 ~~~
 
-#### new Set(Array[\*]): Set[\*]
+#### new Set(Array[T]): Set[T]
 
 Supplying an `Array` to the constructor with create a new `Set` with the contents
 of the `Array`, deduplicated as necessary.

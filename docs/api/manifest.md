@@ -135,7 +135,7 @@ return result;
 ~~~
 
 ### .requests
-#### .requests: List[{ request: Request, result: Varying[types.result] }]
+#### RequestInfo: { request: Request, result: Varying[types.result] } => .requests: List[RequestInfo]
 
 The `requests` property on `Manifest` is a `List` that keeps track of all the resolved
 `Request`s the `Manifest` has seen. `Request`s are added to the `List` the moment

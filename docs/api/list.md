@@ -22,7 +22,7 @@ that value.
 return new List(42);
 ~~~
 
-#### new List(Array[\*]): List[\*]
+#### new List(Array[T]): List[T]
 
 Supplying an `Array` to the constructor with create a new `List` with the same
 contents as the `Array`.
