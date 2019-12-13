@@ -171,11 +171,20 @@ class AppView extends DomView.build($('body').clone(), template(
       });
     });
 
+    // highlight links if keyboard navigation is ever used.
+    // NOTE: i care about accessibility. if this approach is problematic, please
+    //       don't hesitate to tell me.
+    dom.on('keydown.nav', (event) => {
+      if (event.originalEvent.which !== 9) return;
+      if ($(event.target).parents('input, textarea').length > 0) return;
+      dom.addClass('keyboard-navigating');
+      dom.off('keydown.nav');
+    });
 
     ////////////////////////////////////////
     // HEADER EVENTS
 
-    dom.find('#repl-link').on('click', (event) => {
+    dom.find('.repl-link').on('click', (event) => {
       event.preventDefault();
       app.toggleRepl();
     });

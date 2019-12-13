@@ -46,6 +46,7 @@ $z-sheets: 199
 $z-flyout: 200
 $z-junk: 400
 $z-tooltip: 500
+$z-skiplinks: 501
 $z-xray: 1000
 $z-xray-next: $z-xray + 1
 $z-xray-selected: $z-xray + 2
@@ -175,6 +176,12 @@ ul, ol
 
 .hide
   display: none !important
+
+.keyboard-navigating
+  a:focus, a:focus code, button:focus
+    background-color: $color-warning !important
+  nav a:focus, nav button:focus
+    background-color: #8c7100 !important
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -634,6 +641,32 @@ footer
 
 ////////////////////////////////////////////////////////////////////////////////
 // CONTENT
+
+////////////////////////////////////////
+// CONTENT: skiplinks
+
+#skiplinks
+  left: 0
+  position: absolute
+  top: 0
+  z-index: $z-skiplinks
+
+  a
+    background: $color-accent2 !important
+    box-shadow: $subtle-shadow
+    bottom: 0
+    color: #fff
+    display: block
+    font-size: 2em
+    margin: 1em
+    padding: 1em
+    position: absolute
+    right: 0
+    white-space: nowrap
+
+    &:focus
+      bottom: auto
+      right: auto
 
 ////////////////////////////////////////
 // CONTENT: main article
