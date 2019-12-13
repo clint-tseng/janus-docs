@@ -40,8 +40,8 @@ Do not harass, sexually or otherwise. Do not discriminate, in any regard. Langua
 matters. Do not test the limits. Do not force us to write a list of unacceptable
 behavior. In this day and age, these things should not be mysteries.
 
-Be open
--------
+Listen
+------
 
 Remember that engineering is about tradeoffs, and that rarely are there clear
 best answers. When you disagree with somebody, recognize that in all likelihood
