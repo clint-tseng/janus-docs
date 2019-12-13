@@ -177,6 +177,7 @@ class AppView extends DomView.build($('body').clone(), template(
     dom.on('keydown.nav', (event) => {
       if (event.originalEvent.which !== 9) return;
       if ($(event.target).parents('input, textarea').length > 0) return;
+      if (dom.find('#xray .xray').length > 0) return;
       dom.addClass('keyboard-navigating');
       dom.off('keydown.nav');
     });
