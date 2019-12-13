@@ -68,7 +68,7 @@ if (isApiRef === true) {
   let obj, section, member;
   do {
     if (ptr.is('h1')) {
-      article.title = ptr.text();
+      article.title = 'API | ' + ptr.text();
       obj = { name: ptr.text(), path: apiPath, sections: [], members: [] };
       article.exports.push(obj);
       reanchor(ptr);
