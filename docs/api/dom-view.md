@@ -429,6 +429,15 @@ view.wireEvents(); // try commenting this line out.
 return view;
 ~~~
 
+## Creation
+
+### @constructor
+#### new DomView(subject: \*, options: Object): DomView
+
+* !INHERITED
+
+Inherited from [`View@constructor`](view#@constructor).
+
 ## Rendering and Events
 
 ### #artifact
@@ -458,6 +467,13 @@ const model = new Model();
 const view = new SampleView(model, { app });
 return view.artifact();
 ~~~
+
+### #pointer
+#### .pointer(): types.from -> Varying[\*]
+
+* !INHERITED
+
+Inherited from [`View#pointer`](view#pointer).
 
 ### #attach
 #### .attach(node: $Node): $Node
@@ -553,6 +569,66 @@ return view;
 .collapsableSection.collapsed p { display: none; }
 ~~~
 
+## Navigation
+
+All View Navigation methods are [inherited from `View`](view#navigation).
+
+### #parent
+#### .parent(selector: Selector?): Varying[View?]
+
+* !INHERITED
+
+Inherited from [`View#parent`](view#parent).
+
+### #parent_
+#### .parent_(selector: Selector?): View?
+
+* !INHERITED
+
+Inherited from [`View#parent_`](view#parent_).
+
+### #closest
+#### .closest(selector: Selector?): Varying[View?]
+
+* !INHERITED
+
+Inherited from [`View#closest`](view#closest).
+
+### #closest_
+#### .closest_(selector: Selector?): View?
+
+* !INHERITED
+
+Inherited from [`View#closest_`](view#closest_).
+
+### #into
+#### .into(selector: Selector?): Varying[View?]
+
+* !INHERITED
+
+Inherited from [`View#into`](view#into).
+
+### #into_
+#### .into_(selector: Selector?): View?
+
+* !INHERITED
+
+Inherited from [`View#into_`](view#into_).
+
+### #intoAll
+#### .intoAll(selector: Selector?): List[View]
+
+* !INHERITED
+
+Inherited from [`View#intoAll`](view#intoAll).
+
+### #intoAll_
+#### .intoAll_(selector: Selector?): Array[View]
+
+* !INHERITED
+
+Inherited from [`View#intoAll_`](view#intoAll_).
+
 ## Extending DomView (Overrides)
 
 Generally, [`DomView@build`](#@build) should cover all but the most extreme needs.
@@ -591,4 +667,13 @@ overridden [`#_render`](#_render).
 
 More information and sample code may be found in the [further reading chapter](/further-reading/attach)
 about `attach()`ing responsibly.
+
+### @viewModelClass
+#### DomView.viewModelClass: @Model?
+
+* !INHERITED
+
+Inherited from [`View.viewModelClass`](view#@viewModelClass) and works the same
+way, but usually you'll want to define this using [`@build`](#@build).
+
 

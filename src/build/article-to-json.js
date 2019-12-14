@@ -127,6 +127,9 @@ if (isApiRef === true) {
         if (text.startsWith('!')) {
           if (text.startsWith('!VARIANT')) {
             // for now do nothing; not sure how to model this.
+          } else if (text.startsWith('!INHERITED')) {
+            member.inherited = true; // for now discard the superclass
+            addMemberAnnotation('inherited', ptr);
           } else if (text.startsWith('!IMPURE')) {
             member.impure = true;
             addMemberAnnotation('impure', ptr);

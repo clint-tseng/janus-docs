@@ -134,7 +134,7 @@ $ease-extreme-out: cubic-bezier(.05, .9, 0, 1)
 // IMPORTS / EXTERNS
 
 @import '../node_modules/codemirror/lib/codemirror'
-@import '../node_modules/janus-inspect/lib/inspect'
+@import '../node_modules/janus-inspect/src/inspect'
 
 @font-face
   font-family: 'icons';
@@ -496,6 +496,9 @@ header
 
     .api-member
       position: relative
+
+      &.inherited, &.inherited .api-member-name
+        color: #999
 
       .api-member-name
         font-family: $font-monospace

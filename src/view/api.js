@@ -1,5 +1,5 @@
 const { Model, attribute, bind, initial, List, DomView, template, find, from } = require('janus');
-const { nonblank, not } = require('../util/util');
+const { nonblank, not, exists } = require('../util/util');
 
 // TODO: there's probably a better way to do this but my brain is mush at this
 // point and i just gotta power through this nightmare gigantoproject.
@@ -44,7 +44,9 @@ const ApiBrowserMemberView = DomView.build($(`
     <div class="api-member-return-type"/>
   </div>`), template(
 
-  find('.api-member').classed('match', from('match')),
+  find('.api-member')
+    .classed('match', from('match'))
+    .classed('inherited', from('member').get('inherited').map(exists)),
   find('.api-member-name')
     .text(from('member').get('name'))
     .attr('href', from('object').get('path')

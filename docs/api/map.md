@@ -80,7 +80,7 @@ return map;
 
 * !IMPURE
 
-A curried form of `.set(key, value)`, calling `.set(key)` with no `value` returns
+A currying form of `.set(key, value)`, calling `.set(key)` with no `value` returns
 a function which, when called with a `value`, sets that value at the given `key`.
 
 Handy for shortcuts like this:
@@ -91,19 +91,6 @@ const map = new Map();
 
 varying.react(map.set('some.key'));
 varying.set(4);
-return map;
-~~~
-
-### #unsetAll
-#### .unsetAll({ String: \* }): void
-
-* !IMPURE
-
-Removes all data from this `Map`.
-
-~~~
-const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
-map.unsetAll();
 return map;
 ~~~
 
@@ -275,11 +262,10 @@ return map.serialize();
 
 ## Enumeration
 
-### #keys
-#### .keys(): List[String]
-#### .enumerate(): List[String]
+### #enumerate
+#### .enumerate(): Set[String]
 
-Returns a `List` of the `String` keys in the `Map`. The List will remain up-to-date
+Returns a `Set` of the `String` keys in the `Map`. The Set will remain up-to-date
 as the `Map` structure changes, until either is destroyed. Only data leaves are
 represented; intermediate keys that point at nested objects are not returned.
 Nested structures will result in dot-delimited key names.
@@ -292,11 +278,13 @@ map.set('nested.number', 17);
 return keys;
 ~~~
 
-### #keys_
-#### .keys_(): Array[String]
-#### .enumerate_(): Array[String]
+### #keys
+#### .keys(): Set[String]
 
-TODO how should we handle aliases? are there even any others?
+Alias for [`#enumerate`](#enumerate).
+
+### #enumerate
+#### .enumerate_(): Array[String]
 
 Returns a static array of the String keys in the `Map`. Only data leaves are
 represented; intermediate keys that point at nested objects are not returned.
@@ -307,8 +295,36 @@ const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
 return map.keys_();
 ~~~
 
+### #keys_
+#### .keys_(): Array[String]
+
+Alias for [`#enumerate_`](#enumerate_).
+
+### #values
+#### .values(): List[\*]
+
+Returns a `List` of all values within the `Map`. There is no particular order
+guaranteed. This is exactly equivalent to calling `map.keys().flatMap(k => map.get(k))`.
+
+~~~
+const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
+return map.values();
+~~~
+
+### #values_
+#### .values_(): List[\*]
+
+Returns an `Array` of all values within the `Map`. There is no particular order
+guaranteed. This is exactly equivalent to calling `map.keys_()` and then `.get_`ting
+from the map each `key`.
+
+~~~
+const map = new Map({ name: 'a map', nested: { name: 'nested object' } });
+return map.values_();
+~~~
+
 ### .length
-#### .length(): Varying[Int]
+#### .length: Varying[Int]
 
 Returns the number of key/value pairs present in this `Map`, in the form of a
 `Varying[Int]`. This is exactly equivalent to calling `.enumerate().length()`.

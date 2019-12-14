@@ -234,6 +234,18 @@ return [
 ];
 ~~~
 
+### #serialize
+#### .serialize(): [\*]
+
+Returns a plain Javascript object representation of this `Set`'s data. The resulting
+object instance is fresh, and may be modified without concern. It will _not_ be
+updated as the source data changes.
+
+~~~
+const set = new Set([ 0, 1, 2, new Set([ 3, 4 ]), new Map({ last: 6 }) ]);
+return set.serialize();
+~~~
+
 ## Fold-like Operations
 
 ### #any

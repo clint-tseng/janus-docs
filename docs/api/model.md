@@ -259,12 +259,30 @@ return Person.deserialize({
 
 ## Value Manipulation
 
-### #get_
-#### .get_(key: String): \*|null
+### #set
+#### .set(key: String, value: \*): void
+#### .set({ String : \* }): void
+#### .set(key: String): (value: \* -> void)
+
+* !IMPURE
+* !INHERITED Map
+
+Inherited from [`Map#set`](map#set).
+
+### #unset
+#### .unset(key: String): void
+
+* !IMPURE
+* !INHERITED Map
+
+Inherited from [`Map#unset`](map#unset).
+
+### #get
+#### .get(key: String): \*|null
 
 * !IMPURE
 
-The `Model` version of `#get_` differs from [the `Map` version](/api/map#get_) in
+The `Model` version of `#get` differs from [the `Map` version](/api/map#get) in
 precisely one way: if there is no present value but there is an `Attribute` associated
 with the requested `key` that provides a `initial` value, then that initial value
 will be returned. If the `Attribute` additionally specifies `writeInitial` to be
@@ -272,6 +290,27 @@ true, then the initial value will be `.set` directly onto the `Model` before it
 is returned.
 
 If there is no value, `null` will be returned.
+
+~~~ inspect-entity
+const SampleModel = Model.build(
+  initial('status', 'unknown')
+);
+
+const model = new SampleModel({ name: 'Alice' });
+return [
+  model.get('name'),
+  model.get('status')
+];
+~~~
+
+### #get_
+#### .get_(key: String): \*|null
+
+* !IMPURE
+
+As with [`#get`](#get), this method differs from [the `Map` Version](/api/map#get_)
+in that it will pull an initial value from the schema attribute if defined. Please
+see the note on `#get` above for more information.
 
 ~~~
 const SampleModel = Model.build(
@@ -340,29 +379,6 @@ databinding system will both perform this call on your behalf when appropriate.
 const binding = from('name').map(name => `hello, ${name}!`);
 const model = new Model({ name: 'Alice' });
 return binding.all.point(model.pointer());
-~~~
-
-## Mapping and Transformation
-
-### #serialize
-#### .serialize(): {\*}
-
-Returns a plain Javascript Object representation of this model. For any model
-`Attribute`s for which a `#serialize` method is defined, that method will be used
-to process that data value prior to output.
-
-Any attributes marked `transient` will be omitted from the result.
-
-~~~
-const SampleModel = Model.build(
-  attribute('status', class extends attribute.Text {
-    serialize() { return this.getValue_().toUpperCase(); }
-  }),
-  bind('greeting', from('name').map(name => `hello, ${name}!`)),
-  transient('greeting')
-);
-
-return (new SampleModel({ name: 'Alice', status: 'unknown' })).serialize();
 ~~~
 
 ## Model Validation
@@ -450,6 +466,151 @@ const model = new ValidatingModel();
 // model.set('name', 'Alice');
 return model.valid();
 ~~~
+
+## Shadow Copying
+
+All these methods are [inherited from `Map`](/api/map#shadow-copying).
+
+### #shadow
+#### .shadow(): Model
+#### .shadow(T: @+Model): T
+
+* !INHERITED Map
+
+Inherited from [`Map#shadow`](map#shadow).
+
+### #with
+#### .with({ String: \* }): Map
+
+* !INHERITED Map
+
+Inherited from [`Map#with`](map#with).
+
+### #revert
+#### .revert(key: String): void
+
+* !IMPURE
+* !INHERITED Map
+
+Inherited from [`Map#revert`](map#revert).
+
+### #original
+#### .original(): Model
+
+* !INHERITED Map
+
+Inherited from [`Map#original`](map#original).
+
+## Mapping and Transformation
+
+### #mapPairs
+#### .mapPairs(f: (key: String, value: T -> U)): Model
+
+* !INHERITED Map
+
+Inherited from [`Map#mapPairs`](map#mapPairs).
+
+### #flatMapPairs
+#### .flatMapPairs(f: (key: String, value: T -> U)): Model
+
+* !INHERITED Map
+
+Inherited from [`Map#flatMapPairs`](map#flatMapPairs).
+
+### #serialize
+#### .serialize(): {\*}
+
+Returns a plain Javascript Object representation of this model. For any model
+`Attribute`s for which a `#serialize` method is defined, that method will be used
+to process that data value prior to output.
+
+Any attributes marked `transient` will be omitted from the result.
+
+~~~
+const SampleModel = Model.build(
+  attribute('status', class extends attribute.Text {
+    serialize() { return this.getValue_().toUpperCase(); }
+  }),
+  bind('greeting', from('name').map(name => `hello, ${name}!`)),
+  transient('greeting')
+);
+
+return (new SampleModel({ name: 'Alice', status: 'unknown' })).serialize();
+~~~
+
+## Enumeration
+
+### #enumerate
+#### .enumerate(): Set[String]
+
+* !INHERITED Map
+
+Inherited from [`Map#enumerate`](map#enumerate).
+
+### #keys
+#### .keys(): Set[String]
+
+* !INHERITED Map
+
+Inherited from [`Map#keys`](map#keys), and an alias for [`#enumerate`](#enumerate).
+
+### #enumerate_
+#### .enumerate_(): Array[String]
+
+* !INHERITED Map
+
+Inherited from [`Map#enumerate_`](map#enumerate_).
+
+### #keys_
+#### .keys_(): Array[String]
+
+* !INHERITED Map
+
+Inherited from [`Map#keys_`](map#keys_), and an alias for [`#enumerate_`](#enumerate_).
+
+### #values
+#### .values(): List[\*]
+
+* !INHERITED Map
+
+Inherited from [`Map#values`](map#values).
+
+### #values_
+#### .values_(): Array[\*]
+
+* !INHERITED Map
+
+Inherited from [`Map#values_`](map#values_).
+
+### .length
+#### .length: Varying[Int]
+
+* !INHERITED Map
+
+Inherited from [`Map#length`](map#length).
+
+### .length_
+#### .length_: Int
+
+* !INHERITED Map
+
+Inherited from [`Map#length_`](map#length_).
+
+## Change Detection
+
+### #diff
+#### .diff(other: Model): Varying[Boolean\*]
+
+* !INHERITED Map
+
+Inherited from [`Map#diff`](map#diff).
+
+### #modified
+#### .modified(): Varying[Boolean\*]
+
+* !INHERITED Map
+
+Inherited from [`Map#modified`](map#modified).
 
 ## Extending Model (Overrides)
 
