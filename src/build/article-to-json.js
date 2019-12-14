@@ -142,6 +142,8 @@ if (isApiRef === true) {
             } else if (text.includes('inspect-entity')) {
               doc.inspect = 'entity';
             }
+          } else if (text.startsWith('!RETURNS')) {
+            member.return_type = /!RETURNS (.+)$/.exec(text)[1];
           }
           $(child).remove();
         }
