@@ -53,7 +53,7 @@ return [
 ~~~
 
 ### #{x}
-#### .{x}(T): FromPart[…\*, {x}[T]]
+#### .{x}(value: T): FromPart[…\*, {x}[T]]
 
 As mentioned above, the available `from` chain methods can be customized via [`@build`](#@build),
 and so this method signature is somewhat confusingly named. In essence, each
