@@ -236,7 +236,7 @@ Like `@mapAll`, but should `f` return a `Varying`, that result will be flattened
 as with [`#flatMap`](#flatMap).
 
 ### @lift
-#### Varying.lift(f: (…xs: …\* -> y: U|Varying[U])): (…xs: …Varying[\*] -> y: Varying[U])
+#### V = Varying => Varying.lift(f: (…xs: …\* -> y: U|Varying[U])): (…xs: …V[\*] -> y: V[U])
 
 Takes a function that takes any number of plain values `xs` and returns `y`,
 which can be a value or a `Varying`, and returns a function that takes the same
@@ -295,8 +295,8 @@ theory chapter for more information.
 ~~~
 const expensiveComputation = Varying.managed(
   () => new Map({ a: 4, b: 5, c: 6 }),
-  () => new List([ 1, 2, 3 ]),
-  (map, list) => map.enumerate().concat(list).length
+  () => new List([ 'c', 'a', 'b' ]),
+  (map, list) => list.flatMap(k => map.get(k))
 );
 const results = [];
 // causes the map and list to be instantiated:
