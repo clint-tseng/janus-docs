@@ -355,14 +355,13 @@ stdlib.view($).registerWith(app.views);
 app.views.register(Workspace, WorkspaceView);
 app.views.register(Box, BoxView);
 
-const workspace = new Workspace({
-  box: new Box({ x1: 0.2, y1: 0.2, x2: 0.8, y2: 0.8 })
-});
+const box = new Box({ x1: 0.2, y1: 0.2, x2: 0.8, y2: 0.8 });
+const workspace = new Workspace({ box });
 const view = app.view(workspace);
 view.wireEvents();
 
 const inspected = new Varying();
-return [ view, inspect.panel(workspace), inspected.map(inspect.panel) ];
+return [ view, inspect.panel(box), inspected.map(inspect.panel) ];
 ~~~
 
 ~~~ styles
