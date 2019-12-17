@@ -88,7 +88,17 @@
   }]
 }, {
   "title": "Cookbook",
-  "path": "/cookbook"
+  "path": "/cookbook",
+  "children": [{
+    "title": "Bootstrapping an Application",
+    "path": "/cookbook/application"
+  }, {
+    "title": "Flyouts",
+    "path": "/cookbook/flyouts"
+  }, {
+    "title": "Draggable Objects",
+    "path": "/cookbook/draggable"
+  }]
 }, {
   "title": "API Reference",
   "path": "/api",
