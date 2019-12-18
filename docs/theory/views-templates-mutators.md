@@ -701,7 +701,6 @@ const PersonView = DomView.build(PersonViewModel, $(`
 
   find('.child-show')
     .render(from.vm().map((vm) => vm.attribute('children.show')))
-      .context('edit')
       .criteria({ style: 'button' })
       .options({ stringify: (x => x ? 'hide' : 'show') })
     .classed('hide', from.vm('children.count').map(count => count === 0)),

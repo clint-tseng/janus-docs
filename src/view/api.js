@@ -208,7 +208,6 @@ const ApiBrowserView = DomView.build($(`
 
   find('.api-browser').classed('finding', from('find').map(nonblank)),
   find('.api-find-input').render(from.attribute('find'))
-    .context('edit')
     .options({ placeholder: 'Find…' }),
   find('.api-find-clear')
     .classed('hide', from('finding').map(not))

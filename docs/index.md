@@ -90,8 +90,8 @@ const DogEditor = DomView.build($(`
   </div>`),
 
   template(
-    find('.name').render(from.attribute('name')).context('edit'),
-    find('.age').render(from.attribute('age')).context('edit'),
+    find('.name').render(from.attribute('name')),
+    find('.age').render(from.attribute('age')),
     find('.info').text(from('name').and('age')
       .all.map((name, age) => `${name} is ${age * 7} in human years.`))
   )
@@ -134,8 +134,8 @@ const Pet = Model.build(
 const PetEditor = DomView.build(
   $('<div class="pet"><span class="name"/><span class="kind"/></div>'),
   template(
-    find('.name').render(from.attribute('name')).context('edit'),
-    find('.kind').render(from.attribute('kind')).context('edit')
+    find('.name').render(from.attribute('name')),
+    find('.kind').render(from.attribute('kind'))
   ));
 
 const pets = new List([
@@ -190,8 +190,8 @@ const shadow = model.shadow();
 const Editor = DomView.build(
   $('<div><div class="name"/><div class="child-name"/></div>'),
   template(
-    find('.name').render(from.attribute('name')).context('edit'),
-    find('.child-name').render(from('child').attribute('name')).context('edit')
+    find('.name').render(from.attribute('name')),
+    find('.child-name').render(from('child').attribute('name'))
   ));
 
 const changed = shadow.modified().map(modified => `Changed: ${modified}`);
@@ -221,11 +221,11 @@ const ItemView = DomView.build($(`
     <button class="remove">x</button>
   </div>`), template(
 
-  find('.done').render(from.attribute('done')).context('edit'),
+  find('.done').render(from.attribute('done')),
 
   find('.description')
     .classed('done', from('done'))
-    .render(from.attribute('description')).context('edit'),
+    .render(from.attribute('description')),
 
   find('.remove').on('click', (event, subject) => { subject.destroy(); })
 ));

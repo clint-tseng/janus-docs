@@ -66,7 +66,7 @@ class OrderedItem extends Model.build(
 // views:
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 
@@ -309,7 +309,7 @@ class OrderedItem extends Model.build(
 // views:
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 
@@ -337,7 +337,7 @@ const SaleView = DomView.build($(`
   </div>`),
   template(
     //! and we let the user choose a type
-    find('.type').render(from.attribute('type')).context('edit'),
+    find('.type').render(from.attribute('type')),
     find('.inventory').render(from('order'))
       .options({ renderItem: (item => item.context('orderer')) }),
     find('.order').render(from('order').map(order =>
@@ -449,7 +449,7 @@ class OrderedItem extends Model.build(
 // views:
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 
@@ -476,7 +476,7 @@ const SaleView = DomView.build($(`
     <h1>Order Total</h1> <div class="total"/>
   </div>`),
   template(
-    find('.type').render(from.attribute('type')).context('edit'),
+    find('.type').render(from.attribute('type')),
     find('.inventory').render(from('order'))
       .options({ renderItem: (item => item.context('orderer')) }),
     find('.order').render(from('order').map(order =>
@@ -676,7 +676,7 @@ class OrderedItem extends Model.build(
 // views:
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 
@@ -708,7 +708,7 @@ const SaleView = DomView.build(SaleViewModel, $(`
     <button>Order</button>
   </div>`),
   template(
-    find('.type').render(from.attribute('type')).context('edit'),
+    find('.type').render(from.attribute('type')),
     find('.inventory').render(from('order'))
       .options({ renderItem: (item => item.context('orderer')) }),
     find('.order').render(from.vm('ordered-items')),
@@ -824,7 +824,7 @@ class OrderedItem extends Model.build(
 // views:
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 
@@ -856,7 +856,7 @@ const SaleView = DomView.build(SaleViewModel, $(`
     <button>Order</button>
   </div>`),
   template(
-    find('.type').render(from.attribute('type')).context('edit'),
+    find('.type').render(from.attribute('type')),
     find('.inventory').render(from('order'))
       .options({ renderItem: (item => item.context('orderer')) }),
     find('.order').render(from.vm('ordered-items')),
@@ -1022,7 +1022,7 @@ class OrderedItem extends Model.build(
 // views:
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 
@@ -1055,7 +1055,7 @@ const SaleView = DomView.build(SaleViewModel, $(`
   </div>`),
   template(
     find('.sale').classed('requesting', from.app('requesting')),
-    find('.type').render(from.attribute('type')).context('edit'),
+    find('.type').render(from.attribute('type')),
     find('.inventory').render(from('order'))
       .options({ renderItem: (item => item.context('orderer')) }),
     find('.order').render(from.vm('ordered-items')),

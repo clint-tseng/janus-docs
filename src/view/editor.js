@@ -69,6 +69,6 @@ class EditorView extends DomView {
 
 module.exports = {
   EditorView,
-  registerWith: (library) => library.register(attribute.Text, EditorView, { context: 'edit', style: 'code' })
+  registerWith: (library) => library.register(attribute.Text, EditorView, { style: 'code' })
 };
 

@@ -66,7 +66,7 @@ const ItemOrdererView = DomView.build(
   $(`<div><div class="info"/><label class="qty">Qty <span/></label><button/></div>`),
   template(
     find('.info').render(from.subject()),
-    find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    find('.qty span').render(from.vm().attribute('qty')),
     find('button')
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))
@@ -140,7 +140,7 @@ const ItemOrdererView = DomView.build(
   template(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
-    find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    find('.qty span').render(from.vm().attribute('qty')),
     find('button')
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))
@@ -264,7 +264,7 @@ const ItemOrdererView = DomView.build(
   template(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
-    find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    find('.qty span').render(from.vm().attribute('qty')),
     find('button')
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))
@@ -378,7 +378,7 @@ class OrderedItem extends Model.build( //! this is our new View Model:
 //  in response to a given prefix.
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 
@@ -582,7 +582,7 @@ const Thing = Model.build(
 );
 
 const field = (field) =>
-  find('.' + field).render(from.attribute(field)).context('edit');
+  find('.' + field).render(from.attribute(field));
 const ThingView = DomView.build(
   $('<div><span class="foo"/><span class="bar"/><span class="baz"/></div>'),
   template(field('foo'), field('bar'), field('baz'))
@@ -639,7 +639,7 @@ class OrderedItem extends Model.build(
 // views:
 const itemCommon = (prefix) => template(
   find('.name').text(from('name')),
-  find('.qty').render(from.attribute(`${prefix}-qty`)).context('edit'),
+  find('.qty').render(from.attribute(`${prefix}-qty`)),
   find('.subtotal').text(from(`${prefix}-subtotal`))
 );
 

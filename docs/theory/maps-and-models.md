@@ -700,10 +700,10 @@ const DocumentEditView = DomView.build(
   $('<div class="document"><div class="title"/><div class="content"/></div>'),
   template(
     // here we use from.attribute:
-    find('.title').render(from.attribute('name')).context('edit'),
+    find('.title').render(from.attribute('name')),
     // here we directly call #attribute:
     find('.content').render(from.subject().map(doc => doc.attribute('content')))
-      .criteria({ context: 'edit', style: 'multiline' })));
+      .criteria({ style: 'multiline' })));
 
 const DocumentSummaryView = DomView.build(
   $('<div class="document-summary"/>'),
@@ -718,7 +718,7 @@ const WindowView = DomView.build($(`
     <div class="current"/>
   </div>`), template(
   find('.documents .doc-list').render(from.attribute('current-document'))
-    .criteria({ context: 'edit', style: 'list' })
+    .criteria({ style: 'list' })
     .options({ renderItem: (x) => x.context('summary')}),
   find('.current').render(from('current-document')),
 
@@ -944,7 +944,7 @@ const applyValidationClass = (field) => find(`.${field}`).classed('invalid',
 
 const renderField = (field) => template(
   applyValidationClass(field),
-  find(`.${field} .input`).render(from.attribute(field)).context('edit'));
+  find(`.${field} .input`).render(from.attribute(field)));
 
 const DogEditor = DomView.build($(`
   <div class="dog-editor">

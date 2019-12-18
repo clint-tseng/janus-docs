@@ -96,7 +96,7 @@ const ExceptionView = DomView.build(ExceptionViewModel, $(`
     find('.exception-stack').render(from.vm('stack')),
 
     find('.exception-expando').render(from.vm().attribute('expanded'))
-      .criteria({ context: 'edit', style: 'button' })
+      .criteria({ style: 'button' })
       .options({ stringify: give('') })
   ));
 

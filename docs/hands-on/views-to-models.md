@@ -165,7 +165,7 @@ const ItemView = DomView.build(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
     //! here, we .render the attribute we declare above
-    find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    find('.qty span').render(from.vm().attribute('qty')),
     //! and everything to do with button updates a little in response.
     find('button')
       .text(from.vm('qty').and('price')
@@ -231,7 +231,7 @@ const Thing = Model.build(
 
 const ThingView = DomView.build(
   $('<div/>'),
-  find('div').render(from.attribute('name')).context('edit')
+  find('div').render(from.attribute('name'))
 );
 
 const thing = new Thing();
@@ -270,7 +270,7 @@ stdlib.view($).registerWith(app.views);
 
 return [
   inspect.panel(thing),
-  app.view(name, { context: 'edit' })
+  app.view(name)
 ];
 ~~~
 
@@ -315,7 +315,7 @@ const ItemView = DomView.build(
   template(
     find('.name').text(from('name')),
     find('.price').text(from('price')),
-    find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    find('.qty span').render(from.vm().attribute('qty')),
     find('button')
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))
@@ -336,7 +336,7 @@ const SaleView = DomView.build($(`
     find('.inventory').render(from('inventory')),
     find('.total').text(from('order')
       .flatMap(list => list.flatMap(item => item.get('price')).sum())),
-    find('.shipping').render(from.attribute('shipping')).context('edit')
+    find('.shipping').render(from.attribute('shipping'))
   )
 );
 
@@ -511,7 +511,7 @@ const ItemOrdererView = DomView.build(
   $(`<div><div class="info"/><label class="qty">Qty <span/></label><button/></div>`),
   template(
     find('.info').render(from.subject()),
-    find('.qty span').render(from.vm().attribute('qty')).context('edit'),
+    find('.qty span').render(from.vm().attribute('qty')),
     find('button')
       .text(from.vm('qty').and('price')
         .all.map((qty, price) => `Order (${qty * price})`))

@@ -69,7 +69,7 @@ class StatementView extends DomView.build(StatementVM, $(`
     .classed('has-result', from('result').map(exists))
     .classed('is-stale', from.vm('stale'))
     .classGroup('status-', from.vm('status')),
-  find('.statement-name').render(from.attribute('name')).context('edit'),
+  find('.statement-name').render(from.attribute('name')),
 
   template('toolbox',
     find('.statement-insert').on('click', (e, statement, view) => {
@@ -84,7 +84,7 @@ class StatementView extends DomView.build(StatementVM, $(`
       view.closest_(Repl).subject.get_('pins').add(statement);
     }),
     find('.statement-panel').render(from.vm().attribute('panel.direct'))
-      .criteria({ context: 'edit', style: 'button' })
+      .criteria({ style: 'button' })
       .options({ stringify: give('') })
   ),
 
@@ -97,7 +97,7 @@ class StatementView extends DomView.build(StatementVM, $(`
       ({ app: app.with({ eval: { env } }) }))),
 
   find('.statement-code').render(from.attribute('code'))
-    .criteria({ context: 'edit', style: 'code' })
+    .criteria({ style: 'code' })
     .options(from.self().map((view) => ({ onCommit: () => {
       const result = view.subject.commit();
       if (result === true) view.vm.set('last-commit', new Date());
@@ -128,7 +128,7 @@ const ReferenceView = DomView.build(StatementVM, $(`
     <div class="statement-result"/>
   </div>`), template(
   find('.statement').classed('named', from('named')),
-  find('.statement-name').render(from.attribute('name')).context('edit'),
+  find('.statement-name').render(from.attribute('name')),
   StatementView.template.toolbox,
   find('.statement-result').render(from.vm('result')).context(from.vm('context'))
 ));
@@ -152,7 +152,7 @@ const PinView = DomView.build($(`
 
   find('.pin').classed('expanded', from('expanded')),
   find('.pin-expand').render(from.attribute('expanded'))
-    .criteria({ context: 'edit', style: 'button' }).options({ stringify: give('') }),
+    .criteria({ style: 'button' }).options({ stringify: give('') }),
 
   find('.pin-remove').on('click', (e, subject, view) => {
     // we do this by index on the parent list in case multiple instances of this
@@ -198,7 +198,7 @@ class ReplView extends DomView.build($(`
     });
   }),
   find('.repl-autopanel').render(from.attribute('autopanel'))
-    .criteria({ context: 'edit', style: 'button' })
+    .criteria({ style: 'button' })
     .options({ stringify: give('') }),
   find('.repl-clear').on('click', (event, repl, view) => {
     view.options.app.confirm($(event.target), // TODO: disallow multiple
