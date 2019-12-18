@@ -46,9 +46,9 @@ Applying attach
 
 So, how do you actually put attach to use?
 
-We [generally suggest](TODO) an application structure with a root Model and View
-from which the entire application can render. This means the client-side initialization
-code of your application will probably look a little like this:
+We [generally suggest](/cookbook/application) an application structure with a root
+Model and View from which the entire application can render. This means the client-side
+initialization code of your application will probably look a little like this:
 
 ~~~ noexec
 const model = RootModel({ …data… });

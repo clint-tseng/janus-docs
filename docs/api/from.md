@@ -119,7 +119,7 @@ or a specifically typed descriptor can be added instead by referencing it by nam
 const model = new Model({ name: 'Spot', age: 7 });
 const point = (expr) => expr.all.point(model.pointer());
 
-return point(from('name').and('age')); // TODO
+return point(from('name').and('age').all.map((name, age) => name + age));
 ~~~
 
 ## Part Mapping

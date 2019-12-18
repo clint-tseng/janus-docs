@@ -524,8 +524,8 @@ the rendered markup for use by the client.
 The goal behind Manifest is to serve as a thin, generic layer between your router
 and your response formulation. Once you have instantiated the appropriate Model
 for the page in question, it can be fed to Manifest and a common handling layer
-can take over from there. You can check the [cookbook](/cookbook/TODO) for some
-examples of this plumbing in practice.
+can take over from there. You can check the [Practical Guide chapter](/hands-on/and-the-server-too)
+on this topic for some examples of this plumbing in practice.
 
 Recap
 =====

@@ -92,7 +92,7 @@ const obj = new Base();
 obj.on('get_excited', about => { results.push(`hooray ${about}!`); });
 
 return [
-  obj.listeners('get_excited'), // TODO: seems wrong
+  obj.listeners('get_excited'),
   obj.listeners('other_event')
 ];
 ~~~

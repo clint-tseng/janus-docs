@@ -70,13 +70,13 @@ its transformation of the source structures until `.destroy()`ed.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-const result = Traversal.natural(data, {
+const result = Traversal.natural({
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2)
-});
+}, data);
 data.set('w', 0);
-return inspect.panel(result); // TODO: why does this not panel?
+return inspect.panel(result);
 ~~~
 
 ### λnatural_
@@ -91,11 +91,11 @@ of plain Javascript `Object`s and `Array`s.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-return Traversal.natural_(data, {
+return Traversal.natural_({
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2)
-});
+}, data);
 ~~~
 
 ### λlist
@@ -111,11 +111,11 @@ its transformation of the source structures until `.destroy()`ed.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-const result = Traversal.list(data, {
+const result = Traversal.list({
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2)
-});
+}, data);
 data.set('w', 0);
 return inspect.panel(result);
 ~~~
@@ -133,12 +133,12 @@ with `#list`), this method returns an `Array`.
 
 ~~~
 const data = new Map({ x: 1, y: new List([ 2, 3 ]), z: new Map({ x: 4, y: 5 }) });
-return Traversal.list_(data, {
+return Traversal.list_({
   map: (_, v) => v.isEnumerable
     ? types.traversal.recurse(v)
     : types.traversal.value(v * 2),
   reduce: (xs) => xs.reduce((x, y) => x + y, 0)
-});
+}, data);
 ~~~
 
 ## Default Implementations

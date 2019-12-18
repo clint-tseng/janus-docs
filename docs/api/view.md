@@ -51,7 +51,7 @@ instance of a single subject, `#artifact` will always yield the same reference
 no matter how many times it is called&mdash;the result of `#_render` is cached
 and returned directly after the first call.
 
-~~~
+~~~ inspect-plain
 class SampleView extends View {
   _render() {
     const node = $('<div/>');
@@ -65,7 +65,7 @@ class SampleView extends View {
 const model = new Model({ name: 'Alice' });
 const view = new SampleView(model);
 return [
-  view.artifact(), // TODO: debug-render jquery fragments
+  view.artifact(),
   view.artifact() === view.artifact()
 ];
 ~~~

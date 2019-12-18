@@ -155,7 +155,7 @@ const ModelWithDate = Model.build(
   attribute('date', DateAttribute)
 );
 
-return ModelWithDate.deserialize({ date: 1547083603524 }); // TODO: Date class does not render
+return ModelWithDate.deserialize({ date: 1547083603524 });
 ~~~
 
 ### #default

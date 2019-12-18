@@ -4,7 +4,7 @@ Along with [`Map`](Map), `List` is one of the core data structures in Janus.
 It is covered in depth in its [own article](/theory/lists).
 
 `List` conforms to `Enumerable`, which unifies some methods between `Map` and
-`List`. Those methods are notated below. TODO: this is a lie right now.
+`List`.
 
 ## Creation
 
