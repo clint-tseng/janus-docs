@@ -23,7 +23,7 @@ const _atomize = (nodes) => {
       result.push([ node.expression.left, node.expression.right ]);
     else if ((node.type === 'AssignmentExpression') && (node.left.type === 'Identifier'))
       result.push([ node.left, node.right ]);
-    else if ((node.type === 'VariableDeclarator') && (node.left.type === 'Identifier'))
+    else if ((node.type === 'VariableDeclarator') && (node.id.type === 'Identifier'))
       result.push([ node.id, node.init ]);
     else
       result.push([ null, node ]);
@@ -47,6 +47,7 @@ const atomize = (code) => {
   return (tree.body.length === 0) ? false : _atomize(tree.body);
 };
 
+// TODO: some bug here where pairs may not have #filter
 const filterRequires = (pairs) => pairs.filter((p) =>
   !((p[1].type === 'CallExpression') &&
     (p[1].callee.type === 'Identifier') && (p[1].callee.name === 'require')));
