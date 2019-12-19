@@ -1993,6 +1993,19 @@ $pin-chrome-outer-width: (2 * $pin-chrome-padding) + $pin-chrome-width
     &:before
       @include icon($icon-add)
 
+  .model-validation
+    border-top: 1px dotted #ccc
+    margin: -1em
+      top: 1em
+    padding: 1em
+
+    .model-validations
+      padding-top: 0.5em
+
+    .data-pair
+      .pair-key, .value-parent, .pair-function
+        display: none
+
 .namer
   .namer-input input
     @include no-appearance

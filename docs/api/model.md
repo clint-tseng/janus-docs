@@ -412,7 +412,7 @@ const ValidatingModel = Model.build(
 );
 
 const model = new ValidatingModel({ age: 4 });
-return model.validations();
+return inspect.panel(model);
 ~~~
 
 ### #errors
