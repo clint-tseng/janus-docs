@@ -452,6 +452,9 @@ which will always contain at most the first `n` elements of the original list.
 Should `n` be larger than the list length, the entire list will be returned, and
 it will be the same length as the original list.
 
+Given a negative `n`, all list elements _exclusively up to_ `|n|` elements from the
+end will be returned (so `n = -1` will give all but the last element).
+
 Should the original list `l` change, the taken result list will be eagerly updated
 until it is `.destroy()`ed.
 
